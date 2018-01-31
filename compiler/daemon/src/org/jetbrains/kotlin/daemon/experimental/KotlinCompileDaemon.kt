@@ -1,20 +1,9 @@
 /*
- * Copyright 2010-2015 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.daemon
+package org.jetbrains.kotlin.daemon.experimental
 
 import org.jetbrains.kotlin.cli.common.CLICompiler
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
@@ -22,6 +11,7 @@ import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.cli.metadata.K2MetadataCompiler
 import org.jetbrains.kotlin.daemon.common.*
+import org.jetbrains.kotlin.daemon.common.experimental.findPortForSocket
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
@@ -56,12 +46,15 @@ class LogStream(name: String) : OutputStream() {
     }
 }
 
-object KotlinCompileDaemon {
+object KotlinCompileDaemonSockets {
 
     init {
         val logTime: String = SimpleDateFormat("yyyy-MM-dd.HH-mm-ss-SSS").format(Date())
         val (logPath: String, fileIsGiven: Boolean) =
-                System.getProperty(COMPILE_DAEMON_LOG_PATH_PROPERTY)?.trimQuotes()?.let { Pair(it, File(it).isFile) } ?: Pair("%t", false)
+                System.getProperty(COMPILE_DAEMON_LOG_PATH_PROPERTY)
+                    ?.trimQuotes()
+                    ?.let { Pair(it, File(it).isFile) }
+                        ?: Pair("%t", false)
         val cfg: String =
             "handlers = java.util.logging.FileHandler\n" +
                     "java.util.logging.FileHandler.level     = ALL\n" +
@@ -79,7 +72,7 @@ object KotlinCompileDaemon {
     val log by lazy { Logger.getLogger("daemon") }
 
     private fun loadVersionFromResource(): String? {
-        (KotlinCompileDaemon::class.java.classLoader as? URLClassLoader)
+        (KotlinCompileDaemonSockets::class.java.classLoader as? URLClassLoader)
             ?.findResource("META-INF/MANIFEST.MF")
             ?.let {
                 try {
@@ -112,11 +105,16 @@ object KotlinCompileDaemon {
                 inheritAdditionalProperties = true
             )
 
-            val filteredArgs =
-                args.asIterable().filterExtractProps(compilerId, daemonOptions, prefix = COMPILE_DAEMON_CMDLINE_OPTIONS_PREFIX)
+            val filteredArgs = args.asIterable()
+                .filterExtractProps(
+                    compilerId,
+                    daemonOptions,
+                    prefix = COMPILE_DAEMON_CMDLINE_OPTIONS_PREFIX
+                )
 
             if (filteredArgs.any()) {
                 val helpLine = "usage: <daemon> <compilerId options> <daemon options>"
+
                 log.info(helpLine)
                 println(helpLine)
                 throw IllegalArgumentException("Unknown arguments: " + filteredArgs.joinToString(" "))
@@ -131,7 +129,7 @@ object KotlinCompileDaemon {
             //
             //            setDaemonPermissions(daemonOptions.socketPort)
 
-            val (registry, port) = findPortAndCreateRegistry(
+            val port = findPortForSocket(
                 COMPILE_DAEMON_FIND_PORT_ATTEMPTS,
                 COMPILE_DAEMON_PORTS_RANGE_START,
                 COMPILE_DAEMON_PORTS_RANGE_END
@@ -149,15 +147,15 @@ object KotlinCompileDaemon {
             }
             // timer with a daemon thread, meaning it should not prevent JVM to exit normally
             val timer = Timer(true)
-            val compilerService = CompileServiceImpl(
-                registry = registry,
-                compiler = compilerSelector,
-                compilerId = compilerId,
-                daemonOptions = daemonOptions,
-                daemonJVMOptions = daemonJVMOptions,
-                port = port,
-                timer = timer,
-                onShutdown = {
+            val compilerService = CompileServiceServerSideImpl(
+                port,
+                compilerSelector,
+                compilerId,
+                daemonOptions,
+                daemonJVMOptions,
+                port,
+                timer,
+                {
                     if (daemonOptions.forceShutdownTimeoutMilliseconds != COMPILE_DAEMON_TIMEOUT_INFINITE_MS) {
                         // running a watcher thread that ensures that if the daemon is not exited normally (may be due to RMI leftovers), it's forced to exit
                         timer.schedule(daemonOptions.forceShutdownTimeoutMilliseconds) {
@@ -169,6 +167,7 @@ object KotlinCompileDaemon {
                         timer.cancel()
                     }
                 })
+            compilerService.runServer()
 
             println(COMPILE_DAEMON_IS_READY_MESSAGE)
             log.info("daemon is listening on socketPort: $port")
@@ -189,4 +188,5 @@ object KotlinCompileDaemon {
             throw e
         }
     }
+
 }
