@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.idea.debugger.filter
 
 import com.intellij.debugger.engine.SyntheticTypeComponentProvider
+import com.intellij.util.containers.ContainerUtil
 import com.sun.jdi.*
 import org.jetbrains.kotlin.idea.debugger.safeAllLineLocations
 import org.jetbrains.kotlin.load.java.JvmAbi
@@ -25,33 +26,35 @@ import org.jetbrains.org.objectweb.asm.Opcodes
 import kotlin.jvm.internal.FunctionReference
 import kotlin.jvm.internal.PropertyReference
 
-class KotlinSyntheticTypeComponentProvider: SyntheticTypeComponentProvider {
+class KotlinSyntheticTypeComponentProvider : SyntheticTypeComponentProvider {
+    private val cache = ContainerUtil.createConcurrentWeakMap<Method, Boolean>()
+
     override fun isSynthetic(typeComponent: TypeComponent?): Boolean {
         if (typeComponent !is Method) return false
+
+        val fromCache = cache[typeComponent]
+        if (fromCache != null) {
+            return fromCache
+        }
 
         val containingType = typeComponent.declaringType()
         val typeName = containingType.name()
         if (!FqNameUnsafe.isValid(typeName)) return false
 
-        if (containingType.isCallableReferenceSyntheticClass()) {
-            return true
-        }
-
         try {
-            if (typeComponent.isDelegateToDefaultInterfaceImpl()) return true
-
-            if (typeComponent.location()?.lineNumber() != 1) return false
-
-            if (typeComponent.allLineLocations().any { it.lineNumber() != 1 }) {
-                return false
+            val result = when {
+                containingType.isCallableReferenceSyntheticClass() -> true
+                typeComponent.isDelegateToDefaultInterfaceImpl() -> true
+                typeComponent.location()?.lineNumber() != 1 -> true
+                typeComponent.allLineLocations().any { it.lineNumber() != 1 } -> false
+                else -> !typeComponent.declaringType().allLineLocations().any { it.lineNumber() != 1 }
             }
 
-            return !typeComponent.declaringType().allLineLocations().any { it.lineNumber() != 1 }
-        }
-        catch(e: AbsentInformationException) {
+            cache.putIfAbsent(typeComponent, result)
+            return result
+        } catch (e: AbsentInformationException) {
             return false
-        }
-        catch(e: UnsupportedOperationException) {
+        } catch (e: UnsupportedOperationException) {
             return false
         }
     }
