@@ -25,7 +25,8 @@ import org.jetbrains.kotlin.resolve.BindingContext
 class ExternalDependenciesGenerator(
     moduleDescriptor: ModuleDescriptor,
     val symbolTable: SymbolTable,
-    val irBuiltIns: IrBuiltIns
+    val irBuiltIns: IrBuiltIns,
+    val deserializer: IrDeserializer? = null
 ) {
     private val stubGenerator = DeclarationStubGenerator(
         moduleDescriptor, symbolTable, IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, irBuiltIns.languageVersionSettings
@@ -40,21 +41,27 @@ class ExternalDependenciesGenerator(
         fun run() {
             stubGenerator.unboundSymbolGeneration = true
             ArrayList(symbolTable.unboundClasses).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateClassStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundConstructors).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateConstructorStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundEnumEntries).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateEnumEntryStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundFields).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generatePropertyStub(it.descriptor, bindingContext)
             }
             ArrayList(symbolTable.unboundSimpleFunctions).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateFunctionStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundTypeParameters).forEach {
+                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateOrGetTypeParameterStub(it.descriptor)
             }
 

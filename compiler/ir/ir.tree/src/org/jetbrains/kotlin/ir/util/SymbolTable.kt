@@ -30,6 +30,10 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
 
+interface IrDeserializer {
+    fun findDeserializedDeclaration(descriptor: DeclarationDescriptor): IrDeclaration
+}
+
 interface ReferenceSymbolTable {
     fun referenceClass(descriptor: ClassDescriptor): IrClassSymbol
 
