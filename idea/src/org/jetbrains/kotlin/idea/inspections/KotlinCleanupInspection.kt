@@ -46,7 +46,7 @@ class KotlinCleanupInspection : LocalInspectionTool(), CleanupLocalInspectionToo
     override fun getDisplayName(): String = "Usage of redundant or deprecated syntax or deprecated symbols"
 
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<out ProblemDescriptor>? {
-        if (isOnTheFly || file !is KtFile || !ProjectRootsUtil.isInProjectSource(file)) {
+        if (isOnTheFly || file !is KtFile || !ProjectRootsUtil.isInProjectSource(file, includeScriptsOutsideSourceRoots = false)) {
             return null
         }
 

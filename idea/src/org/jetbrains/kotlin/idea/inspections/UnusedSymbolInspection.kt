@@ -145,7 +145,7 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
         return namedDeclarationVisitor(fun(declaration) {
             val message = declaration.describe()?.let { "$it is never used" } ?: return
 
-            if (!ProjectRootsUtil.isInProjectSource(declaration)) return
+            if (!ProjectRootsUtil.isInProjectSource(declaration, includeScriptsOutsideSourceRoots = false)) return
 
             // Simple PSI-based checks
             if (declaration is KtObjectDeclaration && declaration.isCompanion()) return // never mark companion object as unused (there are too many reasons it can be needed for)

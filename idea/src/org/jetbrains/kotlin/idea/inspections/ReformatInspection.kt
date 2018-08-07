@@ -37,7 +37,7 @@ class ReformatInspection : LocalInspectionTool() {
     @XmlAttribute var processChangedFilesOnly: Boolean = false
 
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<out ProblemDescriptor>? {
-        if (file !is KtFile || !ProjectRootsUtil.isInProjectSource(file)) {
+        if (file !is KtFile || !ProjectRootsUtil.isInProjectSource(file, includeScriptsOutsideSourceRoots = false)) {
             return null
         }
 

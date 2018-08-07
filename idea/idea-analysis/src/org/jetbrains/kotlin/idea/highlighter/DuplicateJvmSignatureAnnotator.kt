@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.resolve.jvm.platform.JvmPlatform
 class DuplicateJvmSignatureAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is KtFile && element !is KtDeclaration) return
-        if (!ProjectRootsUtil.isInProjectSource(element)) return
+        if (!ProjectRootsUtil.isInProjectSource(element, includeScriptsOutsideSourceRoots = false)) return
 
         val file = element.containingFile
         if (file !is KtFile || TargetPlatformDetector.getPlatform(file) !== JvmPlatform) return
