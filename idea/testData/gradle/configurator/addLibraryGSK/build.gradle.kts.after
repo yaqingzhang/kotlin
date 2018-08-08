@@ -1,5 +1,5 @@
 plugins {
-    java
+    kotlin("jvm") version "1.2.50"
 }
 
 dependencies {

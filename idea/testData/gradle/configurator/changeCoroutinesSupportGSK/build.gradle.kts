@@ -5,5 +5,5 @@ plugins {
 }
 
 kotlin {
-    experimental.coroutines = Coroutines.DISABLE
+    experimental.coroutines = Coroutines.ERROR
 }
