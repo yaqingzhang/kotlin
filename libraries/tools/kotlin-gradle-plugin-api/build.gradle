@@ -6,7 +6,7 @@ configureJvmProject(project)
 configurePublishing(project)
 
 repositories {
-    jcenter()
+    mavenLocal()
 }
 
 pill {
@@ -15,8 +15,6 @@ pill {
 
 dependencies {
     compile project(':kotlin-stdlib')
-
-    compile 'org.jetbrains.kotlin:kotlin-native-utils:0.8.1'
 
     compileOnly gradleApi()
     compileOnly 'com.android.tools.build:gradle:0.4.2'
