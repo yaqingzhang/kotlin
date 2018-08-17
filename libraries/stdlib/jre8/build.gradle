@@ -4,7 +4,7 @@ apply plugin: 'kotlin'
 apply plugin: 'pill-configurable'
 
 configureJvm6Project(project)
-//configureDist(project)
+configureDist(project)
 //configurePublishing(project)
 ext.javaHome = JDK_18
 ext.jvmTarget = "1.8"
@@ -47,9 +47,15 @@ artifacts {
     archives javadocJar
 }
 
-//dist {
-//    from (jar, sourcesJar)
-//}
+task distForTest(type: Copy) {
+    rename "-${java.util.regex.Pattern.quote(version)}", ''
+    from jar
+    into distDir
+}
+
+dist {
+    dependsOn(distForTest)
+}
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions.jdkHome = JDK_18
