@@ -4,7 +4,6 @@
     <target name="build">
         <kotlinc src="${test.data}/main.kt" output="${temp}/test.jar" nowarn="true">
             <classpath>
-                <!-- TODO: Decide what to do with this test (now failing) -->
                 <file file="${kotlin.stdlib.jre7.jar}"/>
                 <file file="${kotlin.stdlib.jre8.jar}"/>
                 <file file="${kotlin.stdlib.jdk7.jar}"/>
