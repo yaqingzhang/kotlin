@@ -89,6 +89,7 @@ dependencies {
     testCompileOnly(commonDep("com.google.code.findbugs", "jsr305"))
     testCompileOnly(intellijPluginDep("gradle"))
     testCompileOnly(intellijPluginDep("Groovy"))
+    testCompileOnly(intellijPluginDep("stream-debugger"))
     //testCompileOnly(intellijPluginDep("maven"))
 
     testRuntime(intellijPluginDep("junit"))
