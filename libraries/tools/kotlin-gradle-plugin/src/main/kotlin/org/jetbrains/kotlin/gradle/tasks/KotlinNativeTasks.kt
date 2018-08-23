@@ -58,7 +58,8 @@ open class KotlinNativeCompile : DefaultTask() {
     val additionalCompilerOptions: Collection<String>
         @Input get() = compilation.extraOpts
 
-
+    // We manually register this property as output file or directory depending on output kind.
+    @Internal
     val outputFile: Property<File> = project.objects.property(File::class.java)
 
     // endregion
