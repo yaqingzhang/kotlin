@@ -1,0 +1,1 @@
+val foo = org.buildsrc.BuildSrcClass().sayHello()

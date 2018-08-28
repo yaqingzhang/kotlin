@@ -68,6 +68,9 @@ public abstract class ExternalSystemTestCase extends UsefulTestCase {
     @Before
     @Override
     public void setUp() throws Exception {
+        // This property is needed to load extension points from gradle-groovy-integration.xml. See more details here IDEA-193463
+        System.setProperty("resolve.descriptors.in.resources", "true");
+
         super.setUp();
         ensureTempDirCreated();
 

@@ -14,7 +14,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
 import com.intellij.openapi.util.EmptyRunnable
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.ui.UIUtil
 import org.jetbrains.kotlin.idea.core.script.*
 import org.jetbrains.kotlin.idea.util.application.runWriteAction
 import org.jetbrains.kotlin.script.*
@@ -39,11 +38,15 @@ abstract class ScriptDependenciesLoader(
             val existingLoader = loaders[file]
             if (existingLoader != null) return existingLoader.updateDependencies()
 
-            val newLoader = when (scriptDef.dependencyResolver) {
-                is AsyncDependenciesResolver,
-                is LegacyResolverWrapper -> AsyncScriptDependenciesLoader(file, scriptDef, project)
-                else -> SyncScriptDependenciesLoader(file, scriptDef, project)
-            }
+            val newLoader =
+                if (ApplicationManager.getApplication().isUnitTestMode ||
+                    scriptDef.dependencyResolver is AsyncDependenciesResolver ||
+                    scriptDef.dependencyResolver is LegacyResolverWrapper
+                ) {
+                    AsyncScriptDependenciesLoader(file, scriptDef, project)
+                } else {
+                    SyncScriptDependenciesLoader(file, scriptDef, project)
+                }
             loaders.put(file, newLoader)
             newLoader.updateDependencies()
         }
@@ -70,6 +73,8 @@ abstract class ScriptDependenciesLoader(
 
     protected fun processResult(result: DependenciesResolver.ResolveResult) {
         loaders.remove(file)
+
+        if (project.isDisposed) return
 
         ServiceManager.getService(project, ScriptReportSink::class.java)?.attachReports(file, result.reports)
 
@@ -116,7 +121,7 @@ abstract class ScriptDependenciesLoader(
         }
 
         if (ApplicationManager.getApplication().isUnitTestMode) {
-            UIUtil.invokeLaterIfNeeded(doNotifyRootsChanged)
+            //UIUtil.invokeLaterIfNeeded(doNotifyRootsChanged)
         } else {
             TransactionGuard.getInstance().submitTransactionLater(project, doNotifyRootsChanged)
         }

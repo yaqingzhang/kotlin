@@ -16,6 +16,7 @@
 package org.jetbrains.kotlin.idea.codeInsight.gradle
 
 import com.intellij.compiler.server.BuildManager
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.Result
 import com.intellij.openapi.application.WriteAction
@@ -41,6 +42,7 @@ import org.gradle.util.GradleVersion
 import org.gradle.wrapper.GradleWrapperMain
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.NonNls
+import org.jetbrains.kotlin.idea.core.script.isScriptDependenciesUpdaterDisabled
 import org.jetbrains.kotlin.idea.test.PluginTestCaseBase
 import org.jetbrains.plugins.gradle.settings.DistributionType
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings
@@ -96,6 +98,8 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
         GradleSettings.getInstance(myProject).gradleVmOptions = "-Xmx128m -XX:MaxPermSize=64m"
         System.setProperty(ExternalSystemExecutionSettings.REMOTE_PROCESS_IDLE_TTL_IN_MS_KEY, GRADLE_DAEMON_TTL_MS.toString())
         configureWrapper()
+
+        ApplicationManager.getApplication().isScriptDependenciesUpdaterDisabled = false
     }
 
     override fun tearDown() {
@@ -110,6 +114,7 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
             Messages.setTestDialog(TestDialog.DEFAULT)
             FileUtil.delete(BuildManager.getInstance().buildSystemDirectory.toFile())
         } finally {
+            ApplicationManager.getApplication().isScriptDependenciesUpdaterDisabled = true
             super.tearDown()
         }
     }
@@ -191,6 +196,12 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
         properties.store(writer, null)
 
         createProjectSubFile("gradle/wrapper/gradle-wrapper.properties", writer.toString())
+    }
+
+    protected fun importProjectFromTestData(): List<VirtualFile> {
+        val files = configureByFiles()
+        importProject()
+        return files
     }
 
     protected open fun testDataDirName(): String = ""

@@ -656,12 +656,6 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
         }
     }
 
-    private fun importProjectFromTestData(): List<VirtualFile> {
-        val files = configureByFiles()
-        importProject()
-        return files
-    }
-
     override fun testDataDirName(): String {
         return "configurator"
     }
