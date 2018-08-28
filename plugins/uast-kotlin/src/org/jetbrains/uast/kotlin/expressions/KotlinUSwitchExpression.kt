@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.psi.KtBlockExpression
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.uast.*
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 import org.jetbrains.uast.kotlin.kinds.KotlinSpecialExpressionKinds
 
 class KotlinUSwitchExpression(
@@ -46,7 +45,7 @@ class KotlinUSwitchExpression(
     }
 
     override val switchIdentifier: UIdentifier
-        get() = KotlinUIdentifier(null, this)
+        get() = UIdentifier(null, this)
 }
 
 class KotlinUSwitchEntry(

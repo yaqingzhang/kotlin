@@ -28,8 +28,8 @@ class KotlinAwareMoveClassesOrPackagesToNewDirectoryDialog(
         elementsToMove: Array<out PsiElement>,
         moveCallback: MoveCallback?
 ) : MoveClassesOrPackagesToNewDirectoryDialog(directory, elementsToMove, moveCallback) {
-    override fun createDestination(aPackage: PsiPackage, directory: PsiDirectory): MoveDestination? {
-        val delegate = super.createDestination(aPackage, directory) ?: return null
+    override fun createDestination(aPackage: PsiPackage, directory: PsiDirectory): MoveDestination {
+        val delegate = super.createDestination(aPackage, directory)
         return KotlinAwareDelegatingMoveDestination(delegate, aPackage, directory)
     }
 }

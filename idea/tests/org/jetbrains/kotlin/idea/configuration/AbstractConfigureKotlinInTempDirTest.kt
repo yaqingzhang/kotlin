@@ -8,13 +8,13 @@ package org.jetbrains.kotlin.idea.configuration
 import com.intellij.openapi.util.io.FileUtil
 import org.junit.Assert
 import java.io.File
-import java.nio.file.Path
+import java.io.IOException
 
 abstract class AbstractConfigureKotlinInTempDirTest : AbstractConfigureKotlinTest() {
-    override fun getProjectDirOrFile(): Path {
+    @Throws(IOException::class)
+    override fun getIprFile(): File {
         val tempDir = FileUtil.generateRandomTemporaryPath()
         FileUtil.createTempDirectory("temp", null)
-        myFilesToDelete.add(tempDir)
 
         FileUtil.copyDir(File(projectRoot), tempDir)
 
@@ -24,9 +24,8 @@ abstract class AbstractConfigureKotlinInTempDirTest : AbstractConfigureKotlinTes
         if (!File(projectFilePath).exists()) {
             val dotIdeaPath = projectRoot + "/.idea"
             Assert.assertTrue("Project file or '.idea' dir should exists in " + projectRoot, File(dotIdeaPath).exists())
-            return File(projectRoot).toPath()
+            return File(projectRoot)
         }
-
-        return File(projectFilePath).toPath()
+        return File(projectFilePath)
     }
 }

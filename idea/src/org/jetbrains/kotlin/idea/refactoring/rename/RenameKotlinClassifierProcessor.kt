@@ -93,10 +93,11 @@ class RenameKotlinClassifierProcessor : RenameKotlinPsiProcessor() {
 
     override fun findCollisions(
             element: PsiElement,
-            newName: String,
+            newName: String?,
             allRenames: MutableMap<out PsiElement, String>,
             result: MutableList<UsageInfo>
     ) {
+        if (newName == null) return
         val declaration = element.namedUnwrappedElement as? KtNamedDeclaration ?: return
         val descriptor = declaration.unsafeResolveToDescriptor() as ClassifierDescriptor
 
@@ -123,7 +124,7 @@ class RenameKotlinClassifierProcessor : RenameKotlinPsiProcessor() {
         else -> null
     }
 
-    override fun renameElement(element: PsiElement, newName: String, usages: Array<UsageInfo>, listener: RefactoringElementListener?) {
+    override fun renameElement(element: PsiElement, newName: String?, usages: Array<out UsageInfo>, listener: RefactoringElementListener?) {
         val simpleUsages = ArrayList<UsageInfo>(usages.size)
         val ambiguousImportUsages = com.intellij.util.SmartList<UsageInfo>()
         for (usage in usages) {

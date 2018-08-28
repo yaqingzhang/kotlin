@@ -20,7 +20,6 @@ import org.jetbrains.kotlin.psi.KtDoWhileExpression
 import org.jetbrains.uast.UDoWhileExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinUDoWhileExpression(
         override val psi: KtDoWhileExpression,
@@ -30,8 +29,8 @@ class KotlinUDoWhileExpression(
     override val body by lz { KotlinConverter.convertOrEmpty(psi.body, this) }
 
     override val doIdentifier: UIdentifier
-        get() = KotlinUIdentifier(null, this)
+        get() = UIdentifier(null, this)
 
     override val whileIdentifier: UIdentifier
-        get() = KotlinUIdentifier(null, this)
+        get() = UIdentifier(null, this)
 }

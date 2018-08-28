@@ -394,7 +394,7 @@ private enum class SourceType {
 
 @State(
     name = "AutoImportedSourceRoots",
-    storages = [(Storage(file = StoragePathMacros.MODULE_FILE))]
+    storages = [(Storage(id = "other", file = StoragePathMacros.MODULE_FILE))]
 )
 class KotlinImporterComponent : PersistentStateComponent<KotlinImporterComponent.State> {
     class State(var directories: List<String> = ArrayList())

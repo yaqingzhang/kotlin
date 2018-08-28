@@ -25,7 +25,6 @@ import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.uast.*
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinUBinaryExpression(
         override val psi: KtBinaryExpression,
@@ -43,7 +42,7 @@ class KotlinUBinaryExpression(
     override val rightOperand by lz { KotlinConverter.convertOrEmpty(psi.right, this) }
 
     override val operatorIdentifier: UIdentifier?
-        get() = KotlinUIdentifier(psi.operationReference.getReferencedNameElement(), this)
+        get() = UIdentifier(psi.operationReference, this)
 
     override fun resolveOperator() = psi.operationReference.resolveCallToDeclaration(context = this) as? PsiMethod
 

@@ -23,7 +23,6 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.UPrefixExpression
 import org.jetbrains.uast.UastPrefixOperator
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinUPrefixExpression(
         override val psi: KtPrefixExpression,
@@ -32,7 +31,7 @@ class KotlinUPrefixExpression(
     override val operand by lz { KotlinConverter.convertOrEmpty(psi.baseExpression, this) }
 
     override val operatorIdentifier: UIdentifier?
-        get() = KotlinUIdentifier(psi.operationReference, this)
+        get() = UIdentifier(psi.operationReference, this)
 
     override fun resolveOperator() = psi.operationReference.resolveCallToDeclaration(context = this) as? PsiMethod
 

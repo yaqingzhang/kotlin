@@ -35,7 +35,6 @@ import org.jetbrains.kotlin.asJava.elements.KtLightElement
 import org.jetbrains.kotlin.asJava.elements.KtLightMethod
 import org.jetbrains.kotlin.asJava.namedUnwrappedElement
 import org.jetbrains.kotlin.asJava.unwrapped
-import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper.InternalNameMapper.*
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.unsafeResolveToDescriptor
 import org.jetbrains.kotlin.idea.refactoring.Pass
@@ -89,10 +88,11 @@ class RenameKotlinFunctionProcessor : RenameKotlinPsiProcessor() {
 
     override fun findCollisions(
             element: PsiElement,
-            newName: String,
+            newName: String?,
             allRenames: Map<out PsiElement, String>,
             result: MutableList<UsageInfo>
     ) {
+        if (newName == null) return
         val declaration = element.unwrapped as? KtNamedFunction ?: return
         val descriptor = declaration.unsafeResolveToDescriptor()
         checkConflictsAndReplaceUsageInfos(element, allRenames, result)
@@ -115,7 +115,7 @@ class RenameKotlinFunctionProcessor : RenameKotlinPsiProcessor() {
 
     private fun substituteForExpectOrActual(element: PsiElement?) = (element?.namedUnwrappedElement as? KtNamedDeclaration)?.liftToExpected()
 
-    override fun substituteElementToRename(element: PsiElement, editor: Editor?): PsiElement?  {
+    override fun substituteElementToRename(element: PsiElement?, editor: Editor?): PsiElement?  {
         substituteForExpectOrActual(element)?.let { return it }
 
         val wrappedMethod = wrapPsiMethod(element) ?: return element
@@ -179,8 +179,10 @@ class RenameKotlinFunctionProcessor : RenameKotlinPsiProcessor() {
         }
     }
 
-    override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
+    override fun prepareRenaming(element: PsiElement, newName: String?, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
         super.prepareRenaming(element, newName, allRenames, scope)
+
+        if (newName == null) return
 
         if (element is KtLightMethod && getJvmName(element) == null) {
             (element.kotlinOrigin as? KtNamedFunction)?.let { allRenames[it] = newName }
@@ -188,33 +190,30 @@ class RenameKotlinFunctionProcessor : RenameKotlinPsiProcessor() {
         if (element is FunctionWithSupersWrapper) {
             allRenames.remove(element)
         }
-        val originalName = (element.unwrapped as? KtNamedFunction)?.name ?: return
         for (declaration in ((element as? FunctionWithSupersWrapper)?.supers ?: listOf(element))) {
             val psiMethod = wrapPsiMethod(declaration) ?: continue
             allRenames[declaration] = newName
-            val baseName = psiMethod.name
-            val newBaseName = if (demangleInternalName(baseName) == originalName) {
-                mangleInternalName(newName, getModuleNameSuffix(baseName)!!)
-            } else newName
             if (psiMethod.containingClass != null) {
-                psiMethod.forEachOverridingMethod(scope) { it ->
+                psiMethod.forEachOverridingMethod { it ->
                     val overrider = (it as? PsiMirrorElement)?.prototype as? PsiMethod ?: it
 
                     if (overrider is SyntheticElement) return@forEachOverridingMethod true
 
                     val overriderName = overrider.name
-                    val newOverriderName = RefactoringUtil.suggestNewOverriderName(overriderName, baseName, newBaseName)
+                    val baseName = psiMethod.name
+                    val newOverriderName = RefactoringUtil.suggestNewOverriderName(overriderName, baseName, newName)
                     if (newOverriderName != null) {
                         RenameProcessor.assertNonCompileElement(overrider)
                         allRenames.put(overrider, newOverriderName)
                     }
                     return@forEachOverridingMethod true
                 }
+                javaMethodProcessorInstance.prepareRenaming(psiMethod, newName, allRenames, scope)
             }
         }
     }
 
-    override fun renameElement(element: PsiElement, newName: String, usages: Array<UsageInfo>, listener: RefactoringElementListener?) {
+    override fun renameElement(element: PsiElement, newName: String?, usages: Array<UsageInfo>, listener: RefactoringElementListener?) {
         val simpleUsages = ArrayList<UsageInfo>(usages.size)
         val ambiguousImportUsages = SmartList<UsageInfo>()
         for (usage in usages) {
@@ -227,9 +226,7 @@ class RenameKotlinFunctionProcessor : RenameKotlinPsiProcessor() {
                 ambiguousImportUsages += usage
             }
             else {
-                if (!renameMangledUsageIfPossible(usage, element, newName)) {
-                    simpleUsages += usage
-                }
+                simpleUsages += usage
             }
         }
         element.ambiguousImportUsages = ambiguousImportUsages

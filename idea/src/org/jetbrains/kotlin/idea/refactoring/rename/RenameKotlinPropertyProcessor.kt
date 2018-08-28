@@ -36,9 +36,6 @@ import org.jetbrains.kotlin.asJava.*
 import org.jetbrains.kotlin.asJava.classes.KtLightClass
 import org.jetbrains.kotlin.asJava.elements.KtLightDeclaration
 import org.jetbrains.kotlin.asJava.elements.KtLightMethod
-import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper.InternalNameMapper.demangleInternalName
-import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper.InternalNameMapper.getModuleNameSuffix
-import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper.InternalNameMapper.mangleInternalName
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
@@ -199,10 +196,11 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
 
     override fun findCollisions(
             element: PsiElement,
-            newName: String,
+            newName: String?,
             allRenames: MutableMap<out PsiElement, String>,
             result: MutableList<UsageInfo>
     ) {
+        if (newName == null) return
         val declaration = element.namedUnwrappedElement as? KtNamedDeclaration ?: return
         val descriptor = declaration.unsafeResolveToDescriptor() as VariableDescriptor
 
@@ -239,8 +237,8 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
         }
     }
 
-    override fun substituteElementToRename(element: PsiElement, editor: Editor?): PsiElement? {
-        val namedUnwrappedElement = element.namedUnwrappedElement ?: return null
+    override fun substituteElementToRename(element: PsiElement?, editor: Editor?): PsiElement? {
+        val namedUnwrappedElement = element?.namedUnwrappedElement ?: return null
 
         val callableDeclaration = namedUnwrappedElement as? KtCallableDeclaration
                                   ?: throw IllegalStateException("Can't be for element $element there because of canProcessElement()")
@@ -295,7 +293,7 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
         override fun copy() = this
     }
 
-    override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
+    override fun prepareRenaming(element: PsiElement, newName: String?, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
         super.prepareRenaming(element, newName, allRenames, scope)
 
         val namedUnwrappedElement = element.namedUnwrappedElement
@@ -305,7 +303,7 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
             else -> throw IllegalStateException("Can't be for element $element there because of canProcessElement()")
         }
 
-        val newPropertyName = if (element is KtLightMethod) propertyNameByAccessor(newName, element) else newName
+        val newPropertyName = if (newName != null && element is KtLightMethod) propertyNameByAccessor(newName, element) else newName
 
         val (getterJvmName, setterJvmName) = getJvmNames(namedUnwrappedElement)
 
@@ -326,21 +324,16 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
         }
 
         for (propertyMethod in propertyMethods) {
-            val mangledPropertyName = if (propertyMethod is KtLightMethod && propertyMethod.isMangled) {
-                val suffix = getModuleNameSuffix(propertyMethod.name)
-                if (suffix != null && newPropertyName != null) mangleInternalName(newPropertyName, suffix) else null
-            } else null
-            val adjustedPropertyName = mangledPropertyName ?: newPropertyName
-            if (element is KtDeclaration && adjustedPropertyName != null) {
+            if (element is KtDeclaration && newPropertyName != null) {
                 val wrapper = PropertyMethodWrapper(propertyMethod)
                 when {
                     JvmAbi.isGetterName(propertyMethod.name) && getterJvmName == null ->
-                        allRenames[wrapper] = JvmAbi.getterName(adjustedPropertyName)
+                        allRenames[wrapper] = JvmAbi.getterName(newPropertyName)
                     JvmAbi.isSetterName(propertyMethod.name) && setterJvmName == null ->
-                        allRenames[wrapper] = JvmAbi.setterName(adjustedPropertyName)
+                        allRenames[wrapper] = JvmAbi.setterName(newPropertyName)
                 }
             }
-            addRenameElements(propertyMethod, (element as PsiNamedElement).name, adjustedPropertyName, allRenames, scope)
+            addRenameElements(propertyMethod, (element as PsiNamedElement).name, newPropertyName, allRenames, scope)
         }
     }
 
@@ -397,10 +390,7 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
         val refKindUsages = adjustedUsages.groupBy { usage: UsageInfo ->
             val refElement = usage.reference?.resolve()
             if (refElement is PsiMethod) {
-                val refElementName = refElement.name
-                val refElementNameToCheck =
-                    (if (usage is MangledJavaRefUsageInfo) demangleInternalName(refElementName) else null) ?: refElementName
-                when (refElementNameToCheck) {
+                when (refElement.name) {
                     oldGetterName -> UsageKind.GETTER_USAGE
                     oldSetterName -> UsageKind.SETTER_USAGE
                     else -> UsageKind.SIMPLE_PROPERTY_USAGE
@@ -452,9 +442,7 @@ class RenameKotlinPropertyProcessor : RenameKotlinPsiProcessor() {
                     }
                 }
                 else {
-                    val demangledName = if (newName != null && overrider is KtLightMethod && overrider.isMangled) demangleInternalName(newName) else null
-                    val adjustedName = demangledName ?: newName
-                    val newOverriderName = RefactoringUtil.suggestNewOverriderName(overriderName, oldName, adjustedName)
+                    val newOverriderName = RefactoringUtil.suggestNewOverriderName(overriderName, oldName, newName)
                     if (newOverriderName != null) {
                         allRenames[overriderElement] = newOverriderName
                     }

@@ -16,14 +16,12 @@
 
 package org.jetbrains.kotlin.idea.configuration
 
-import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.roots.DependencyScope
 import com.intellij.openapi.roots.ExternalLibraryDescriptor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.gradle.util.GradleVersion
-import org.jetbrains.kotlin.idea.util.module
-import org.jetbrains.plugins.gradle.settings.GradleSettings
+import org.jetbrains.plugins.gradle.frameworkSupport.BuildScriptDataBuilder
 
 interface GradleBuildScriptManipulator<out Psi: PsiFile> {
     val scriptFile: Psi
@@ -66,13 +64,6 @@ interface GradleBuildScriptManipulator<out Psi: PsiFile> {
 
 val MIN_GRADLE_VERSION_FOR_NEW_PLUGIN_SYNTAX = GradleVersion.version("4.4")
 
-fun GradleBuildScriptManipulator<*>.useNewSyntax(kotlinPluginName: String): Boolean {
-    if (!preferNewSyntax) return false
-
-    val module = scriptFile.module ?: return false
-    val path = ExternalSystemApiUtil.getExternalProjectPath(module) ?: return false
-    val gradleVersion = GradleSettings.getInstance(module.project).getLinkedProjectSettings(path)?.resolveGradleVersion() ?: return false
-    if (gradleVersion < MIN_GRADLE_VERSION_FOR_NEW_PLUGIN_SYNTAX) return false
-
-    return !isConfiguredWithOldSyntax(kotlinPluginName)
-}
+// Kept for compatibility reasons (pre-181.3 IDEAs)
+fun GradleBuildScriptManipulator<*>.useNewSyntax(kotlinPluginName: String) = false
+val BuildScriptDataBuilder.gradleVersion get() = GradleVersion.version("0.0")

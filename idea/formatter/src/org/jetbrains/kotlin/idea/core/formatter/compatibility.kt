@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.idea.core.formatter
 
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
+import com.intellij.psi.codeStyle.CommonCodeStyleSettingsManager
 
 /**
  * Method copyFrom is absent in 173.
@@ -13,5 +14,5 @@ import com.intellij.psi.codeStyle.CommonCodeStyleSettings
  */
 fun CommonCodeStyleSettings.copyFromEx(source: CommonCodeStyleSettings) {
     @Suppress("IncompatibleAPI")
-    copyFrom(source)
+    CommonCodeStyleSettingsManager.copy(source, this)
 }

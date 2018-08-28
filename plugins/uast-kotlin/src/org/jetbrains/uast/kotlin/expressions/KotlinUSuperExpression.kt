@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.USuperExpression
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinUSuperExpression(
         override val psi: KtSuperExpression,
@@ -31,7 +30,7 @@ class KotlinUSuperExpression(
         get() = psi.getLabelName()
 
     override val labelIdentifier: UIdentifier?
-        get() = psi.getTargetLabel()?.let { KotlinUIdentifier(it, this) }
+        get() = psi.getTargetLabel()?.let { UIdentifier(it, this) }
 
     override fun resolve() = psi.analyze()[BindingContext.LABEL_TARGET, psi.getTargetLabel()]
 }

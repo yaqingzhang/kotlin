@@ -20,7 +20,6 @@ import org.jetbrains.kotlin.psi.KtLabeledExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.ULabeledExpression
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinULabeledExpression(
         override val psi: KtLabeledExpression,
@@ -30,7 +29,7 @@ class KotlinULabeledExpression(
         get() = psi.getLabelName().orAnonymous("label")
 
     override val labelIdentifier: UIdentifier?
-        get() = psi.getTargetLabel()?.let { KotlinUIdentifier(it, this) }
+        get() = psi.getTargetLabel()?.let { UIdentifier(it, this) }
 
     override val expression by lz { KotlinConverter.convertOrEmpty(psi.baseExpression, this) }
 }

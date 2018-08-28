@@ -29,7 +29,7 @@ class KtLightPsiArrayInitializerMemberValue(
 
     override fun getParent(): PsiElement = lightParent
 
-    override fun isPhysical(): Boolean = false
+    override fun isPhysical(): Boolean = true
 }
 
 open class KtLightPsiLiteral(
@@ -48,7 +48,7 @@ open class KtLightPsiLiteral(
 
     override fun getParent(): PsiElement = lightParent
 
-    override fun isPhysical(): Boolean = false
+    override fun isPhysical(): Boolean = true
 
     override fun replace(newElement: PsiElement): PsiElement {
         val value = (newElement as? PsiLiteral)?.value as? String ?: return this

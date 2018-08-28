@@ -21,7 +21,6 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIdentifier
 import org.jetbrains.uast.UTryExpression
 import org.jetbrains.uast.UVariable
-import org.jetbrains.uast.kotlin.declarations.KotlinUIdentifier
 
 class KotlinUTryExpression(
         override val psi: KtTryExpression,
@@ -38,7 +37,7 @@ class KotlinUTryExpression(
         get() = false
 
     override val tryIdentifier: UIdentifier
-        get() = KotlinUIdentifier(null, this)
+        get() = UIdentifier(null, this)
 
     override val finallyIdentifier: UIdentifier?
         get() = null

@@ -42,7 +42,7 @@ abstract class AbstractTextJavaToKotlinCopyPasteConversionTest : AbstractCopyPas
     }
 
     override fun tearDown() {
-        oldEditorOptions?.let { KotlinEditorOptions.getInstance().loadState(it) }
+        KotlinEditorOptions.getInstance().loadState(oldEditorOptions)
         super.tearDown()
     }
 

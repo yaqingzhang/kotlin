@@ -67,7 +67,7 @@ import static com.android.SdkConstants.*;
  */
 public class ResourceReferenceAnnotatorUtil {
 
-    public static final int ICON_SIZE = 8;
+    private static final int ICON_SIZE = 8;
 
     @Nullable
     public static File pickBitmapFromXml(@NotNull File file, @NotNull ResourceResolver resourceResolver, @NotNull Project project) {

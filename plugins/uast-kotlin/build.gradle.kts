@@ -11,10 +11,8 @@ dependencies {
     compile(project(":compiler:frontend"))
     compile(project(":compiler:frontend.java"))
     compile(project(":compiler:light-classes"))
-
-    // BEWARE: Uast should not depend on IDEA.
-    compileOnly(intellijCoreDep()) { includeJars("intellij-core") }
-    compileOnly(intellijDep()) { includeJars("java-api", "java-impl", "asm-all") }
+    compile(project(":idea:idea-core"))
+    compileOnly(intellijDep()) { includeJars("openapi", "idea", "util", "extensions", "asm-all") }
 
     testCompile(projectDist(":kotlin-test:kotlin-test-jvm"))
     testCompile(projectTests(":compiler:tests-common"))
@@ -22,7 +20,7 @@ dependencies {
     testCompile(project(":compiler:util"))
     testCompile(project(":compiler:cli"))
     testCompile(projectTests(":idea:idea-test-framework"))
-    testCompileOnly(intellijDep()) { includeJars("java-api", "java-impl") }
+    testCompileOnly(intellijDep()) { includeJars("idea_rt") }
 
     testRuntime(projectDist(":kotlin-reflect"))
     testRuntime(project(":idea:idea-android"))

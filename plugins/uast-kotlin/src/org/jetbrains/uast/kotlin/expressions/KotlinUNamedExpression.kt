@@ -41,7 +41,7 @@ class KotlinUNamedExpression private constructor(
             val expression = valueArgument.getArgumentExpression()
             return KotlinUNamedExpression(name, valueArgument.asElement(), uastParent) { expressionParent ->
                 expression?.let { expressionParent.getLanguagePlugin().convertOpt<UExpression>(it, expressionParent) }
-                    ?: UastEmptyExpression(expressionParent)
+                    ?: UastEmptyExpression
             }
         }
 
@@ -60,7 +60,7 @@ class KotlinUNamedExpression private constructor(
 class KotlinUVarargExpression(
     private val valueArgs: List<ValueArgument>,
     uastParent: UElement?
-) : KotlinAbstractUExpression(uastParent), UCallExpressionEx {
+) : KotlinAbstractUExpression(uastParent), UCallExpression {
     override val kind: UastCallKind = UastCallKind.NESTED_ARRAY_INITIALIZER
 
     override val valueArguments: List<UExpression> by lz {
@@ -70,8 +70,6 @@ class KotlinUVarargExpression(
             } ?: UastEmptyExpression
         }
     }
-
-    override fun getArgumentForParameter(i: Int): UExpression? = valueArguments.getOrNull(i)
 
     override val valueArgumentCount: Int
         get() = valueArgs.size

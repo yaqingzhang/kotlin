@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.idea.completion.test.assertInstanceOf
 import org.jetbrains.kotlin.idea.facet.configureFacet
 import org.jetbrains.kotlin.idea.facet.getOrCreateFacet
+import org.jetbrains.kotlin.idea.search.projectScope
 import org.jetbrains.kotlin.idea.test.KotlinLightCodeInsightFixtureTestCase
 import org.jetbrains.kotlin.idea.test.KotlinWithJdkAndRuntimeLightProjectDescriptor
 
@@ -84,6 +85,7 @@ class KtLightAnnotationTest : KotlinLightCodeInsightFixtureTestCase() {
         val annotation = myFixture.findClass("AnnotatedClass").methods.first { it.name == "bar" }.parameterList.parameters.single()
                 .expectAnnotations(2).single { it.qualifiedName == "Qualifier" }
         val annotationAttributeVal = annotation.findAttributeValue("value") as PsiExpression
+        TestCase.assertTrue(annotationAttributeVal.isPhysical)
         assertTextRangeAndValue("\"foo\"", "foo", annotationAttributeVal)
         TestCase.assertEquals(
             PsiType.getJavaLangString(psiManager, GlobalSearchScope.everythingScope(project)),
@@ -430,7 +432,7 @@ class KtLightAnnotationTest : KotlinLightCodeInsightFixtureTestCase() {
                 assertIsKtLightAnnotation("Inner()", innerAnnotationAttributeVal)
             }
             UsefulTestCase.assertInstanceOf(annotationAttributeVal.parent, PsiNameValuePair::class.java)
-            TestCase.assertTrue(annotation.parameterList.attributes.any { it.value == annotationAttributeVal })
+            TestCase.assertTrue(annotation.parameterList.attributes.any { it.value ==  annotationAttributeVal })
         }
 
     }
@@ -670,7 +672,6 @@ class KtLightAnnotationTest : KotlinLightCodeInsightFixtureTestCase() {
     private fun assertTextAndRange(expected: String, psiElement: PsiElement) {
         TestCase.assertEquals("mismatch for $psiElement of ${psiElement.javaClass}", expected, psiElement.text)
         TestCase.assertEquals(expected, psiElement.textRange.substring(psiElement.containingFile.text))
-        TestCase.assertEquals(psiElement, PsiAnchor.create(psiElement).retrieve())
     }
 
     private fun assertIsKtLightAnnotation(expected: String, psiElement: PsiElement) {

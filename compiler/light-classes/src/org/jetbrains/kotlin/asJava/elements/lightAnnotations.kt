@@ -92,6 +92,8 @@ class KtLightAnnotationForSourceEntry(
 
     override fun getQualifiedName() = qualifiedName
 
+    override fun isPhysical() = true
+
     override fun getName(): String? = null
 
     override fun findAttributeValue(name: String?) = getAttributeValue(name, true)

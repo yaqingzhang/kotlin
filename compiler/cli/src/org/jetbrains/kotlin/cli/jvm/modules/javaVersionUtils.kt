@@ -8,5 +8,5 @@ package org.jetbrains.kotlin.cli.jvm.modules
 import com.intellij.openapi.util.SystemInfo
 
 fun isAtLeastJava9(): Boolean {
-    return SystemInfo.isJavaVersionAtLeast(9, 0, 0)
+    return SystemInfo.isJavaVersionAtLeast("9")
 }

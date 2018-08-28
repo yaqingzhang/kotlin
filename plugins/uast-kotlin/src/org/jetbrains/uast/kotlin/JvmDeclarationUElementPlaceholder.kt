@@ -5,9 +5,9 @@
 
 package org.jetbrains.uast.kotlin
 
-import org.jetbrains.uast.UElement
+import org.jetbrains.uast.JvmDeclarationUElement
 
 /**
  * Actual only for 173-bunch, please remove when 173 is over
  */
-typealias JvmDeclarationUElementPlaceholder = UElement
+typealias JvmDeclarationUElementPlaceholder = JvmDeclarationUElement

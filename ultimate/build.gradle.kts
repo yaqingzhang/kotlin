@@ -1,3 +1,5 @@
+/*
+
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.jvm.tasks.Jar
@@ -40,7 +42,7 @@ dependencies {
 
     if (intellijUltimateEnabled) {
         compileOnly(intellijUltimatePluginDep("NodeJS"))
-        compileOnly(intellijUltimateDep()) { includeJars("annotations", "trove4j", "openapi", "platform-api", "platform-impl", "java-api", "java-impl", "idea", "util", "jdom") }
+        compileOnly(intellijUltimateDep()) { includeJars("annotations", "trove4j", "openapi", "idea", "util", "jdom") }
         compileOnly(intellijUltimatePluginDep("CSS"))
         compileOnly(intellijUltimatePluginDep("DatabaseTools"))
         compileOnly(intellijUltimatePluginDep("JavaEE"))
@@ -66,7 +68,7 @@ dependencies {
     testCompile(projectTests(":generators:test-generator"))
     testCompile(commonDep("junit:junit"))
     if (intellijUltimateEnabled) {
-        testCompileOnly(intellijUltimateDep()) { includeJars("platform-api", "platform-impl", "gson", "annotations", "trove4j", "openapi", "idea", "util", "jdom", rootProject = rootProject) }
+        testCompileOnly(intellijUltimateDep()) { includeJars("gson", "annotations", "trove4j", "openapi", "idea", "util", "jdom", rootProject = rootProject) }
     }
     testCompile(commonDep("org.jetbrains.kotlinx", "kotlinx-coroutines-core")) { isTransitive = false }
 
@@ -91,7 +93,6 @@ dependencies {
     testRuntime(project(":plugins:kapt3-idea")) { isTransitive = false }
     testRuntime(project(":plugins:uast-kotlin"))
     testRuntime(project(":plugins:uast-kotlin-idea"))
-    testRuntime(intellijPluginDep("smali"))
 
     if (intellijUltimateEnabled) {
         testCompile(intellijUltimatePluginDep("CSS"))
@@ -207,3 +208,6 @@ projectTest {
 }
 
 val generateTests by generator("org.jetbrains.kotlin.tests.GenerateUltimateTestsKt")
+
+
+*/

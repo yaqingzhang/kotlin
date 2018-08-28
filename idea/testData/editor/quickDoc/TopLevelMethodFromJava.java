@@ -8,6 +8,4 @@ class Testing {
     }
 }
 
-//INFO: <div class='definition'><pre><a href="psi_element://some"><code>some</code></a> <font color="808080"><i>TopLevelMethodFromJava_Data.kt</i></font><br>public fun <b>foo</b>(
-//INFO:     bar: Int
-//INFO: ): Unit</pre></div><div class='content'><p>KDoc foo</p></div><table class='sections'></table>
+//INFO: <pre><b>public</b> <b>fun</b> foo(bar: Int): Unit <i>defined in</i> some <i>in file</i> TopLevelMethodFromJava_Data.kt</pre><p>KDoc foo</p>
