@@ -26,12 +26,9 @@ object JvmIdePlatformKind : IdePlatformKind<JvmIdePlatformKind>() {
         override val kind get() = JvmIdePlatformKind
 
         override fun createArguments(init: K2JVMCompilerArguments.() -> Unit) = K2JVMCompilerArguments()
-            .apply { jvmTarget = this@Platform.version.description }
             .apply(init)
+            .apply { jvmTarget = this@Platform.version.description }
     }
-
-    override fun equals(other: Any?): Boolean = other is JvmIdePlatformKind
-    override fun hashCode(): Int = javaClass.hashCode()
 }
 
 val IdePlatformKind<*>?.isJvm

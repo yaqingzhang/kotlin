@@ -5,10 +5,8 @@
 
 package org.jetbrains.kotlin.idea.core.platform.impl
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.libraries.Library
-import org.jetbrains.kotlin.analyzer.ResolverForModuleFactory
 import org.jetbrains.kotlin.analyzer.common.CommonAnalyzerFacade
 import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
@@ -26,7 +24,7 @@ import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 import javax.swing.Icon
 
-object CommonIdePlatformKindTooling : IdePlatformKindTooling {
+object CommonIdePlatformKindTooling : IdePlatformKindTooling() {
     const val MAVEN_COMMON_STDLIB_ID = "kotlin-stdlib-common" // TODO: KotlinCommonMavenConfigurator
 
     override val kind = CommonIdePlatformKind
@@ -47,12 +45,12 @@ object CommonIdePlatformKindTooling : IdePlatformKindTooling {
     }
 
     override fun getTestIcon(declaration: KtNamedDeclaration, descriptor: DeclarationDescriptor): Icon? {
-        val icons = IdePlatformKindTooling.getInstances()
-            .mapNotNull { getTestIcon(declaration, descriptor) }
-            .takeIf { it.isNotEmpty() }
-            ?: return null
-
-        return icons.distinct().singleOrNull() ?: AllIcons.RunConfigurations.TestState.Run
+        return IdePlatformKindTooling.getInstances()
+            .asSequence()
+            .filter { it != this }
+            .mapNotNull { it.getTestIcon(declaration, descriptor) }
+            .distinct()
+            .singleOrNull()
     }
 
     override fun acceptsAsEntryPoint(function: KtFunction): Boolean {

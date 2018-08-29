@@ -6,8 +6,12 @@
 @file:JvmName("IdePlatformKindUtil")
 package org.jetbrains.kotlin.platform
 
+import com.intellij.openapi.application.ApplicationManager
 import org.jetbrains.kotlin.extensions.ApplicationExtensionDescriptor
 import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
+import org.jetbrains.kotlin.platform.impl.CommonIdePlatformKind
+import org.jetbrains.kotlin.platform.impl.JsIdePlatformKind
+import org.jetbrains.kotlin.platform.impl.JvmIdePlatformKind
 import org.jetbrains.kotlin.resolve.TargetPlatform
 
 abstract class IdePlatformKind<Kind : IdePlatformKind<Kind>> {
@@ -26,7 +30,19 @@ abstract class IdePlatformKind<Kind : IdePlatformKind<Kind>> {
     companion object : ApplicationExtensionDescriptor<IdePlatformKind<*>>(
         "org.jetbrains.kotlin.idePlatformKind", IdePlatformKind::class.java
     ) {
-        val ALL_KINDS by lazy { getInstances() }
+        // For using only in JPS
+        private val JPS_KINDS = listOf(JvmIdePlatformKind, JsIdePlatformKind, CommonIdePlatformKind)
+
+        val ALL_KINDS by lazy {
+            if (ApplicationManager.getApplication() == null) {
+                return@lazy JPS_KINDS
+            }
+
+            val kinds = getInstances()
+            require(kinds.isNotEmpty()) { "Platform list is empty" }
+            kinds
+        }
+
         val All_PLATFORMS by lazy { ALL_KINDS.flatMap { it.platforms } }
 
         val IDE_PLATFORMS_BY_COMPILER_PLATFORMS by lazy { ALL_KINDS.map { it.compilerPlatform to it }.toMap() }

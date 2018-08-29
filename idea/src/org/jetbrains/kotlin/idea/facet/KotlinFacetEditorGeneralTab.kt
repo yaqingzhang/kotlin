@@ -267,14 +267,14 @@ class KotlinFacetEditorGeneralTab(
 
     override fun isModified(): Boolean {
         if (editor.useProjectSettingsCheckBox.isSelected != configuration.settings.useProjectSettings) return true
-        if (editor.targetPlatformComboBox.selectedItem != configuration.settings.platformKind) return true
+        if (editor.targetPlatformComboBox.selectedItem != configuration.settings.platform) return true
         return !editor.useProjectSettingsCheckBox.isSelected && editor.compilerConfigurable.isModified
     }
 
     override fun reset() {
         validateOnce {
             editor.useProjectSettingsCheckBox.isSelected = configuration.settings.useProjectSettings
-            editor.targetPlatformComboBox.selectedItem = configuration.settings.platformKind
+            editor.targetPlatformComboBox.selectedItem = configuration.settings.platform
             editor.compilerConfigurable.reset()
             editor.updateCompilerConfigurable()
         }
@@ -286,7 +286,7 @@ class KotlinFacetEditorGeneralTab(
             with(configuration.settings) {
                 useProjectSettings = editor.useProjectSettingsCheckBox.isSelected
                 (editor.targetPlatformComboBox.selectedItem as IdePlatformKind<*>?)?.let {
-                    if (it != platformKind) {
+                    if (it != platform) {
                         val platformArguments = when {
                             it.isJvm -> editor.compilerConfigurable.k2jvmCompilerArguments
                             it.isJavaScript -> editor.compilerConfigurable.k2jsCompilerArguments

@@ -16,10 +16,7 @@ import org.jetbrains.jps.util.JpsPathUtil
 import org.jetbrains.kotlin.jps.model.platform
 import org.jetbrains.kotlin.platform.DefaultIdeTargetPlatformKindProvider
 import org.jetbrains.kotlin.platform.IdePlatformKind
-import org.jetbrains.kotlin.platform.impl.JsIdePlatformKind
-import org.jetbrains.kotlin.platform.impl.isCommon
-import org.jetbrains.kotlin.platform.impl.isJavaScript
-import org.jetbrains.kotlin.platform.impl.isJvm
+import org.jetbrains.kotlin.platform.impl.*
 import org.jetbrains.kotlin.utils.LibraryUtils
 import java.util.concurrent.ConcurrentHashMap
 
@@ -80,6 +77,7 @@ class KotlinBuildTargets internal constructor(val compileContext: CompileContext
             return JsIdePlatformKind
         }
 
+        return JvmIdePlatformKind
         return DefaultIdeTargetPlatformKindProvider.defaultPlatform.kind
     }
 

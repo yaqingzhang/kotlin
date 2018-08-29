@@ -27,9 +27,6 @@ object JsIdePlatformKind : IdePlatformKind<JsIdePlatformKind>() {
         override val version get() = TargetPlatformVersion.NoVersion
         override fun createArguments(init: K2JSCompilerArguments.() -> Unit) = K2JSCompilerArguments().apply(init)
     }
-
-    override fun equals(other: Any?): Boolean = other is JsIdePlatformKind
-    override fun hashCode(): Int = javaClass.hashCode()
 }
 
 val IdePlatformKind<*>?.isJavaScript

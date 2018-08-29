@@ -16,7 +16,6 @@
 
 package org.jetbrains.kotlin.idea.highlighter
 
-import com.intellij.codeInsight.TestFrameworks
 import com.intellij.execution.TestStateStorage
 import com.intellij.execution.lineMarker.ExecutorAction
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
@@ -25,9 +24,6 @@ import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.asJava.classes.KtLightClass
-import org.jetbrains.kotlin.asJava.toLightClass
-import org.jetbrains.kotlin.asJava.toLightMethods
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.platform.tooling
 import org.jetbrains.kotlin.idea.project.platform
@@ -53,31 +49,6 @@ class KotlinTestRunLineMarkerContributor : RunLineMarkerContributor() {
                 else -> defaultIcon
             }
         }
-    }
-
-    private fun getJavaTestIcon(declaration: KtNamedDeclaration): Icon? {
-        val (url, framework) = when (declaration) {
-            is KtClassOrObject -> {
-                val lightClass = declaration.toLightClass() ?: return null
-                val framework = TestFrameworks.detectFramework(lightClass) ?: return null
-                if (!framework.isTestClass(lightClass)) return null
-                val qualifiedName = lightClass.qualifiedName ?: return null
-
-                "java:suite://$qualifiedName" to framework
-            }
-
-            is KtNamedFunction -> {
-                val lightMethod = declaration.toLightMethods().firstOrNull() ?: return null
-                val lightClass = lightMethod.containingClass as? KtLightClass ?: return null
-                val framework = TestFrameworks.detectFramework(lightClass) ?: return null
-                if (!framework.isTestMethod(lightMethod)) return null
-
-                "java:test://${lightClass.qualifiedName}.${lightMethod.name}" to framework
-            }
-
-            else -> return null
-        }
-        return getTestStateIcon(url, declaration.project) ?: framework.icon
     }
 
     override fun getInfo(element: PsiElement): RunLineMarkerContributor.Info? {

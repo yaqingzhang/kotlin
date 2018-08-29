@@ -153,7 +153,7 @@ class KotlinFacetSettings {
             compilerArguments!!.apiVersion = value?.versionString
         }
 
-    val platformKind: IdePlatform<*, *>?
+    val platform: IdePlatform<*, *>?
         get() {
             val compilerArguments = this.compilerArguments
             return when (compilerArguments) {

@@ -261,7 +261,7 @@ private fun buildChildElement(element: Element, tag: String, bean: Any, filter: 
 private fun KotlinFacetSettings.writeLatestConfig(element: Element) {
     val filter = SkipDefaultsSerializationFilter()
 
-    platformKind?.let {
+    platform?.let {
         element.setAttribute("platform", it.description)
     }
     if (!useProjectSettings) {

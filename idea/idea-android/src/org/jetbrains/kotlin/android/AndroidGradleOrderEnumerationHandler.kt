@@ -97,5 +97,5 @@ class AndroidGradleOrderEnumerationHandler(module: Module) : GradleOrderEnumerat
 
 private fun Module.isMultiplatformModule(): Boolean {
     val settings = KotlinFacetSettingsProvider.getInstance(project).getInitializedSettings(this)
-    return settings.platformKind.isCommon || settings.implementedModuleNames.isNotEmpty()
+    return settings.platform.isCommon || settings.implementedModuleNames.isNotEmpty()
 }

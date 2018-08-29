@@ -77,7 +77,7 @@ fun getDefaultLanguageLevel(
 }
 
 fun getRuntimeLibraryVersion(module: Module): String? {
-    val targetPlatform = KotlinFacetSettingsProvider.getInstance(module.project).getInitializedSettings(module).platformKind
+    val targetPlatform = KotlinFacetSettingsProvider.getInstance(module.project).getInitializedSettings(module).platform
     val versions = getRuntimeLibraryVersions(module, null, targetPlatform.orDefault().kind)
     return versions.toSet().singleOrNull()
 }

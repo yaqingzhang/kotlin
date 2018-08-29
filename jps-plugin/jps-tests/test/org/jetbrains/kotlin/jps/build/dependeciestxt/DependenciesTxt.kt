@@ -45,10 +45,10 @@ data class DependenciesTxt(
         val usages = mutableListOf<Dependency>()
 
         val isCommonModule
-            get() = kotlinFacetSettings?.platformKind.isCommon
+            get() = kotlinFacetSettings?.platform.isCommon
 
         val isJvmModule
-            get() = kotlinFacetSettings?.platformKind.isJvm
+            get() = kotlinFacetSettings?.platform.isJvm
 
         val expectedBy
             get() = dependencies.filter { it.expectedBy }

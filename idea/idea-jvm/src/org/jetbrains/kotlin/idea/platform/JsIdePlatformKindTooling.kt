@@ -33,7 +33,7 @@ import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.utils.PathUtil
 import javax.swing.Icon
 
-class JsIdePlatformKindTooling : IdePlatformKindTooling {
+class JsIdePlatformKindTooling : IdePlatformKindTooling() {
     companion object {
         private const val MAVEN_OLD_JS_STDLIB_ID = "kotlin-js-library"
 

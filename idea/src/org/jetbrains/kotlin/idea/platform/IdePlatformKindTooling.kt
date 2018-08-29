@@ -18,23 +18,26 @@ import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 import javax.swing.Icon
 
-interface IdePlatformKindTooling {
-    val kind: IdePlatformKind<*>
+abstract class IdePlatformKindTooling {
+    abstract val kind: IdePlatformKind<*>
 
-    fun compilerArgumentsForProject(project: Project): CommonCompilerArguments?
+    abstract fun compilerArgumentsForProject(project: Project): CommonCompilerArguments?
 
-    val resolverForModuleFactory: ResolverForModuleFactory
+    abstract val resolverForModuleFactory: ResolverForModuleFactory
 
-    val mavenLibraryIds: List<String>
-    val gradlePluginId: String
+    abstract val mavenLibraryIds: List<String>
+    abstract val gradlePluginId: String
 
-    val libraryKind: PersistentLibraryKind<*>?
-    fun getLibraryDescription(project: Project): CustomLibraryDescription
-    fun getLibraryVersionProvider(project: Project): (Library) -> String?
+    abstract val libraryKind: PersistentLibraryKind<*>?
+    abstract fun getLibraryDescription(project: Project): CustomLibraryDescription
+    abstract fun getLibraryVersionProvider(project: Project): (Library) -> String?
 
-    fun getTestIcon(declaration: KtNamedDeclaration, descriptor: DeclarationDescriptor): Icon?
+    abstract fun getTestIcon(declaration: KtNamedDeclaration, descriptor: DeclarationDescriptor): Icon?
 
-    fun acceptsAsEntryPoint(function: KtFunction): Boolean
+    abstract fun acceptsAsEntryPoint(function: KtFunction): Boolean
+
+    override fun equals(other: Any?): Boolean = javaClass == other?.javaClass
+    override fun hashCode(): Int = javaClass.hashCode()
 
     companion object : ApplicationExtensionDescriptor<IdePlatformKindTooling>(
         "org.jetbrains.kotlin.idePlatformKindTooling", IdePlatformKindTooling::class.java

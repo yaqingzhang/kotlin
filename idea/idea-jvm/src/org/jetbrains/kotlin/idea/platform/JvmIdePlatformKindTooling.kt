@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.resolve.jvm.JvmAnalyzerFacade
 import org.jetbrains.kotlin.utils.PathUtil
 import javax.swing.Icon
 
-class JvmIdePlatformKindTooling : IdePlatformKindTooling {
+class JvmIdePlatformKindTooling : IdePlatformKindTooling() {
     override val kind = JvmIdePlatformKind
 
     override fun compilerArgumentsForProject(project: Project) = Kotlin2JvmCompilerArgumentsHolder.getInstance(project).settings

@@ -31,8 +31,6 @@ interface IdePlatformKindResolution {
 
     fun createBuiltIns(settings: PlatformAnalysisSettings, sdkContext: GlobalContextImpl): KotlinBuiltIns
 
-    fun isModuleForPlatform(module: Module): Boolean
-
     companion object : ApplicationExtensionDescriptor<IdePlatformKindResolution>(
         "org.jetbrains.kotlin.idePlatformKindResolution", IdePlatformKindResolution::class.java
     ) {

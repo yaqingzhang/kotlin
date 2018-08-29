@@ -21,16 +21,13 @@ object CommonIdePlatformKind : IdePlatformKind<CommonIdePlatformKind>() {
 
     override val argumentsClass get() = K2MetadataCompilerArguments::class.java
 
-    override val name get() = "Common"
+    override val name get() = "Common (experimental)"
 
     object Platform : IdePlatform<CommonIdePlatformKind, CommonCompilerArguments>() {
         override val kind get() = CommonIdePlatformKind
         override val version get() = TargetPlatformVersion.NoVersion
         override fun createArguments(init: CommonCompilerArguments.() -> Unit) = K2MetadataCompilerArguments().apply(init)
     }
-
-    override fun equals(other: Any?): Boolean = other is CommonIdePlatformKind
-    override fun hashCode(): Int = javaClass.hashCode()
 }
 
 val IdePlatformKind<*>?.isCommon

@@ -59,7 +59,7 @@ private fun getDefaultTargetPlatform(module: Module, rootModel: ModuleRootModel?
 fun KotlinFacetSettings.initializeIfNeeded(
     module: Module,
     rootModel: ModuleRootModel?,
-    platformKind: IdePlatform<*, *>? = null, // if null, detect by module dependencies
+    platform: IdePlatform<*, *>? = null, // if null, detect by module dependencies
     compilerVersion: String? = null
 ) {
     val project = module.project
@@ -74,9 +74,9 @@ fun KotlinFacetSettings.initializeIfNeeded(
     val commonArguments = KotlinCommonCompilerArgumentsHolder.getInstance(module.project).settings
 
     if (compilerArguments == null) {
-        val targetPlatformKind = platformKind ?: getDefaultTargetPlatform(module, rootModel)
-        compilerArguments = targetPlatformKind.createArguments {
-            targetPlatformKind.kind.tooling.compilerArgumentsForProject(module.project)?.let { mergeBeans(it, this) }
+        val targetPlatform = platform ?: getDefaultTargetPlatform(module, rootModel)
+        compilerArguments = targetPlatform.createArguments {
+            targetPlatform.kind.tooling.compilerArgumentsForProject(module.project)?.let { mergeBeans(it, this) }
             mergeBeans(commonArguments, this)
         }
     }
@@ -90,7 +90,7 @@ fun KotlinFacetSettings.initializeIfNeeded(
         apiLevel = if (useProjectSettings) {
             LanguageVersion.fromVersionString(commonArguments.apiVersion) ?: languageLevel
         } else {
-            languageLevel!!.coerceAtMost(getLibraryLanguageLevel(module, rootModel, this.platformKind?.kind))
+            languageLevel!!.coerceAtMost(getLibraryLanguageLevel(module, rootModel, this.platform?.kind))
         }
     }
 }
@@ -128,7 +128,7 @@ fun Module.getOrCreateFacet(
 fun KotlinFacet.configureFacet(
     compilerVersion: String,
     coroutineSupport: LanguageFeature.State,
-    platformKind: IdePlatform<*, *>?, // if null, detect by module dependencies
+    platform: IdePlatform<*, *>?, // if null, detect by module dependencies
     modelsProvider: IdeModifiableModelsProvider
 ) {
     val module = module
@@ -138,7 +138,7 @@ fun KotlinFacet.configureFacet(
         initializeIfNeeded(
             module,
             modelsProvider.getModifiableRootModel(module),
-            platformKind,
+            platform,
             compilerVersion
         )
         val apiLevel = apiLevel
