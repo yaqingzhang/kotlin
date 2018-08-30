@@ -27,6 +27,8 @@ abstract class IdePlatformKind<Kind : IdePlatformKind<Kind>> {
     override fun equals(other: Any?): Boolean = javaClass == other?.javaClass
     override fun hashCode(): Int = javaClass.hashCode()
 
+    override fun toString() = name
+
     companion object : ApplicationExtensionDescriptor<IdePlatformKind<*>>(
         "org.jetbrains.kotlin.idePlatformKind", IdePlatformKind::class.java
     ) {
