@@ -13,8 +13,11 @@ import org.jetbrains.kotlin.gradle.util.isWindows
 import org.jetbrains.kotlin.gradle.util.modify
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.util.DependencyDirectories
 import org.junit.Assert
+import org.junit.BeforeClass
 import org.junit.Test
+import java.io.File
 import java.util.jar.JarFile
 import java.util.zip.ZipFile
 import kotlin.test.assertEquals
@@ -546,5 +549,22 @@ class NewMultiplatformIT : BaseGradleIT() {
             assertFailed()
             assertContains("Declaration annotated with '@OptionalExpectation' can only be used in common module sources")
         }
+    }
+
+    companion object {
+
+        @JvmStatic
+        @BeforeClass
+        // TODO: A workaround to remove ~/.konan created by old runs for the test on teamcity agents
+        fun cleanDotKonan() {
+            val konanDir = File(System.getProperty("user.home") + File.separator + ".konan")
+            println("TTT ~/.konan: ${konanDir.absolutePath}")
+            println("TTT ~/.konan contents: ${konanDir.list()?.joinToString()}")
+            println("TTT Deleting ~/.konan...")
+            konanDir.deleteRecursively()
+            println("TTT ~/.konan contents after deleting: ${konanDir.list()?.joinToString()}")
+            println("TTT: localDir: ${DependencyDirectories.localKonanDir.absolutePath}")
+        }
+
     }
 }
