@@ -1,5 +1,6 @@
 // PROBLEM: none
 // WITH_RUNTIME
+// ERROR: Unsupported [suspend operator "getValue"]
 
 import kotlin.reflect.KProperty
 

@@ -1,5 +1,6 @@
 // PROBLEM: none
 // WITH_RUNTIME
+// ERROR: Unsupported [suspend operator "setValue"]
 
 import kotlin.reflect.KProperty
 
