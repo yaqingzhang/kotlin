@@ -150,6 +150,18 @@ class GroovyBuildScriptManipulator(
         return kotlinBlock.parent
     }
 
+    override fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? {
+        val snippet = "inlineClasses \"$inlineClassesOption\""
+        val kotlinBlock = scriptFile.getBlockOrCreate("kotlin")
+        kotlinBlock.getBlockOrCreate("experimental").apply {
+            addOrReplaceExpression(snippet) { stmt ->
+                (stmt as? GrMethodCall)?.invokedExpression?.text == "inlineClasses"
+            }
+        }
+
+        return kotlinBlock.parent
+    }
+
     override fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement? =
         changeKotlinTaskParameter(scriptFile, "languageVersion", version, forTests)
 

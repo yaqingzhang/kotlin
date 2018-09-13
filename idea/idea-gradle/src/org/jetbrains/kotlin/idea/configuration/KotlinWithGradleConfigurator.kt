@@ -252,6 +252,27 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
         }
     }
 
+    override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+        // TODO
+        val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
+                (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
+
+        if (runtimeUpdateRequired) {
+            Messages.showErrorDialog(
+                module.project,
+                "Coroutines support requires version 1.3 or later of the Kotlin runtime library. " +
+                        "Please update the version in your build script.",
+                ChangeCoroutineSupportFix.getFixText(state)
+            )
+            return
+        }
+
+        //val element = changeInlineClassesConfiguration(module, InlineClassesSupport.getCompilerArgument(state))
+        //if (element != null) {
+        //    OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
+        //}
+    }
+
     override fun addLibraryDependency(
         module: Module,
         element: PsiElement,
@@ -299,6 +320,10 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
 
         fun changeCoroutineConfiguration(module: Module, coroutineOption: String): PsiElement? = changeBuildGradle(module) {
             getManipulator(it).changeCoroutineConfiguration(coroutineOption)
+        }
+
+        fun changeInlineClassesConfiguration(module: Module, inlineClassesOption: String): PsiElement? = changeBuildGradle(module) {
+            getManipulator(it).changeInlineClassesConfiguration(inlineClassesOption)
         }
 
         fun changeLanguageVersion(module: Module, languageVersion: String?, apiVersion: String?, forTests: Boolean) =

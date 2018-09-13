@@ -700,3 +700,14 @@ fun PomFile.changeCoroutineConfiguration(value: String): PsiElement? {
     ) ?: return null
     return changeConfigurationOrProperty(kotlinPlugin, "experimentalCoroutines", "kotlin.compiler.experimental.coroutines", value)
 }
+
+fun PomFile.changeInlineClassesConfiguration(value: String): PsiElement? {
+    val kotlinPlugin = findPlugin(
+        MavenId(
+            KotlinMavenConfigurator.GROUP_ID,
+            KotlinMavenConfigurator.MAVEN_PLUGIN_ID,
+            null
+        )
+    ) ?: return null
+    return changeConfigurationOrProperty(kotlinPlugin, "experimentalInlineClasses", "kotlin.compiler.experimental.inlineClasses", value)
+}

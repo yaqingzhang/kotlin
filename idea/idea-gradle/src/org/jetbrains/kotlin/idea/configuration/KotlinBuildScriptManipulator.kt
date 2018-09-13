@@ -108,6 +108,9 @@ class KotlinBuildScriptManipulator(
     override fun changeCoroutineConfiguration(coroutineOption: String): PsiElement? =
         scriptFile.changeCoroutineConfiguration(coroutineOption)
 
+    override fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? =
+        scriptFile.changeInlineClassesConfiguration(inlineClassesOption)
+
     override fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement? =
         scriptFile.changeKotlinTaskParameter("languageVersion", version, forTests)
 
@@ -291,6 +294,18 @@ class KotlinBuildScriptManipulator(
         val kotlinBlock = findScriptInitializer("kotlin")?.getBlock() ?: addTopLevelBlock("kotlin") ?: return null
         addImportIfMissing("org.jetbrains.kotlin.gradle.dsl.Coroutines")
         val statement = kotlinBlock.statements.find { it.text.startsWith("experimental.coroutines") }
+        return if (statement != null) {
+            statement.replace(psiFactory.createExpression(snippet))
+        } else {
+            kotlinBlock.add(psiFactory.createExpression(snippet)).apply { addNewLinesIfNeeded() }
+        }
+    }
+
+    private fun KtFile.changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? {
+        val snippet = "experimental.inlineClasses = InlineClasses.${inlineClassesOption.toUpperCase()}"
+        val kotlinBlock = findScriptInitializer("kotlin")?.getBlock() ?: addTopLevelBlock("kotlin") ?: return null
+        addImportIfMissing("org.jetbrains.kotlin.gradle.dsl.InlineClasses")
+        val statement = kotlinBlock.statements.find { it.text.startsWith("experimental.inlineClasses") }
         return if (statement != null) {
             statement.replace(psiFactory.createExpression(snippet))
         } else {

@@ -19,12 +19,11 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Contract
 import org.jetbrains.kotlin.config.*
-import org.jetbrains.kotlin.idea.KotlinPluginUtil
-import org.jetbrains.kotlin.idea.compiler.configuration.KotlinCommonCompilerArgumentsHolder
 import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
 import org.jetbrains.kotlin.idea.framework.ui.CreateLibraryDialogWithModules
 import org.jetbrains.kotlin.idea.framework.ui.FileUIUtils
 import org.jetbrains.kotlin.idea.quickfix.askUpdateRuntime
+import org.jetbrains.kotlin.idea.quickfix.updateFeature
 import org.jetbrains.kotlin.idea.util.application.runWriteAction
 import org.jetbrains.kotlin.idea.util.projectStructure.sdk
 import org.jetbrains.kotlin.idea.versions.LibraryJarDescriptor
@@ -343,6 +342,29 @@ abstract class KotlinWithLibraryConfigurator protected constructor() : KotlinPro
             facetSettings.coroutineSupport = state
             facetSettings.apiLevel = LanguageVersion.KOTLIN_1_1
             facetSettings.languageLevel = LanguageVersion.KOTLIN_1_1
+        }
+    }
+
+    override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+        val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED && run {
+            val runtimeLibraryVersion = getRuntimeLibraryVersion(module)
+            when {
+                runtimeLibraryVersion == null -> false
+                !runtimeLibraryVersion.startsWith("1.") -> false
+                runtimeLibraryVersion.getOrNull(2) in '0'..'2' -> true
+                else -> false
+            }
+        }
+
+        if (runtimeUpdateRequired && !askUpdateRuntime(module, LanguageFeature.InlineClasses.sinceApiVersion)) {
+            return
+        }
+
+        val facetSettings = KotlinFacetSettingsProvider.getInstance(module.project).getInitializedSettings(module)
+        ModuleRootModificationUtil.updateModel(module) {
+            facetSettings.apiLevel = LanguageVersion.KOTLIN_1_3
+            facetSettings.languageLevel = LanguageVersion.KOTLIN_1_3
+            facetSettings.compilerArguments?.updateFeature(LanguageFeature.InlineClasses, state)
         }
     }
 

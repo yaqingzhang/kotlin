@@ -25,7 +25,7 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.idea.util.module
 import org.jetbrains.plugins.gradle.settings.GradleSettings
 
-interface GradleBuildScriptManipulator<out Psi: PsiFile> {
+interface GradleBuildScriptManipulator<out Psi : PsiFile> {
     val scriptFile: Psi
     val preferNewSyntax: Boolean
 
@@ -43,6 +43,8 @@ interface GradleBuildScriptManipulator<out Psi: PsiFile> {
     fun configureProjectBuildScript(kotlinPluginName: String, version: String): Boolean
 
     fun changeCoroutineConfiguration(coroutineOption: String): PsiElement?
+
+    fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement?
 
     fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement?
 

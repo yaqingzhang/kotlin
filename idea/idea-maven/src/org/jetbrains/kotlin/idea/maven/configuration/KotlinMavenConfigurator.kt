@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
 import org.jetbrains.kotlin.idea.framework.ui.ConfigureDialogWithModulesAndVersion
 import org.jetbrains.kotlin.idea.maven.*
 import org.jetbrains.kotlin.idea.quickfix.ChangeCoroutineSupportFix
+import org.jetbrains.kotlin.idea.quickfix.ChangeInlineClassesSupportFix
 import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.jetbrains.kotlin.idea.versions.LibraryJarDescriptor
 
@@ -262,7 +263,9 @@ protected constructor(
             return
         }
 
-        val element = changeMavenCoroutineConfiguration(module, CoroutineSupport.getCompilerArgument(state), messageTitle)
+        val element = changeMavenFeatureConfiguration(
+            module, CoroutineSupport.getCompilerArgument(state), messageTitle
+        ) { this.changeCoroutineConfiguration(it) }
 
         if (element != null) {
             OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
@@ -270,11 +273,42 @@ protected constructor(
 
     }
 
-    private fun changeMavenCoroutineConfiguration(module: Module, value: String, messageTitle: String): PsiElement? {
+    override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+        // TODO: change me
+        val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
+                (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
+
+        val messageTitle = ChangeInlineClassesSupportFix.getFixText(state)
+        if (runtimeUpdateRequired) {
+            Messages.showErrorDialog(
+                module.project,
+                "Inline classes support requires version 1.3 or later of the Kotlin runtime library. " +
+                        "Please update the version in your build script.",
+                messageTitle
+            )
+            return
+        }
+
+//        val element = changeMavenFeatureConfiguration(
+//            module, InlineClassesSupport.getCompilerArgument(state), messageTitle
+//        ) { this.changeInlineClassesConfiguration(it) }
+//
+//        if (element != null) {
+//            OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
+//        }
+
+    }
+
+    private fun changeMavenFeatureConfiguration(
+        module: Module,
+        value: String,
+        messageTitle: String,
+        changeFeatureConfiguration: PomFile.(String) -> PsiElement?
+    ): PsiElement? {
         fun doChangeMavenCoroutineConfiguration(): PsiElement? {
             val psi = KotlinMavenConfigurator.findModulePomFile(module) as? XmlFile ?: return null
             val pom = PomFile.forFileOrNull(psi) ?: return null
-            return pom.changeCoroutineConfiguration(value)
+            return pom.changeFeatureConfiguration(value)
         }
 
         val element = doChangeMavenCoroutineConfiguration()
