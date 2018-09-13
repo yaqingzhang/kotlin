@@ -436,6 +436,10 @@ private fun renderAnnotationArgument(arg: KmAnnotationArgument<*>): String =
         is KmAnnotationArgument.LongValue -> arg.value.toString() + "L"
         is KmAnnotationArgument.FloatValue -> arg.value.toString() + "f"
         is KmAnnotationArgument.DoubleValue -> arg.value.toString()
+        is KmAnnotationArgument.UByteValue -> arg.value.toString() + ".toUByte()"
+        is KmAnnotationArgument.UShortValue -> arg.value.toString() + ".toUShort()"
+        is KmAnnotationArgument.UIntValue -> arg.value.toString() + "u"
+        is KmAnnotationArgument.ULongValue -> arg.value.toString() + "uL"
         is KmAnnotationArgument.BooleanValue -> arg.value.toString()
         is KmAnnotationArgument.StringValue -> "\"${arg.value.sanitize(quote = '"')}\""
         is KmAnnotationArgument.KClassValue -> "${arg.value}::class"
