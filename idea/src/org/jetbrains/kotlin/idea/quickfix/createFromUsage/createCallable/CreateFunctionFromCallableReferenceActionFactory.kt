@@ -17,10 +17,7 @@
 package org.jetbrains.kotlin.idea.quickfix.createFromUsage.createCallable
 
 import com.intellij.util.SmartList
-import org.jetbrains.kotlin.builtins.getReceiverTypeFromFunctionType
-import org.jetbrains.kotlin.builtins.getReturnTypeFromFunctionType
-import org.jetbrains.kotlin.builtins.getValueParameterTypesFromFunctionType
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.*
 import org.jetbrains.kotlin.diagnostics.Diagnostic
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.quickfix.createFromUsage.callableBuilder.*
@@ -46,7 +43,7 @@ object CreateFunctionFromCallableReferenceActionFactory : CreateCallableMemberFr
         return element
                 .guessTypes(context, resolutionFacade.moduleDescriptor)
                 .ifEmpty { element.guessTypes(context, resolutionFacade.moduleDescriptor, allowErrorTypes = true) } // approximate with Any
-                .filter(KotlinType::isFunctionType)
+                .filter(KotlinType::isFunctionOrSuspendFunctionType)
                 .mapNotNull {
                     val expectedReceiverType = it.getReceiverTypeFromFunctionType()
                     val receiverExpression = element.receiverExpression

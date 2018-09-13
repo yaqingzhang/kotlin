@@ -18,7 +18,7 @@ package org.jetbrains.kotlin.idea.core
 
 import com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.lexer.KotlinLexer
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.*
@@ -206,7 +206,7 @@ object KotlinNameSuggester {
                     }
                 }
             }
-            type.isFunctionType -> addName("function", validator)
+            type.isFunctionOrSuspendFunctionType -> addName("function", validator)
             else -> {
                 val descriptor = type.constructor.declarationDescriptor
                 if (descriptor != null) {

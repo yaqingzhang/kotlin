@@ -12,7 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiFile
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtExpression
@@ -51,7 +51,7 @@ class UnusedLambdaExpressionBodyInspection : AbstractKotlinInspection() {
 
     private fun KtExpression.used(context: BindingContext): Boolean = context[BindingContext.USED_AS_EXPRESSION, this] ?: true
 
-    private fun CallableDescriptor.returnsFunction() = returnType?.isFunctionType ?: false
+    private fun CallableDescriptor.returnsFunction() = returnType?.isFunctionOrSuspendFunctionType ?: false
 
     class RemoveEqTokenFromFunctionDeclarationFix(function: KtFunction) : LocalQuickFixOnPsiElement(function) {
         override fun getText(): String = "Remove '=' token from function declaration"

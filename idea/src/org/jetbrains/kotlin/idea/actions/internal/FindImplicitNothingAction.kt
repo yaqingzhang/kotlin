@@ -36,7 +36,7 @@ import com.intellij.usages.UsageViewManager
 import com.intellij.usages.UsageViewPresentation
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.getReturnTypeFromFunctionType
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.util.application.progressIndicatorNullable
@@ -131,7 +131,7 @@ class FindImplicitNothingAction : AnAction() {
 
     private fun KotlinType.isNothingOrNothingFunctionType(): Boolean {
         return KotlinBuiltIns.isNothing(this) ||
-               (isFunctionType && this.getReturnTypeFromFunctionType().isNothingOrNothingFunctionType())
+               (isFunctionOrSuspendFunctionType && this.getReturnTypeFromFunctionType().isNothingOrNothingFunctionType())
     }
 
     override fun update(e: AnActionEvent) {
