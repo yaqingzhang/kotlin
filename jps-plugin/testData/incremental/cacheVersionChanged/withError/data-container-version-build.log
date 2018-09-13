@@ -1,5 +1,6 @@
 ================ Step #1 =================
 
+Building module5
 Lookups cache are INVALID: actual=(777, [jvm]) -> expected=(3011001, [jvm])
 Marked as dirty by Kotlin:
   module1/src/a.kt
@@ -7,7 +8,6 @@ Marked as dirty by Kotlin:
   module2/src/b.kt
   module3/src/c.kt
   module4/src/d.kt
-Building module5
 Exit code: NOTHING_DONE
 ------------------------------------------
 Building module4

@@ -76,9 +76,9 @@ Compiling files:
 End of files
 Exit code: OK
 ------------------------------------------
+Building pJvm
 Marked as dirty by Kotlin:
   pJs/src/servicePJsNewImpl.kt
-Building pJvm
 Cleaning output files:
   out/production/pJvm/META-INF/pJvm.kotlin_module
   out/production/pJvm/ServiceCNewHeaderKt.class
@@ -145,9 +145,9 @@ Compiling files:
 End of files
 Exit code: OK
 ------------------------------------------
+Building pJvm
 Marked as dirty by Kotlin:
   c/src/serviceCNewHeader.kt
-Building pJvm
 Exit code: NOTHING_DONE
 ------------------------------------------
 

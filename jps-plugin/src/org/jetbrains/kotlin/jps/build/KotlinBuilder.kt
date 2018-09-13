@@ -173,24 +173,26 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
 
         if (chunk.isDummy(context)) return
 
-        val kotlinContext = ensureKotlinContextInitialized(context)
-
         val buildLogger = context.testingContext?.buildLogger
         buildLogger?.chunkBuildStarted(context, chunk)
 
-        if (JavaBuilderUtil.isForcedRecompilationAllJavaModules(context)) return
+        val kotlinContext = ensureKotlinContextInitialized(context)
 
-        val targets = chunk.targets
-        if (targets.none { kotlinContext.hasKotlinMarker[it] == true }) return
+        try {
+            if (JavaBuilderUtil.isForcedRecompilationAllJavaModules(context)) return
 
-        val kotlinChunk = kotlinContext.getChunk(chunk) ?: return
-        kotlinContext.checkChunkCacheVersion(kotlinChunk)
+            val targets = chunk.targets
+            if (targets.none { kotlinContext.hasKotlinMarker[it] == true }) return
 
-        if (!kotlinContext.rebuildingAllKotlin && kotlinChunk.isEnabled) {
-            markAdditionalFilesForInitialRound(kotlinChunk, chunk, kotlinContext)
+            val kotlinChunk = kotlinContext.getChunk(chunk) ?: return
+            kotlinContext.checkChunkCacheVersion(kotlinChunk)
+
+            if (!kotlinContext.rebuildingAllKotlin && kotlinChunk.isEnabled) {
+                markAdditionalFilesForInitialRound(kotlinChunk, chunk, kotlinContext)
+            }
+        } finally {
+            buildLogger?.afterChunkBuildStarted(context, chunk)
         }
-
-        buildLogger?.afterChunkBuildStarted(context, chunk)
     }
 
     /**

@@ -1,10 +1,10 @@
 ================ Step #1 =================
 
+Building module1
 Lookups cache are INVALID: actual=(777, [jvm]) -> expected=(3011001, [jvm])
 Marked as dirty by Kotlin:
   module1/src/a.kt
   module2/src/b.kt
-Building module1
 Cleaning output files:
   out/production/module1/META-INF/module1.kotlin_module
   out/production/module1/module1/A.class

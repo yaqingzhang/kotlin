@@ -578,8 +578,6 @@ abstract class AbstractIncrementalJpsTest(
         }
 
         override fun chunkBuildStarted(context: CompileContext, chunk: ModuleChunk) {
-            logDirtyFiles(markedDirtyBeforeRound) // files can be marked as dirty during build start (KotlinCompileContext initialization)
-
             if (!chunk.isDummy(context) && context.projectDescriptor.project.modules.size > 1) {
                 logLine("Building ${chunk.modules.sortedBy { it.name }.joinToString { it.name }}")
             }
