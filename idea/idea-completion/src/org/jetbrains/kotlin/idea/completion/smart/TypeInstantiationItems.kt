@@ -26,7 +26,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.builtins.jvm.JavaToKotlinClassMap
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
@@ -90,7 +90,7 @@ class TypeInstantiationItems(
             fuzzyType: FuzzyType,
             tail: Tail?
     ) {
-        if (fuzzyType.type.isFunctionType) return // do not show "object: ..." for function types
+        if (fuzzyType.type.isFunctionOrSuspendFunctionType) return // do not show "object: ..." for function types
 
         val classifier = fuzzyType.type.constructor.declarationDescriptor as? ClassifierDescriptorWithTypeParameters ?: return
         val classDescriptor = when (classifier) {

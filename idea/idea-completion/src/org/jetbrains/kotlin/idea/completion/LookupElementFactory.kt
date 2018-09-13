@@ -24,7 +24,7 @@ import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
 import com.intellij.util.SmartList
 import org.jetbrains.kotlin.builtins.isBuiltinFunctionalType
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.completion.handlers.GenerateLambdaInfo
 import org.jetbrains.kotlin.idea.completion.handlers.KotlinFunctionInsertHandler
@@ -75,7 +75,7 @@ class LookupElementFactory(
     companion object {
         fun hasSingleFunctionTypeParameter(descriptor: FunctionDescriptor): Boolean {
             val parameter = descriptor.original.valueParameters.singleOrNull() ?: return false
-            return parameter.type.isFunctionType
+            return parameter.type.isFunctionOrSuspendFunctionType
         }
     }
 
@@ -368,7 +368,7 @@ class LookupElementFactory(
             onReceiverTypeMismatch: CallableWeight?,
             receiverParameter: ReceiverParameterDescriptor
     ): CallableWeight? {
-        if ((receiverParameter.value as? TransientReceiver)?.type?.isFunctionType == true) return null
+        if ((receiverParameter.value as? TransientReceiver)?.type?.isFunctionOrSuspendFunctionType == true) return null
 
         val matchingReceiverIndices = HashSet<Int>()
         var bestReceiverType: ReceiverType? = null

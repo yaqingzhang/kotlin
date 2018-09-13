@@ -26,7 +26,7 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiDocumentManager
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.KotlinIcons
 import org.jetbrains.kotlin.idea.completion.handlers.CastReceiverInsertHandler
@@ -299,7 +299,7 @@ fun breakOrContinueExpressionItems(position: KtElement, breakOrContinue: String)
 fun BasicLookupElementFactory.createLookupElementForType(type: KotlinType): LookupElement? {
     if (type.isError) return null
 
-    return if (type.isFunctionType) {
+    return if (type.isFunctionOrSuspendFunctionType) {
         val text = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_NO_ANNOTATIONS.renderType(type)
         val baseLookupElement = LookupElementBuilder.create(text).withIcon(KotlinIcons.LAMBDA)
         BaseTypeLookupElement(type, baseLookupElement)

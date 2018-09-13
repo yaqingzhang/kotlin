@@ -23,7 +23,7 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.openapi.util.Key
 import org.jetbrains.kotlin.builtins.ReflectionTypes
-import org.jetbrains.kotlin.builtins.isFunctionType
+import org.jetbrains.kotlin.builtins.isFunctionOrSuspendFunctionType
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
 import org.jetbrains.kotlin.idea.completion.handlers.WithExpressionPrefixInsertHandler
@@ -335,7 +335,7 @@ fun DeclarationDescriptor.fuzzyTypesForSmartCompletion(
 }
 
 fun Collection<ExpectedInfo>.filterFunctionExpected()
-        = filter { it.fuzzyType != null && it.fuzzyType!!.type.isFunctionType }
+        = filter { it.fuzzyType != null && it.fuzzyType!!.type.isFunctionOrSuspendFunctionType }
 
 fun Collection<ExpectedInfo>.filterCallableExpected()
         = filter { it.fuzzyType != null && ReflectionTypes.isCallableType(it.fuzzyType!!.type) }
