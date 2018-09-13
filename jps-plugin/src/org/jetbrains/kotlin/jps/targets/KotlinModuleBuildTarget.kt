@@ -128,8 +128,8 @@ abstract class KotlinModuleBuildTarget<BuildMetaInfoType : BuildMetaInfo> intern
         val exported: Boolean
     )
 
-    // TODO(1.2.80): try replace allDependencies with KotlinChunk.collectDependentChunksRecursivelyExportedOnly
-    @Deprecated("Consider using precalculated KotlinChunk.collectDependentChunksRecursivelyExportedOnly")
+    // TODO(1.2.80): try replace allDependencies with KotlinChunk.dependent
+    @Deprecated("Consider using precalculated KotlinChunk.dependent")
     val allDependencies by lazy {
         JpsJavaExtensionService.dependencies(module).recursively().exportedOnly()
             .includedIn(JpsJavaClasspathKind.compile(isTests))

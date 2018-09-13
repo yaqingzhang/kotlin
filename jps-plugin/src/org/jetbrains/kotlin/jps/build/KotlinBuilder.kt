@@ -299,7 +299,7 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
             val proposedExitCode =
                 doBuild(chunk, kotlinTarget, context, kotlinDirtyFilesHolder, messageCollector, outputConsumer, fsOperations)
 
-            val actualExitCode = if (proposedExitCode == OK && fsOperations.hasMarkedDirty) ADDITIONAL_PASS_REQUIRED else proposedExitCode
+            val actualExitCode = if (proposedExitCode == OK && fsOperations.hasMarkedDirtyForNextRound) ADDITIONAL_PASS_REQUIRED else proposedExitCode
 
             LOG.debug("Build result: $actualExitCode")
 
@@ -433,7 +433,7 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
         kotlinChunk.saveVersions()
 
         if (targets.any { kotlinContext.hasKotlinMarker[it] == null }) {
-            fsOperations.markChunk(recursively = false, kotlinOnly = true, excludeFiles = kotlinDirtyFilesHolder.allDirtyFiles)
+            fsOperations.markChunkForNextRound(recursively = false, kotlinOnly = true, excludeFiles = kotlinDirtyFilesHolder.allDirtyFiles)
         }
 
         for (target in targets) {
@@ -675,7 +675,7 @@ private fun ChangesCollector.processChangesUsingLookups(
     reporter.report { "Start processing changes" }
 
     val dirtyFiles = getDirtyFiles(allCaches, dataManager)
-    fsOperations.markInChunkOrDependents(dirtyFiles.asIterable(), excludeFiles = compiledFiles)
+    fsOperations.markForNextRound(dirtyFiles.asIterable(), excludeFiles = compiledFiles)
 
     reporter.report { "End of processing changes" }
 }
