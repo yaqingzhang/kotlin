@@ -72,6 +72,11 @@ public class MultiplatformJpsTestWithGeneratedContentGenerated extends AbstractM
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple"), Pattern.compile("^([^\\.]+)$"), TargetBackend.ANY, true);
         }
 
+        @TestMetadata("editingCExpectActual")
+        public void testEditingCExpectActual() throws Exception {
+            runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingCExpectActual/");
+        }
+
         @TestMetadata("editingCKotlin")
         public void testEditingCKotlin() throws Exception {
             runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingCKotlin/");
@@ -90,6 +95,19 @@ public class MultiplatformJpsTestWithGeneratedContentGenerated extends AbstractM
         @TestMetadata("editingPJvmKotlin")
         public void testEditingPJvmKotlin() throws Exception {
             runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingPJvmKotlin/");
+        }
+
+        @TestMetadata("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingCExpectActual")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class EditingCExpectActual extends AbstractMultiplatformJpsTestWithGeneratedContent {
+            private void runTest(String testDataFilePath) throws Exception {
+                KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+            }
+
+            public void testAllFilesPresentInEditingCExpectActual() throws Exception {
+                KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingCExpectActual"), Pattern.compile("^([^\\.]+)$"), TargetBackend.ANY, true);
+            }
         }
 
         @TestMetadata("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simple/editingCKotlin")
@@ -206,6 +224,11 @@ public class MultiplatformJpsTestWithGeneratedContentGenerated extends AbstractM
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp"), Pattern.compile("^([^\\.]+)$"), TargetBackend.ANY, true);
         }
 
+        @TestMetadata("editingCExpectActual")
+        public void testEditingCExpectActual() throws Exception {
+            runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingCExpectActual/");
+        }
+
         @TestMetadata("editingCKotlin")
         public void testEditingCKotlin() throws Exception {
             runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingCKotlin/");
@@ -224,6 +247,19 @@ public class MultiplatformJpsTestWithGeneratedContentGenerated extends AbstractM
         @TestMetadata("editingPJvmKotlin")
         public void testEditingPJvmKotlin() throws Exception {
             runTest("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingPJvmKotlin/");
+        }
+
+        @TestMetadata("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingCExpectActual")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class EditingCExpectActual extends AbstractMultiplatformJpsTestWithGeneratedContent {
+            private void runTest(String testDataFilePath) throws Exception {
+                KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+            }
+
+            public void testAllFilesPresentInEditingCExpectActual() throws Exception {
+                KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingCExpectActual"), Pattern.compile("^([^\\.]+)$"), TargetBackend.ANY, true);
+            }
         }
 
         @TestMetadata("jps-plugin/testData/incremental/multiModule/multiplatform/withGeneratedContent/simpleNewMpp/editingCKotlin")

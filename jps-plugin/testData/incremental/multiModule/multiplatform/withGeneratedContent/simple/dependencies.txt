@@ -1,5 +1,4 @@
-// TODO: editExpectActual
-c [common, edit]
+c [common, edit, editExpectActual]
 
 pJvm [jvm, edit, editJvm]
 pJvm -> c [expectedBy]
