@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.idea.util.isInSourceContentWithoutInjected
 import org.jetbrains.kotlin.idea.util.isKotlinBinary
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
-import org.jetbrains.kotlin.script.findScriptDefinition
 import org.jetbrains.kotlin.utils.addIfNotNull
 import org.jetbrains.kotlin.utils.sure
 import org.jetbrains.kotlin.utils.yieldIfNotNull
@@ -171,7 +170,7 @@ private fun <T> PsiElement.collectInfos(c: ModuleInfoCollector<T>): T {
         getModuleRelatedModuleInfo(ProjectFileIndex.SERVICE.getInstance(project), virtualFile)?.let {
             return c.onResult(it)
         }
-        findScriptDefinition(virtualFile, project)?.let {
+        containingKtFile.script?.kotlinScriptDefinition?.let {
             return c.onResult(ScriptModuleInfo(project, virtualFile, it))
         }
     }

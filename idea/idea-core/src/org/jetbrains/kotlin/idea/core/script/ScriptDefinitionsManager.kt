@@ -34,6 +34,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotifications
+import com.intellij.util.containers.SLRUMap
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.caches.project.SdkInfo
 import org.jetbrains.kotlin.idea.caches.project.getScriptRelatedModuleInfo
@@ -47,6 +48,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.flattenTo
 import java.io.File
 import java.net.URLClassLoader
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 import kotlin.script.dependencies.Environment
 import kotlin.script.dependencies.ScriptContents
@@ -66,6 +68,24 @@ import kotlin.script.templates.standard.ScriptTemplateWithArgs
 class ScriptDefinitionsManager(private val project: Project) : LazyScriptDefinitionProvider() {
     private var definitionsByContributor = mutableMapOf<ScriptDefinitionContributor, List<KotlinScriptDefinition>>()
     private var definitions: List<KotlinScriptDefinition>? = null
+
+    private val scriptDefinitionsCacheLock = ReentrantReadWriteLock()
+    private val scriptDefinitionsCache = SLRUMap<String, KotlinScriptDefinition>(10, 10)
+
+    override fun findScriptDefinition(fileName: String): KotlinScriptDefinition? {
+        if (nonScriptFileName(fileName)) return null
+
+        val cached = synchronized(scriptDefinitionsCacheLock) { scriptDefinitionsCache.get(fileName) }
+        if (cached != null) return cached
+
+        val definition = super.findScriptDefinition(fileName) ?: return null
+
+        synchronized(scriptDefinitionsCacheLock) {
+            scriptDefinitionsCache.put(fileName, definition)
+        }
+
+        return definition
+    }
 
     fun reloadDefinitionsBy(contributor: ScriptDefinitionContributor) = lock.write {
         if (definitions == null) return // not loaded yet
@@ -173,6 +193,8 @@ class ScriptDefinitionsManager(private val project: Project) : LazyScriptDefinit
         }
 
         clearCache()
+        scriptDefinitionsCache.clear()
+
         // TODO: clear by script type/definition
         ServiceManager.getService(project, ScriptDependenciesCache::class.java).clear()
 
