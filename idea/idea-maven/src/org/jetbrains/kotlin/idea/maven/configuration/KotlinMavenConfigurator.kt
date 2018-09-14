@@ -274,6 +274,7 @@ protected constructor(
     }
 
     override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+        // TODO: here we should make something like https://kotlinlang.org/docs/reference/using-maven.html#specifying-compiler-options
         // TODO: change me
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
                 (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)

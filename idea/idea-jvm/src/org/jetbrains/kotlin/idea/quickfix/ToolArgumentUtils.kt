@@ -19,4 +19,7 @@ internal fun CommonToolArguments.updateFeature(feature: LanguageFeature, feature
     internalArguments = internalArguments.filter {
         it !is ManualLanguageFeatureSetting || it.languageFeature != feature
     } + ManualLanguageFeatureSetting(feature, featureSupport, stringRepresentation)
+
+    // TODO: for project, we have an exception (?) here
+    // TODO: for module, we have no exception, but empty tag is written into kotlinc.xml
 }

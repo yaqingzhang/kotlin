@@ -151,6 +151,8 @@ class GroovyBuildScriptManipulator(
     }
 
     override fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? {
+        // TODO: here we should use compileKotlin (TestKotlin).kotlinOptions.freeCompilerArgs = ["-XXLanguage:-InlineClasses"]
+
         val snippet = "inlineClasses \"$inlineClassesOption\""
         val kotlinBlock = scriptFile.getBlockOrCreate("kotlin")
         kotlinBlock.getBlockOrCreate("experimental").apply {
