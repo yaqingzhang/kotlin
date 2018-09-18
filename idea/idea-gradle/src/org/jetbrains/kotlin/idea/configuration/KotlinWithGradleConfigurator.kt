@@ -271,9 +271,7 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
             return
         }
 
-        val element = changeBuildGradle(module) {
-            getManipulator(it).changeLanguageFeatureConfiguration(feature, state)
-        }
+        val element = changeFeatureConfiguration(module, feature, state)
         if (element != null) {
             OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
         }
@@ -326,6 +324,14 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
 
         fun changeCoroutineConfiguration(module: Module, coroutineOption: String): PsiElement? = changeBuildGradle(module) {
             getManipulator(it).changeCoroutineConfiguration(coroutineOption)
+        }
+
+        fun changeFeatureConfiguration(
+            module: Module,
+            feature: LanguageFeature,
+            state: LanguageFeature.State
+        ) = changeBuildGradle(module) {
+            getManipulator(it).changeLanguageFeatureConfiguration(feature, state)
         }
 
         fun changeLanguageVersion(module: Module, languageVersion: String?, apiVersion: String?, forTests: Boolean) =

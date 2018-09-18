@@ -155,17 +155,43 @@ class GroovyBuildScriptManipulator(
         feature: LanguageFeature,
         state: LanguageFeature.State
     ): PsiElement? {
-        // TODO: here we should use compileKotlin (TestKotlin).kotlinOptions.freeCompilerArgs = ["-XXLanguage:-InlineClasses"]
+        val compileKotlinBlock = scriptFile.getBlockOrCreate("compileKotlin")
+        val kotlinOptionsBlock = compileKotlinBlock.getBlockOrCreate("kotlinOptions")
 
-        val snippet = "inlineClasses"
-        val kotlinBlock = scriptFile.getBlockOrCreate("kotlin")
-        kotlinBlock.getBlockOrCreate("experimental").apply {
-            addOrReplaceExpression(snippet) { stmt ->
-                (stmt as? GrMethodCall)?.invokedExpression?.text == "inlineClasses"
-            }
+        val compilerArgumentsStatement = kotlinOptionsBlock.statements.find { stmt ->
+            stmt.text.startsWith("freeCompilerArgs")
         }
 
-        return kotlinBlock.parent
+        val sign = when (state) {
+            LanguageFeature.State.ENABLED -> "+"
+            LanguageFeature.State.DISABLED -> "-"
+            LanguageFeature.State.ENABLED_WITH_WARNING -> "+" // not supported normally
+            LanguageFeature.State.ENABLED_WITH_ERROR -> "-" // not supported normally
+        }
+        val languagePrefix = "-XXLanguage:"
+        val featureArgumentString = "$languagePrefix$sign${feature.name}"
+
+        if (compilerArgumentsStatement != null) {
+            val text = compilerArgumentsStatement.text
+            val existingFeatureIndex = text.indexOf(feature.name)
+            val languagePrefixIndex = text.lastIndexOf(languagePrefix, existingFeatureIndex)
+            val newText = if (languagePrefixIndex != -1) {
+                text.substring(0, languagePrefixIndex) + featureArgumentString + text.substring(existingFeatureIndex + feature.name.length)
+            } else {
+
+                val splitText = text.split("]")
+                if (splitText.size != 2) {
+                    "freeCompilerArgs = [\"$featureArgumentString\"]"
+                } else {
+                    splitText[0] + ", \"$featureArgumentString\"]" + splitText[1]
+                }
+            }
+            compilerArgumentsStatement.replaceWithStatementFromText(newText)
+        } else {
+            kotlinOptionsBlock.addLastStatementInBlockIfNeeded("freeCompilerArgs = [\"$featureArgumentString\"]")
+        }
+
+        return compileKotlinBlock
     }
 
     override fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement? =
