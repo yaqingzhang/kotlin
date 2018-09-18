@@ -265,9 +265,7 @@ protected constructor(
             return
         }
 
-        val element = changeMavenFeatureConfiguration(
-            module, CoroutineSupport.getCompilerArgument(state), messageTitle
-        ) { this.changeCoroutineConfiguration(it) }
+        val element = changeMavenCoroutineConfiguration(module, CoroutineSupport.getCompilerArgument(state), messageTitle)
 
         if (element != null) {
             OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
@@ -306,16 +304,15 @@ protected constructor(
 
     }
 
-    private fun changeMavenFeatureConfiguration(
+    private fun changeMavenCoroutineConfiguration(
         module: Module,
         value: String,
-        messageTitle: String,
-        changeFeatureConfiguration: PomFile.(String) -> PsiElement?
+        messageTitle: String
     ): PsiElement? {
         fun doChangeMavenCoroutineConfiguration(): PsiElement? {
             val psi = KotlinMavenConfigurator.findModulePomFile(module) as? XmlFile ?: return null
             val pom = PomFile.forFileOrNull(psi) ?: return null
-            return pom.changeFeatureConfiguration(value)
+            return pom.changeCoroutineConfiguration(value)
         }
 
         val element = doChangeMavenCoroutineConfiguration()
