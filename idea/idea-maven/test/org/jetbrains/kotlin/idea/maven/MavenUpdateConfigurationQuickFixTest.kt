@@ -71,7 +71,7 @@ class MavenUpdateConfigurationQuickFixTest : MavenImportingTestCase() {
 
     @Test
     fun testEnableCoroutines() {
-        doTest("Enable coroutine support in the current module")
+        doTest("Enable coroutines support in the current module")
     }
 
     @Test
