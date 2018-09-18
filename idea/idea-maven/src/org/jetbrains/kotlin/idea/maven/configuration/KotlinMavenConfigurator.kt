@@ -294,13 +294,13 @@ protected constructor(
             return
         }
 
-//        val element = changeMavenFeatureConfiguration(
-//            module, InlineClassesSupport.getCompilerArgument(state), messageTitle
-//        ) { this.changeGeneralFeatureConfiguration(it) }
-//
-//        if (element != null) {
-//            OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
-//        }
+        val element = changeMavenFeatureConfiguration(
+            module, feature, state, messageTitle
+        )
+
+        if (element != null) {
+            OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
+        }
 
     }
 
@@ -316,6 +316,25 @@ protected constructor(
         }
 
         val element = doChangeMavenCoroutineConfiguration()
+        if (element == null) {
+            Messages.showErrorDialog(
+                module.project,
+                "Failed to update.pom.xml. Please update the file manually.",
+                messageTitle
+            )
+        }
+        return element
+    }
+
+    private fun changeMavenFeatureConfiguration(
+        module: Module,
+        feature: LanguageFeature,
+        state: LanguageFeature.State,
+        messageTitle: String
+    ): PsiElement? {
+        val psi = KotlinMavenConfigurator.findModulePomFile(module) as? XmlFile ?: return null
+        val pom = PomFile.forFileOrNull(psi) ?: return null
+        val element = pom.changeFeatureConfiguration(feature, state)
         if (element == null) {
             Messages.showErrorDialog(
                 module.project,
