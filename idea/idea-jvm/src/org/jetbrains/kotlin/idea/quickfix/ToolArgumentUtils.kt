@@ -8,17 +8,13 @@ package org.jetbrains.kotlin.idea.quickfix
 import org.jetbrains.kotlin.cli.common.arguments.CommonToolArguments
 import org.jetbrains.kotlin.cli.common.arguments.ManualLanguageFeatureSetting
 import org.jetbrains.kotlin.config.LanguageFeature
+import org.jetbrains.kotlin.cli.common.arguments.CliArgumentStringBuilder.buildArgumentString
 
-internal fun CommonToolArguments.updateFeature(feature: LanguageFeature, featureSupport: LanguageFeature.State) {
-    val sign = when (featureSupport) {
-        LanguageFeature.State.ENABLED -> "+"
-        LanguageFeature.State.DISABLED -> "-"
-        else -> return
-    }
-    val stringRepresentation = "-XXLanguage:$sign${feature.name}"
+internal fun CommonToolArguments.updateFeature(feature: LanguageFeature, state: LanguageFeature.State) {
+    val featureArgumentString = feature.buildArgumentString(state)
     internalArguments = internalArguments.filter {
         it !is ManualLanguageFeatureSetting || it.languageFeature != feature
-    } + ManualLanguageFeatureSetting(feature, featureSupport, stringRepresentation)
+    } + ManualLanguageFeatureSetting(feature, state, featureArgumentString)
 
     // TODO: for project, we have an exception (?) here
     // TODO: for module, we have no exception, but empty tag is written into kotlinc.xml
