@@ -20,36 +20,39 @@ import org.jetbrains.kotlin.idea.facet.KotlinFacet
 import org.jetbrains.kotlin.idea.roots.invalidateProjectRoots
 import org.jetbrains.kotlin.psi.KtFile
 
-sealed class ChangeInlineClassesSupportFix(
+sealed class ChangeGeneralLanguageFeatureSupportFix(
     element: PsiElement,
-    inlineClassesSupport: LanguageFeature.State
-) : AbstractChangeFeatureSupportLevelFix(element, inlineClassesSupport, shortFeatureName) {
+    feature: LanguageFeature,
+    featureSupport: LanguageFeature.State
+) : AbstractChangeFeatureSupportLevelFix(element, feature, featureSupport, feature.presentableName) {
 
     class InModule(
         element: PsiElement,
-        inlineClassesSupport: LanguageFeature.State
-    ) : ChangeInlineClassesSupportFix(element, inlineClassesSupport) {
+        feature: LanguageFeature,
+        featureSupport: LanguageFeature.State
+    ) : ChangeGeneralLanguageFeatureSupportFix(element, feature, featureSupport) {
         override fun getText() = "${super.getText()} in the current module"
 
         override fun invoke(project: Project, editor: Editor?, file: KtFile) {
             val module = ModuleUtilCore.findModuleForPsiElement(file) ?: return
 
-            findApplicableConfigurator(module).changeInlineClassesConfiguration(module, featureSupport)
+            findApplicableConfigurator(module).changeGeneralFeatureConfiguration(module, feature, featureSupport)
         }
     }
 
     class InProject(
         element: PsiElement,
-        inineClassesSupport: LanguageFeature.State
-    ) : ChangeInlineClassesSupportFix(element, inineClassesSupport) {
+        feature: LanguageFeature,
+        featureSupport: LanguageFeature.State
+    ) : ChangeGeneralLanguageFeatureSupportFix(element, feature, featureSupport) {
         override fun getText() = "${super.getText()} in the project"
 
         override fun invoke(project: Project, editor: Editor?, file: KtFile) {
             if (featureSupportEnabled) {
-                if (!checkUpdateRuntime(project, LanguageFeature.InlineClasses.sinceApiVersion)) return
+                if (!checkUpdateRuntime(project, feature.sinceApiVersion)) return
             }
             KotlinCommonCompilerArgumentsHolder.getInstance(project).update {
-                updateFeature(LanguageFeature.InlineClasses, featureSupport)
+                updateFeature(feature, featureSupport)
             }
             project.invalidateProjectRoots()
         }
@@ -57,9 +60,9 @@ sealed class ChangeInlineClassesSupportFix(
     }
 
     companion object : FeatureSupportIntentionActionsFactory() {
-        private const val shortFeatureName = "inline classes"
+        private val supportedFeatures = listOf(LanguageFeature.InlineClasses)
 
-        fun getFixText(state: LanguageFeature.State) = getFixText(state, shortFeatureName)
+        fun getFixText(feature: LanguageFeature, state: LanguageFeature.State) = getFixText(state, feature.presentableName)
 
         override fun doCreateActions(diagnostic: Diagnostic): List<IntentionAction> {
             val module = ModuleUtilCore.findModuleForPsiElement(diagnostic.psiElement) ?: return emptyList()
@@ -70,10 +73,12 @@ sealed class ChangeInlineClassesSupportFix(
                         module.getBuildSystemType() == BuildSystemType.JPS
             }
 
-            return doCreateActions(
-                diagnostic, LanguageFeature.InlineClasses, allowWarningAndErrorMode = false,
-                quickFixConstructor = if (shouldConfigureInProject()) ::InProject else ::InModule
-            )
+            return supportedFeatures.flatMap { feature ->
+                doCreateActions(
+                    diagnostic, feature, allowWarningAndErrorMode = false,
+                    quickFixConstructor = if (shouldConfigureInProject()) ::InProject else ::InModule
+                )
+            }
         }
     }
 }

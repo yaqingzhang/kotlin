@@ -345,7 +345,11 @@ abstract class KotlinWithLibraryConfigurator protected constructor() : KotlinPro
         }
     }
 
-    override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+    override fun changeGeneralFeatureConfiguration(
+        module: Module,
+        feature: LanguageFeature,
+        state: LanguageFeature.State
+    ) {
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED && run {
             val runtimeLibraryVersion = getRuntimeLibraryVersion(module)
             when {

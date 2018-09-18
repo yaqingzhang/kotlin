@@ -56,7 +56,7 @@ interface KotlinProjectConfigurator {
 
     fun changeCoroutineConfiguration(module: Module, state: LanguageFeature.State)
 
-    fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State)
+    fun changeGeneralFeatureConfiguration(module: Module, feature: LanguageFeature, state: LanguageFeature.State)
 
     fun addLibraryDependency(module: Module, element: PsiElement, library: ExternalLibraryDescriptor, libraryJarDescriptors: List<LibraryJarDescriptor>)
 

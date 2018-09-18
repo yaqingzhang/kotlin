@@ -22,6 +22,7 @@ import com.intellij.openapi.roots.ExternalLibraryDescriptor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.idea.util.module
 import org.jetbrains.plugins.gradle.settings.GradleSettings
 
@@ -44,7 +45,7 @@ interface GradleBuildScriptManipulator<out Psi : PsiFile> {
 
     fun changeCoroutineConfiguration(coroutineOption: String): PsiElement?
 
-    fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement?
+    fun changeLanguageFeatureConfiguration(feature: LanguageFeature, state: LanguageFeature.State): PsiElement?
 
     fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement?
 

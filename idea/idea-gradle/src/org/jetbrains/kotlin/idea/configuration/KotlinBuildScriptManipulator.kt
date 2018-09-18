@@ -21,6 +21,7 @@ import com.intellij.openapi.roots.ExternalLibraryDescriptor
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.idea.configuration.KotlinWithGradleConfigurator.Companion.getBuildScriptSettingsPsiFile
 import org.jetbrains.kotlin.idea.inspections.gradle.GradleHeuristicHelper.PRODUCTION_DEPENDENCY_STATEMENTS
 import org.jetbrains.kotlin.idea.util.application.runReadAction
@@ -108,8 +109,11 @@ class KotlinBuildScriptManipulator(
     override fun changeCoroutineConfiguration(coroutineOption: String): PsiElement? =
         scriptFile.changeCoroutineConfiguration(coroutineOption)
 
-    override fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? =
-        scriptFile.changeInlineClassesConfiguration(inlineClassesOption)
+    override fun changeLanguageFeatureConfiguration(
+        feature: LanguageFeature,
+        state: LanguageFeature.State
+    ): PsiElement? =
+        scriptFile.changeLanguageFeatureConfiguration(feature, state)
 
     override fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement? =
         scriptFile.changeKotlinTaskParameter("languageVersion", version, forTests)
@@ -301,8 +305,12 @@ class KotlinBuildScriptManipulator(
         }
     }
 
-    private fun KtFile.changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? {
-        val snippet = "experimental.inlineClasses = InlineClasses.${inlineClassesOption.toUpperCase()}"
+    private fun KtFile.changeLanguageFeatureConfiguration(
+        feature: LanguageFeature,
+        state: LanguageFeature.State
+    ): PsiElement? {
+        // TODO
+        val snippet = "experimental.inlineClasses = InlineClasses"
         val kotlinBlock = findScriptInitializer("kotlin")?.getBlock() ?: addTopLevelBlock("kotlin") ?: return null
         addImportIfMissing("org.jetbrains.kotlin.gradle.dsl.InlineClasses")
         val statement = kotlinBlock.statements.find { it.text.startsWith("experimental.inlineClasses") }

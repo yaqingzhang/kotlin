@@ -37,7 +37,7 @@ import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
 import org.jetbrains.kotlin.idea.framework.ui.ConfigureDialogWithModulesAndVersion
 import org.jetbrains.kotlin.idea.maven.*
 import org.jetbrains.kotlin.idea.quickfix.ChangeCoroutineSupportFix
-import org.jetbrains.kotlin.idea.quickfix.ChangeInlineClassesSupportFix
+import org.jetbrains.kotlin.idea.quickfix.ChangeGeneralLanguageFeatureSupportFix
 import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.jetbrains.kotlin.idea.versions.LibraryJarDescriptor
 
@@ -273,13 +273,17 @@ protected constructor(
 
     }
 
-    override fun changeInlineClassesConfiguration(module: Module, state: LanguageFeature.State) {
+    override fun changeGeneralFeatureConfiguration(
+        module: Module,
+        feature: LanguageFeature,
+        state: LanguageFeature.State
+    ) {
         // TODO: here we should make something like https://kotlinlang.org/docs/reference/using-maven.html#specifying-compiler-options
         // TODO: change me
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
                 (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
 
-        val messageTitle = ChangeInlineClassesSupportFix.getFixText(state)
+        val messageTitle = ChangeGeneralLanguageFeatureSupportFix.getFixText(feature, state)
         if (runtimeUpdateRequired) {
             Messages.showErrorDialog(
                 module.project,
@@ -292,7 +296,7 @@ protected constructor(
 
 //        val element = changeMavenFeatureConfiguration(
 //            module, InlineClassesSupport.getCompilerArgument(state), messageTitle
-//        ) { this.changeInlineClassesConfiguration(it) }
+//        ) { this.changeGeneralFeatureConfiguration(it) }
 //
 //        if (element != null) {
 //            OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)

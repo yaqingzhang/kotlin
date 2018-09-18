@@ -21,6 +21,7 @@ import com.intellij.openapi.roots.ExternalLibraryDescriptor
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.codeStyle.CodeStyleManager
+import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.idea.configuration.KotlinWithGradleConfigurator.Companion.getBuildScriptSettingsPsiFile
 import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.jetbrains.kotlin.idea.util.module
@@ -150,10 +151,13 @@ class GroovyBuildScriptManipulator(
         return kotlinBlock.parent
     }
 
-    override fun changeInlineClassesConfiguration(inlineClassesOption: String): PsiElement? {
+    override fun changeLanguageFeatureConfiguration(
+        feature: LanguageFeature,
+        state: LanguageFeature.State
+    ): PsiElement? {
         // TODO: here we should use compileKotlin (TestKotlin).kotlinOptions.freeCompilerArgs = ["-XXLanguage:-InlineClasses"]
 
-        val snippet = "inlineClasses \"$inlineClassesOption\""
+        val snippet = "inlineClasses"
         val kotlinBlock = scriptFile.getBlockOrCreate("kotlin")
         kotlinBlock.getBlockOrCreate("experimental").apply {
             addOrReplaceExpression(snippet) { stmt ->

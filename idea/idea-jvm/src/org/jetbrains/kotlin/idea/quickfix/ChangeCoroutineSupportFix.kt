@@ -24,7 +24,7 @@ import org.jetbrains.kotlin.psi.KtFile
 sealed class ChangeCoroutineSupportFix(
     element: PsiElement,
     coroutineSupport: LanguageFeature.State
-) : AbstractChangeFeatureSupportLevelFix(element, coroutineSupport, shortFeatureName) {
+) : AbstractChangeFeatureSupportLevelFix(element, LanguageFeature.Coroutines, coroutineSupport, shortFeatureName) {
 
     class InModule(element: PsiElement, coroutineSupport: LanguageFeature.State) : ChangeCoroutineSupportFix(element, coroutineSupport) {
         override fun getText() = "${super.getText()} in the current module"
@@ -72,7 +72,14 @@ sealed class ChangeCoroutineSupportFix(
 
             return doCreateActions(
                 diagnostic, LanguageFeature.Coroutines, allowWarningAndErrorMode = true,
-                quickFixConstructor = if (shouldConfigureInProject()) ::InProject else ::InModule
+                quickFixConstructor = if (shouldConfigureInProject()) { element, _, coroutineSupport ->
+                    InProject(
+                        element,
+                        coroutineSupport
+                    )
+                } else { element, _, coroutineSupport ->
+                    InModule(element, coroutineSupport)
+                }
             )
         }
     }

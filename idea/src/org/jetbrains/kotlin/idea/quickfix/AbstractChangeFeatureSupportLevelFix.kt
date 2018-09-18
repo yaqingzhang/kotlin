@@ -13,8 +13,9 @@ import org.jetbrains.kotlin.diagnostics.Errors
 
 abstract class AbstractChangeFeatureSupportLevelFix(
     element: PsiElement,
+    protected val feature: LanguageFeature,
     protected val featureSupport: LanguageFeature.State,
-    private val featureShortName: String
+    private val featureShortName: String = feature.presentableName
 ) : KotlinQuickFixAction<PsiElement>(element) {
     protected val featureSupportEnabled: Boolean
         get() = featureSupport == LanguageFeature.State.ENABLED || featureSupport == LanguageFeature.State.ENABLED_WITH_WARNING
@@ -36,25 +37,25 @@ abstract class AbstractChangeFeatureSupportLevelFix(
     abstract class FeatureSupportIntentionActionsFactory : KotlinIntentionActionsFactory() {
         protected fun doCreateActions(
             diagnostic: Diagnostic,
-            languageFeature: LanguageFeature,
+            feature: LanguageFeature,
             allowWarningAndErrorMode: Boolean,
-            quickFixConstructor: (PsiElement, LanguageFeature.State) -> IntentionAction
+            quickFixConstructor: (PsiElement, LanguageFeature, LanguageFeature.State) -> IntentionAction
         ): List<IntentionAction> {
             val newFeatureSupports = when (diagnostic.factory) {
                 Errors.EXPERIMENTAL_FEATURE_ERROR -> {
-                    if (Errors.EXPERIMENTAL_FEATURE_ERROR.cast(diagnostic).a.first != languageFeature) return emptyList()
+                    if (Errors.EXPERIMENTAL_FEATURE_ERROR.cast(diagnostic).a.first != feature) return emptyList()
                     if (!allowWarningAndErrorMode) listOf(LanguageFeature.State.ENABLED)
                     else listOf(LanguageFeature.State.ENABLED_WITH_WARNING, LanguageFeature.State.ENABLED)
                 }
                 Errors.EXPERIMENTAL_FEATURE_WARNING -> {
-                    if (Errors.EXPERIMENTAL_FEATURE_WARNING.cast(diagnostic).a.first != languageFeature) return emptyList()
+                    if (Errors.EXPERIMENTAL_FEATURE_WARNING.cast(diagnostic).a.first != feature) return emptyList()
                     if (!allowWarningAndErrorMode) listOf(LanguageFeature.State.ENABLED)
                     listOf(LanguageFeature.State.ENABLED, LanguageFeature.State.ENABLED_WITH_ERROR)
                 }
                 else -> return emptyList()
             }
 
-            return newFeatureSupports.map { quickFixConstructor(diagnostic.psiElement, it) }
+            return newFeatureSupports.map { quickFixConstructor(diagnostic.psiElement, feature, it) }
         }
     }
 }
