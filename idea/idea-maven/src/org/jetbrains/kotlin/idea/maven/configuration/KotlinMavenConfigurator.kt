@@ -32,8 +32,10 @@ import org.jetbrains.idea.maven.utils.MavenArtifactScope
 import org.jetbrains.kotlin.config.ApiVersion
 import org.jetbrains.kotlin.config.CoroutineSupport
 import org.jetbrains.kotlin.config.LanguageFeature
+import org.jetbrains.kotlin.config.LanguageVersion
 import org.jetbrains.kotlin.idea.configuration.*
 import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
+import org.jetbrains.kotlin.idea.facet.toLanguageVersion
 import org.jetbrains.kotlin.idea.framework.ui.ConfigureDialogWithModulesAndVersion
 import org.jetbrains.kotlin.idea.maven.*
 import org.jetbrains.kotlin.idea.quickfix.ChangeCoroutineSupportFix
@@ -250,7 +252,7 @@ protected constructor(
 
     override fun changeCoroutineConfiguration(module: Module, state: LanguageFeature.State) {
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
-                (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
+                getRuntimeLibraryVersion(module).toLanguageVersion() == LanguageVersion.KOTLIN_1_0
 
         val messageTitle = ChangeCoroutineSupportFix.getFixText(state)
         if (runtimeUpdateRequired) {
@@ -280,15 +282,14 @@ protected constructor(
         forTests: Boolean
     ) {
         // TODO: here we should make something like https://kotlinlang.org/docs/reference/using-maven.html#specifying-compiler-options
-        // TODO: change me
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
-                (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
+                getRuntimeLibraryVersion(module).toLanguageVersion() < LanguageVersion.KOTLIN_1_3
 
         val messageTitle = ChangeGeneralLanguageFeatureSupportFix.getFixText(feature, state)
         if (runtimeUpdateRequired) {
             Messages.showErrorDialog(
                 module.project,
-                "Inline classes support requires version 1.3 or later of the Kotlin runtime library. " +
+                "${feature.presentableName} support requires version 1.3 or later of the Kotlin runtime library. " +
                         "Please update the version in your build script.",
                 messageTitle
             )

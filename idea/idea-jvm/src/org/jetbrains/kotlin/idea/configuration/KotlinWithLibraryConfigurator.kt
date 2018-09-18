@@ -20,6 +20,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Contract
 import org.jetbrains.kotlin.config.*
 import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
+import org.jetbrains.kotlin.idea.facet.toLanguageVersion
 import org.jetbrains.kotlin.idea.framework.ui.CreateLibraryDialogWithModules
 import org.jetbrains.kotlin.idea.framework.ui.FileUIUtils
 import org.jetbrains.kotlin.idea.quickfix.askUpdateRuntime
@@ -331,7 +332,7 @@ abstract class KotlinWithLibraryConfigurator protected constructor() : KotlinPro
 
     override fun changeCoroutineConfiguration(module: Module, state: LanguageFeature.State) {
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
-                                    (getRuntimeLibraryVersion(module)?.startsWith("1.0") ?: false)
+                getRuntimeLibraryVersion(module).toLanguageVersion() == LanguageVersion.KOTLIN_1_0
 
         if (runtimeUpdateRequired && !askUpdateRuntime(module, LanguageFeature.Coroutines.sinceApiVersion)) {
             return
@@ -351,15 +352,8 @@ abstract class KotlinWithLibraryConfigurator protected constructor() : KotlinPro
         state: LanguageFeature.State,
         forTests: Boolean
     ) {
-        val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED && run {
-            val runtimeLibraryVersion = getRuntimeLibraryVersion(module)
-            when {
-                runtimeLibraryVersion == null -> false
-                !runtimeLibraryVersion.startsWith("1.") -> false
-                runtimeLibraryVersion.getOrNull(2) in '0'..'2' -> true
-                else -> false
-            }
-        }
+        val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
+                getRuntimeLibraryVersion(module).toLanguageVersion() < LanguageVersion.KOTLIN_1_3
 
         if (runtimeUpdateRequired && !askUpdateRuntime(module, LanguageFeature.InlineClasses.sinceApiVersion)) {
             return
