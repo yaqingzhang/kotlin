@@ -255,7 +255,8 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
     override fun changeGeneralFeatureConfiguration(
         module: Module,
         feature: LanguageFeature,
-        state: LanguageFeature.State
+        state: LanguageFeature.State,
+        forTests: Boolean
     ) {
         // TODO
         val runtimeUpdateRequired = state != LanguageFeature.State.DISABLED &&
@@ -271,7 +272,7 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
             return
         }
 
-        val element = changeFeatureConfiguration(module, feature, state)
+        val element = changeFeatureConfiguration(module, feature, state, forTests)
         if (element != null) {
             OpenFileDescriptor(module.project, element.containingFile.virtualFile, element.textRange.startOffset).navigate(true)
         }
@@ -329,9 +330,10 @@ abstract class KotlinWithGradleConfigurator : KotlinProjectConfigurator {
         fun changeFeatureConfiguration(
             module: Module,
             feature: LanguageFeature,
-            state: LanguageFeature.State
+            state: LanguageFeature.State,
+            forTests: Boolean
         ) = changeBuildGradle(module) {
-            getManipulator(it).changeLanguageFeatureConfiguration(feature, state)
+            getManipulator(it).changeLanguageFeatureConfiguration(feature, state, forTests)
         }
 
         fun changeLanguageVersion(module: Module, languageVersion: String?, apiVersion: String?, forTests: Boolean) =

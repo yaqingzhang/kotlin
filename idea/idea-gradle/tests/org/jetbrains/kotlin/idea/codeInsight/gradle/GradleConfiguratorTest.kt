@@ -55,7 +55,8 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
             <p>This may cause different set of errors and warnings reported in IDE.</p>
             <p><a href="update">Update</a>  <a href="ignore">Ignore</a></p>
             """.trimIndent().lines().joinToString(separator = ""),
-            createOutdatedBundledCompilerMessage(myProject, "1.0.0"))
+            createOutdatedBundledCompilerMessage(myProject, "1.0.0")
+        )
     }
 
     @Test
@@ -557,7 +558,7 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
         runInEdtAndWait {
             myTestFixture.project.executeWriteCommand("") {
                 KotlinWithGradleConfigurator.changeFeatureConfiguration(
-                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED
+                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED, false
                 )
             }
 
@@ -572,7 +573,7 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
         runInEdtAndWait {
             myTestFixture.project.executeWriteCommand("") {
                 KotlinWithGradleConfigurator.changeFeatureConfiguration(
-                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.DISABLED
+                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.DISABLED, false
                 )
             }
 
@@ -587,7 +588,7 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
         runInEdtAndWait {
             myTestFixture.project.executeWriteCommand("") {
                 KotlinWithGradleConfigurator.changeFeatureConfiguration(
-                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED
+                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED, false
                 )
             }
 
@@ -602,7 +603,7 @@ class GradleConfiguratorTest : GradleImportingTestCase() {
         runInEdtAndWait {
             myTestFixture.project.executeWriteCommand("") {
                 KotlinWithGradleConfigurator.changeFeatureConfiguration(
-                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED
+                    myTestFixture.module, LanguageFeature.InlineClasses, LanguageFeature.State.ENABLED, false
                 )
             }
 

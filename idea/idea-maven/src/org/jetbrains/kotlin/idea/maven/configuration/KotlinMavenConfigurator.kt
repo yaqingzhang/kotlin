@@ -276,7 +276,8 @@ protected constructor(
     override fun changeGeneralFeatureConfiguration(
         module: Module,
         feature: LanguageFeature,
-        state: LanguageFeature.State
+        state: LanguageFeature.State,
+        forTests: Boolean
     ) {
         // TODO: here we should make something like https://kotlinlang.org/docs/reference/using-maven.html#specifying-compiler-options
         // TODO: change me

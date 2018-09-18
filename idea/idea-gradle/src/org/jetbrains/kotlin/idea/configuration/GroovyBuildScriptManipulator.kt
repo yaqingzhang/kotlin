@@ -153,15 +153,9 @@ class GroovyBuildScriptManipulator(
 
     override fun changeLanguageFeatureConfiguration(
         feature: LanguageFeature,
-        state: LanguageFeature.State
+        state: LanguageFeature.State,
+        forTests: Boolean
     ): PsiElement? {
-        val compileKotlinBlock = scriptFile.getBlockOrCreate("compileKotlin")
-        val kotlinOptionsBlock = compileKotlinBlock.getBlockOrCreate("kotlinOptions")
-
-        val compilerArgumentsStatement = kotlinOptionsBlock.statements.find { stmt ->
-            stmt.text.startsWith("freeCompilerArgs")
-        }
-
         val sign = when (state) {
             LanguageFeature.State.ENABLED -> "+"
             LanguageFeature.State.DISABLED -> "-"
@@ -170,28 +164,28 @@ class GroovyBuildScriptManipulator(
         }
         val languagePrefix = "-XXLanguage:"
         val featureArgumentString = "$languagePrefix$sign${feature.name}"
-
-        if (compilerArgumentsStatement != null) {
-            val text = compilerArgumentsStatement.text
+        val parameterName = "freeCompilerArgs"
+        return addOrReplaceKotlinTaskParameter(
+            scriptFile,
+            parameterName,
+            "[\"$featureArgumentString\"]",
+            forTests
+        ) { insideKotlinOptions ->
             val existingFeatureIndex = text.indexOf(feature.name)
             val languagePrefixIndex = text.lastIndexOf(languagePrefix, existingFeatureIndex)
             val newText = if (languagePrefixIndex != -1) {
                 text.substring(0, languagePrefixIndex) + featureArgumentString + text.substring(existingFeatureIndex + feature.name.length)
             } else {
-
                 val splitText = text.split("]")
                 if (splitText.size != 2) {
-                    "freeCompilerArgs = [\"$featureArgumentString\"]"
+                    val prefix = if (insideKotlinOptions) "kotlinOptions." else ""
+                    "$prefix$parameterName = [\"$featureArgumentString\"]"
                 } else {
                     splitText[0] + ", \"$featureArgumentString\"]" + splitText[1]
                 }
             }
-            compilerArgumentsStatement.replaceWithStatementFromText(newText)
-        } else {
-            kotlinOptionsBlock.addLastStatementInBlockIfNeeded("freeCompilerArgs = [\"$featureArgumentString\"]")
+            replaceWithStatementFromText(newText)
         }
-
-        return compileKotlinBlock
     }
 
     override fun changeLanguageVersion(version: String, forTests: Boolean): PsiElement? =
@@ -268,28 +262,47 @@ class GroovyBuildScriptManipulator(
             )
     }
 
+    private fun addOrReplaceKotlinTaskParameter(
+        gradleFile: GroovyFile,
+        parameterName: String,
+        defaultValue: String,
+        forTests: Boolean,
+        replaceIt: GrStatement.(Boolean) -> GrStatement
+    ): PsiElement? {
+        val kotlinBlock = gradleFile.getBlockOrCreate(if (forTests) "compileTestKotlin" else "compileKotlin")
+
+        for (stmt in kotlinBlock.statements) {
+            if ((stmt as? GrAssignmentExpression)?.lValue?.text == "kotlinOptions.$parameterName") {
+                return stmt.replaceIt(true)
+            }
+        }
+
+        kotlinBlock.getBlockOrCreate("kotlinOptions").apply {
+            statements.firstOrNull { stmt ->
+                (stmt as? GrAssignmentExpression)?.lValue?.text == parameterName
+            }?.let { stmt ->
+                stmt.replaceIt(false)
+            } ?: addLastExpressionInBlockIfNeeded("$parameterName = $defaultValue")
+        }
+
+        return kotlinBlock.parent
+    }
+
     private fun changeKotlinTaskParameter(
         gradleFile: GroovyFile,
         parameterName: String,
         parameterValue: String,
         forTests: Boolean
     ): PsiElement? {
-        val snippet = "$parameterName = \"$parameterValue\""
-        val kotlinBlock = gradleFile.getBlockOrCreate(if (forTests) "compileTestKotlin" else "compileKotlin")
-
-        for (stmt in kotlinBlock.statements) {
-            if ((stmt as? GrAssignmentExpression)?.lValue?.text == "kotlinOptions." + parameterName) {
-                return stmt.replaceWithStatementFromText("kotlinOptions." + snippet)
+        return addOrReplaceKotlinTaskParameter(
+            gradleFile, parameterName, "\"$parameterValue\"", forTests
+        ) { insideKotlinOptions ->
+            if (insideKotlinOptions) {
+                replaceWithStatementFromText("kotlinOptions.$parameterName = \"$parameterValue\"")
+            } else {
+                replaceWithStatementFromText("$parameterName = \"$parameterValue\"")
             }
         }
-
-        kotlinBlock.getBlockOrCreate("kotlinOptions").apply {
-            addOrReplaceExpression(snippet) { stmt ->
-                (stmt as? GrAssignmentExpression)?.lValue?.text == parameterName
-            }
-        }
-
-        return kotlinBlock.parent
     }
 
     private fun getGroovyDependencySnippet(
