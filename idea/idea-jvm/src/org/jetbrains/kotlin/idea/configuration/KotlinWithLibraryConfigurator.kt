@@ -18,13 +18,13 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Contract
+import org.jetbrains.kotlin.cli.common.arguments.CliArgumentStringBuilder.replaceLanguageFeature
 import org.jetbrains.kotlin.config.*
 import org.jetbrains.kotlin.idea.facet.getRuntimeLibraryVersion
 import org.jetbrains.kotlin.idea.facet.toLanguageVersion
 import org.jetbrains.kotlin.idea.framework.ui.CreateLibraryDialogWithModules
 import org.jetbrains.kotlin.idea.framework.ui.FileUIUtils
 import org.jetbrains.kotlin.idea.quickfix.askUpdateRuntime
-import org.jetbrains.kotlin.idea.quickfix.updateFeature
 import org.jetbrains.kotlin.idea.util.application.runWriteAction
 import org.jetbrains.kotlin.idea.util.projectStructure.sdk
 import org.jetbrains.kotlin.idea.versions.LibraryJarDescriptor
@@ -363,7 +363,9 @@ abstract class KotlinWithLibraryConfigurator protected constructor() : KotlinPro
         ModuleRootModificationUtil.updateModel(module) {
             facetSettings.apiLevel = LanguageVersion.KOTLIN_1_3
             facetSettings.languageLevel = LanguageVersion.KOTLIN_1_3
-            facetSettings.compilerArguments?.updateFeature(LanguageFeature.InlineClasses, state)
+            facetSettings.compilerSettings?.apply {
+                additionalArguments = additionalArguments.replaceLanguageFeature(feature, state, separator = " ", quoted = false)
+            }
         }
     }
 
