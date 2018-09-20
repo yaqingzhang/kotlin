@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.idea.test
 
-import com.intellij.BundleBase
 import com.intellij.codeInsight.CodeInsightTestCase
 import com.intellij.codeInsight.daemon.impl.EditorTracker
 import com.intellij.ide.highlighter.JavaFileType
@@ -62,8 +61,6 @@ abstract class KotlinLightCodeInsightFixtureTestCase : KotlinLightCodeInsightFix
 
     override fun setUp() {
         super.setUp()
-        BundleBase.assertKeyIsFound = false
-
         (StartupManager.getInstance(project) as StartupManagerImpl).runPostStartupActivities()
         VfsRootAccess.allowRootAccess(KotlinTestUtils.getHomeDirectory())
 
@@ -82,8 +79,6 @@ abstract class KotlinLightCodeInsightFixtureTestCase : KotlinLightCodeInsightFix
     }
 
     override fun tearDown() {
-        BundleBase.assertKeyIsFound = true
-
         LoggedErrorProcessor.restoreDefaultProcessor()
 
         VfsRootAccess.disallowRootAccess(KotlinTestUtils.getHomeDirectory())
