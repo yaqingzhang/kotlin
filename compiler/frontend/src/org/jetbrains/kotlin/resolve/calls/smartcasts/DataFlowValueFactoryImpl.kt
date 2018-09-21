@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.lexer.KtToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.callUtil.isSafeCall
 import org.jetbrains.kotlin.resolve.calls.context.ResolutionContext
@@ -29,7 +28,10 @@ import org.jetbrains.kotlin.types.isError
 
 class DataFlowValueFactoryImpl
 @Deprecated("Please, avoid to use that implementation explicitly. If you need DataFlowValueFactory, use injection")
-constructor(private val languageVersionSettings: LanguageVersionSettings) : DataFlowValueFactory {
+constructor(
+    private val languageVersionSettings: LanguageVersionSettings,
+    private val moduleDescriptor: ModuleDescriptor
+) : DataFlowValueFactory {
 
     // Receivers
     override fun createDataFlowValue(
@@ -106,7 +108,7 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                 DataFlowValue(IdentifierInfo.Expression(expression, stableComplex = true), type)
 
             else -> {
-                val result = getIdForStableIdentifier(expression, bindingContext, containingDeclarationOrModule)
+                val result = getIdForStableIdentifier(expression, bindingContext)
                 DataFlowValue(if (result === IdentifierInfo.NO) IdentifierInfo.Expression(expression) else result, type)
             }
         }
@@ -127,13 +129,12 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
 
     private fun getIdForStableIdentifier(
         expression: KtExpression?,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ): IdentifierInfo {
         if (expression != null) {
             val deparenthesized = KtPsiUtil.deparenthesize(expression)
             if (expression !== deparenthesized) {
-                return getIdForStableIdentifier(deparenthesized, bindingContext, containingDeclarationOrModule)
+                return getIdForStableIdentifier(deparenthesized, bindingContext)
             }
         }
         return when (expression) {
@@ -141,9 +142,9 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                 val receiverExpression = expression.receiverExpression
                 val selectorExpression = expression.selectorExpression
                 val receiverInfo =
-                    getIdForStableIdentifier(receiverExpression, bindingContext, containingDeclarationOrModule)
+                    getIdForStableIdentifier(receiverExpression, bindingContext)
                 val selectorInfo =
-                    getIdForStableIdentifier(selectorExpression, bindingContext, containingDeclarationOrModule)
+                    getIdForStableIdentifier(selectorExpression, bindingContext)
 
                 qualified(
                     receiverInfo, bindingContext.getType(receiverExpression),
@@ -159,7 +160,7 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                     IdentifierInfo.NO
                 } else {
                     IdentifierInfo.SafeCast(
-                        getIdForStableIdentifier(subjectExpression, bindingContext, containingDeclarationOrModule),
+                        getIdForStableIdentifier(subjectExpression, bindingContext),
                         bindingContext.getType(subjectExpression),
                         bindingContext[BindingContext.TYPE, targetTypeReference]
                     )
@@ -167,7 +168,7 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
             }
 
             is KtSimpleNameExpression ->
-                getIdForSimpleNameExpression(expression, bindingContext, containingDeclarationOrModule)
+                getIdForSimpleNameExpression(expression, bindingContext)
 
             is KtThisExpression -> {
                 val declarationDescriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, expression.instanceReference)
@@ -180,8 +181,7 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                     postfix(
                         getIdForStableIdentifier(
                             expression.baseExpression,
-                            bindingContext,
-                            containingDeclarationOrModule
+                            bindingContext
                         ),
                         operationType
                     )
@@ -195,8 +195,7 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
 
     private fun getIdForSimpleNameExpression(
         simpleNameExpression: KtSimpleNameExpression,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ): IdentifierInfo {
         val declarationDescriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, simpleNameExpression)
         return when (declarationDescriptor) {
@@ -207,11 +206,10 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                 // KT-4113
                 // for now it fails for resolving 'invoke' convention, return it after 'invoke' algorithm changes
                 // assert resolvedCall != null : "Cannot create right identifier info if the resolved call is not known yet for
-                val usageModuleDescriptor = DescriptorUtils.getContainingModuleOrNull(containingDeclarationOrModule)
                 val selectorInfo = IdentifierInfo.Variable(
                     declarationDescriptor,
                     declarationDescriptor.variableKind(
-                        usageModuleDescriptor,
+                        moduleDescriptor,
                         bindingContext,
                         simpleNameExpression,
                         languageVersionSettings

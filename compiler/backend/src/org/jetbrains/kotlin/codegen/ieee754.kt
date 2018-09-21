@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.bindingContextUtil.getDataFlowInfoBefore
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowValueFactoryImpl
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeUtils
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
@@ -67,7 +68,7 @@ fun legacyCalcTypeForIeee754ArithmeticIfNeeded(
     }
 
     // NB. Using DataFlowValueFactoryImpl is a hack, but it is ok for 'legacy'
-    val dataFlow = DataFlowValueFactoryImpl(languageVersionSettings).createDataFlowValue(
+    val dataFlow = DataFlowValueFactoryImpl(languageVersionSettings, descriptor.module).createDataFlowValue(
         expression,
         ktType,
         bindingContext,

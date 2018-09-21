@@ -35,7 +35,9 @@ import org.jetbrains.kotlin.resolve.constants.CompileTimeConstant
 import org.jetbrains.kotlin.resolve.constants.EnumValue
 import org.jetbrains.kotlin.resolve.constants.evaluate.ConstantExpressionEvaluator
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.utils.sure
 
 private typealias EntryWithConstants = Pair<List<JsExpression>, KtWhenEntry>
 
@@ -46,7 +48,8 @@ private constructor(private val whenExpression: KtWhenExpression, context: Trans
     private val type: KotlinType?
     private val uniqueConstants = mutableSetOf<Any>()
     private val uniqueEnumNames = mutableSetOf<String>()
-    private val dataFlowValueFactory: DataFlowValueFactory = DataFlowValueFactoryImpl(context.languageVersionSettings)
+    private val dataFlowValueFactory: DataFlowValueFactory =
+        DataFlowValueFactoryImpl(context.languageVersionSettings, context.declarationDescriptor.sure { "Should be non-root" }.module)
 
     private val isExhaustive: Boolean
         get() {
