@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.resolve.scopes.receivers.TransientReceiver
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.expressions.ExpressionTypingUtils
 import org.jetbrains.kotlin.types.isError
+import java.util.concurrent.ConcurrentHashMap
 
 class DataFlowValueFactoryImpl
 @Deprecated("Please, avoid to use that implementation explicitly. If you need DataFlowValueFactory, use injection")
@@ -188,12 +189,21 @@ constructor(
         }
     }
 
+    private val q = ConcurrentHashMap<KtSimpleNameExpression, IdentifierInfo>(3, 1.0f, 2)
+
     private fun getIdForSimpleNameExpression(
         simpleNameExpression: KtSimpleNameExpression,
         bindingContext: BindingContext
     ): IdentifierInfo {
-        val declarationDescriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, simpleNameExpression)
-        return when (declarationDescriptor) {
+        val w = q[simpleNameExpression]
+
+        if (w != null) {
+            return w
+        }
+
+        val declarationDescriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, simpleNameExpression) ?: return IdentifierInfo.NO
+
+        val result = when (declarationDescriptor) {
             is VariableDescriptor -> {
                 val resolvedCall = simpleNameExpression.getResolvedCall(bindingContext)
 
@@ -240,6 +250,9 @@ constructor(
 
             else -> IdentifierInfo.NO
         }
+
+        q.put(simpleNameExpression, result)
+        return result
     }
 
     private fun getIdForImplicitReceiver(receiverValue: ReceiverValue?, expression: KtExpression?) =
