@@ -352,7 +352,7 @@ fun getDataFlowAwareTypes(
     val dataFlowValue = dataFlowValueFactory.createDataFlowValue(
             expression,
             bindingContext.getType(expression)!!,
-            bindingContext, expression.getResolutionFacade().moduleDescriptor
+            bindingContext
     )
     return dataFlowInfo.getCollectedTypes(dataFlowValue, expression.languageVersionSettings).ifEmpty { listOf(originalType) }
 }

@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.diagnostics.Errors
 import org.jetbrains.kotlin.resolve.calls.checkers.CallChecker
 import org.jetbrains.kotlin.resolve.calls.checkers.CallCheckerContext
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
-import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowValueFactory
 import org.jetbrains.kotlin.resolve.calls.smartcasts.getReceiverValueWithSmartCast
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
 import org.jetbrains.kotlin.synthetic.SamAdapterExtensionFunctionDescriptor
@@ -49,8 +48,8 @@ object ProtectedSyntheticExtensionCallChecker : CallChecker {
 
         val receiverValue = resolvedCall.extensionReceiver as ReceiverValue
         val receiverTypes = listOf(receiverValue.type) + context.dataFlowInfo.getStableTypes(
-                context.dataFlowValueFactory.createDataFlowValue(receiverValue, context.trace.bindingContext, context.scope.ownerDescriptor),
-                context.languageVersionSettings
+            context.dataFlowValueFactory.createDataFlowValue(receiverValue, context.trace.bindingContext),
+            context.languageVersionSettings
         )
 
         if (receiverTypes.none { Visibilities.isVisible(getReceiverValueWithSmartCast(null, it), sourceFunction, from) }) {

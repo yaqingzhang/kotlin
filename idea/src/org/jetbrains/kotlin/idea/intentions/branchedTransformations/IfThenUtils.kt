@@ -22,7 +22,6 @@ import com.intellij.psi.search.LocalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.idea.caches.resolve.findModuleDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.idea.core.KotlinNameSuggester
@@ -189,7 +188,7 @@ fun KtExpression.isStableVal(context: BindingContext = this.analyze()): Boolean 
 private fun KtExpression.toDataFlowValue(context: BindingContext): DataFlowValue? {
     val expressionType = this.getType(context) ?: return null
     val dataFlowValueFactory = this.getResolutionFacade().frontendService<DataFlowValueFactory>()
-    return dataFlowValueFactory.createDataFlowValue(this, expressionType, context, findModuleDescriptor())
+    return dataFlowValueFactory.createDataFlowValue(this, expressionType, context)
 }
 
 data class IfThenToSelectData(

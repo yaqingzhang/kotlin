@@ -193,7 +193,7 @@ data class ExtractionData(
 
         val type = resolvedCall?.resultingDescriptor?.returnType ?: return emptySet()
         val containingDescriptor = expression.getResolutionScope(context, expression.getResolutionFacade()).ownerDescriptor
-        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(expression, type, context, containingDescriptor)
+        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(expression, type, context)
         return dataFlowInfo.getCollectedTypes(dataFlowValue, expression.languageVersionSettings)
     }
 

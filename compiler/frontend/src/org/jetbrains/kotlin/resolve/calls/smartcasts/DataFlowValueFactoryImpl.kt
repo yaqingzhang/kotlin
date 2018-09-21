@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.callUtil.isSafeCall
 import org.jetbrains.kotlin.resolve.calls.context.ResolutionContext
-import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.scopes.receivers.ExpressionReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ImplicitReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
@@ -37,19 +36,17 @@ constructor(
     override fun createDataFlowValue(
         receiverValue: ReceiverValue,
         resolutionContext: ResolutionContext<*>
-    ) = createDataFlowValue(receiverValue, resolutionContext.trace.bindingContext, resolutionContext.scope.ownerDescriptor)
+    ) = createDataFlowValue(receiverValue, resolutionContext.trace.bindingContext)
 
     override fun createDataFlowValue(
         receiverValue: ReceiverValue,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ) = when (receiverValue) {
         is TransientReceiver, is ImplicitReceiver -> createDataFlowValueForStableReceiver(receiverValue)
         is ExpressionReceiver -> createDataFlowValue(
             receiverValue.expression,
             receiverValue.getType(),
-            bindingContext,
-            containingDeclarationOrModule
+            bindingContext
         )
         else -> throw UnsupportedOperationException("Unsupported receiver value: " + receiverValue::class.java.name)
     }
@@ -62,12 +59,11 @@ constructor(
     override fun createDataFlowValueForProperty(
         property: KtProperty,
         variableDescriptor: VariableDescriptor,
-        bindingContext: BindingContext,
-        usageContainingModule: ModuleDescriptor?
+        bindingContext: BindingContext
     ): DataFlowValue {
         val identifierInfo = IdentifierInfo.Variable(
             variableDescriptor,
-            variableDescriptor.variableKind(usageContainingModule, bindingContext, property, languageVersionSettings),
+            variableDescriptor.variableKind(moduleDescriptor, bindingContext, property, languageVersionSettings),
             bindingContext[BindingContext.BOUND_INITIALIZER_VALUE, variableDescriptor]
         )
         return DataFlowValue(identifierInfo, variableDescriptor.type)
@@ -79,22 +75,21 @@ constructor(
         expression: KtExpression,
         type: KotlinType,
         resolutionContext: ResolutionContext<*>
-    ) = createDataFlowValue(expression, type, resolutionContext.trace.bindingContext, resolutionContext.scope.ownerDescriptor)
+    ) = createDataFlowValue(expression, type, resolutionContext.trace.bindingContext)
 
     override fun createDataFlowValue(
         expression: KtExpression,
         type: KotlinType,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ): DataFlowValue {
         return when {
             expression is KtConstantExpression && expression.node.elementType === KtNodeTypes.NULL ->
-                DataFlowValue.nullValue(containingDeclarationOrModule.builtIns)
+                DataFlowValue.nullValue(moduleDescriptor.builtIns)
 
             type.isError -> DataFlowValue.ERROR
 
             KotlinBuiltIns.isNullableNothing(type) ->
-                DataFlowValue.nullValue(containingDeclarationOrModule.builtIns) // 'null' is the only inhabitant of 'Nothing?'
+                DataFlowValue.nullValue(moduleDescriptor.builtIns) // 'null' is the only inhabitant of 'Nothing?'
 
             // In most cases type of `E!!`-expression is strictly not nullable and we could get proper Nullability
             // by calling `getImmanentNullability` (as it happens below).

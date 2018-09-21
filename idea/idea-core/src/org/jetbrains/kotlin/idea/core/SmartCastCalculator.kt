@@ -87,7 +87,7 @@ class SmartCastCalculator(
         if (receiver != null) {
             val receiverType = bindingContext.getType(receiver) ?: return emptyMap()
             val receiverIdentifierInfo = dataFlowValueFactory.createDataFlowValue(
-                    receiver, receiverType, bindingContext, containingDeclarationOrModule
+                    receiver, receiverType, bindingContext
             ).identifierInfo
             dataFlowValueToEntity = { value ->
                 val identifierInfo = value.identifierInfo

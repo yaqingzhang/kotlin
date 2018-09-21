@@ -25,7 +25,6 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.idea.caches.resolve.findModuleDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.project.languageVersionSettings
 import org.jetbrains.kotlin.idea.references.mainReference
@@ -116,7 +115,7 @@ class KotlinExpressionTypeProvider : ExpressionTypeProvider<KtExpression>() {
         val result = expressionType?.let { typeRenderer.renderType(it) } ?: return "Type is unknown"
 
         val dataFlowValueFactory = element.getResolutionFacade().frontendService<DataFlowValueFactory>()
-        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(element, expressionType, bindingContext, element.findModuleDescriptor())
+        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(element, expressionType, bindingContext)
         val types = expressionTypeInfo.dataFlowInfo.getStableTypes(dataFlowValue, element.languageVersionSettings)
         if (!types.isEmpty()) {
             return types.joinToString(separator = " & ") { typeRenderer.renderType(it) } + " (smart cast from " + result + ")"

@@ -556,7 +556,7 @@ fun transformToReceiverWithSmartCastInfo(
     languageVersionSettings: LanguageVersionSettings,
     dataFlowValueFactory: DataFlowValueFactory
 ): ReceiverValueWithSmartCastInfo {
-    val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiver, bindingContext, containingDescriptor)
+    val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiver, bindingContext)
     return ReceiverValueWithSmartCastInfo(
         receiver,
         dataFlowInfo.getCollectedTypes(dataFlowValue, languageVersionSettings),

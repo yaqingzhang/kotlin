@@ -344,7 +344,7 @@ private fun receiverValueTypes(
         languageVersionSettings: LanguageVersionSettings,
         dataFlowValueFactory: DataFlowValueFactory
 ): List<KotlinType> {
-    val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiverValue, bindingContext, moduleDescriptor)
+    val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiverValue, bindingContext)
     return if (dataFlowValue.isStable || !stableSmartCastsOnly) { // we don't include smart cast receiver types for "unstable" receiver value to mark members grayed
         SmartCastManager().getSmartCastVariantsWithLessSpecificExcluded(
                 receiverValue,

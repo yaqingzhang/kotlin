@@ -162,8 +162,7 @@ class EffectsExtractingVisitor(
         return dataFlowValueFactory.createDataFlowValue(
             expression = this,
             type = trace.getType(this) ?: return null,
-            bindingContext = trace.bindingContext,
-            containingDeclarationOrModule = moduleDescriptor
+            bindingContext = trace.bindingContext
         )
     }
 

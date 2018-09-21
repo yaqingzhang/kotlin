@@ -82,7 +82,7 @@ class SmartCastManager {
         languageVersionSettings: LanguageVersionSettings,
         dataFlowValueFactory: DataFlowValueFactory
     ): Collection<KotlinType> {
-        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiverToCast, bindingContext, containingDeclarationOrModule)
+        val dataFlowValue = dataFlowValueFactory.createDataFlowValue(receiverToCast, bindingContext)
         return dataFlowInfo.getCollectedTypes(dataFlowValue, languageVersionSettings)
     }
 

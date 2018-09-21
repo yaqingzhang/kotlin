@@ -71,8 +71,7 @@ fun legacyCalcTypeForIeee754ArithmeticIfNeeded(
     val dataFlow = DataFlowValueFactoryImpl(languageVersionSettings, descriptor.module).createDataFlowValue(
         expression,
         ktType,
-        bindingContext,
-        descriptor
+        bindingContext
     )
     val stableTypes = bindingContext.getDataFlowInfoBefore(expression).getStableTypes(dataFlow, languageVersionSettings)
     return stableTypes.firstNotNullResult {

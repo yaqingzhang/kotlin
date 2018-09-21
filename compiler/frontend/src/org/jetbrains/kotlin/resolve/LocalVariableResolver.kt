@@ -118,8 +118,7 @@ class LocalVariableResolver(
                 // In this case s will be not-nullable until it is changed
                 if (property.typeReference == null) {
                     val variableDataFlowValue = dataFlowValueFactory.createDataFlowValueForProperty(
-                        property, propertyDescriptor, context.trace.bindingContext,
-                        DescriptorUtils.getContainingModuleOrNull(scope.ownerDescriptor)
+                        property, propertyDescriptor, context.trace.bindingContext
                     )
                     // We cannot say here anything new about initializerDataFlowValue
                     // except it has the same value as variableDataFlowValue

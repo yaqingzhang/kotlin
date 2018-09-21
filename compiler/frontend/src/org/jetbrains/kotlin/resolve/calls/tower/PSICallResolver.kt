@@ -456,7 +456,7 @@ class PSICallResolver(
 
             temporaryTrace.record(BindingContext.REFERENCE_TARGET, calleeExpression, variable.resolvedCall.candidateDescriptor)
             val dataFlowValue =
-                dataFlowValueFactory.createDataFlowValue(variableReceiver, temporaryTrace.bindingContext, context.scope.ownerDescriptor)
+                dataFlowValueFactory.createDataFlowValue(variableReceiver, temporaryTrace.bindingContext)
             return ReceiverValueWithSmartCastInfo(
                 variableReceiver,
                 context.dataFlowInfo.getCollectedTypes(dataFlowValue, context.languageVersionSettings),

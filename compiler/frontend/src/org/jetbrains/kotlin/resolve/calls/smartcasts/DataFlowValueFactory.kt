@@ -37,8 +37,7 @@ interface DataFlowValueFactory {
     fun createDataFlowValue(
         expression: KtExpression,
         type: KotlinType,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ): DataFlowValue
 
     fun createDataFlowValueForStableReceiver(receiver: ReceiverValue): DataFlowValue
@@ -50,15 +49,13 @@ interface DataFlowValueFactory {
 
     fun createDataFlowValue(
         receiverValue: ReceiverValue,
-        bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor
+        bindingContext: BindingContext
     ): DataFlowValue
 
     fun createDataFlowValueForProperty(
         property: KtProperty,
         variableDescriptor: VariableDescriptor,
-        bindingContext: BindingContext,
-        usageContainingModule: ModuleDescriptor?
+        bindingContext: BindingContext
     ): DataFlowValue
 
 }
