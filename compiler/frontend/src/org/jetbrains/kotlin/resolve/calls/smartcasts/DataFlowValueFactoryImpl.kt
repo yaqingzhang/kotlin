@@ -94,11 +94,11 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
             KotlinBuiltIns.isNullableNothing(type) ->
                 DataFlowValue.nullValue(containingDeclarationOrModule.builtIns) // 'null' is the only inhabitant of 'Nothing?'
 
-        // In most cases type of `E!!`-expression is strictly not nullable and we could get proper Nullability
-        // by calling `getImmanentNullability` (as it happens below).
-        //
-        // But there are some problem with types built on type parameters, e.g.
-        // fun <T : Any?> foo(x: T) = x!!.hashCode() // there no way in type system to denote that `x!!` is not nullable
+            // In most cases type of `E!!`-expression is strictly not nullable and we could get proper Nullability
+            // by calling `getImmanentNullability` (as it happens below).
+            //
+            // But there are some problem with types built on type parameters, e.g.
+            // fun <T : Any?> foo(x: T) = x!!.hashCode() // there no way in type system to denote that `x!!` is not nullable
             ExpressionTypingUtils.isExclExclExpression(KtPsiUtil.deparenthesize(expression)) ->
                 DataFlowValue(IdentifierInfo.Expression(expression), type, Nullability.NOT_NULL)
 
@@ -141,8 +141,10 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
             is KtQualifiedExpression -> {
                 val receiverExpression = expression.receiverExpression
                 val selectorExpression = expression.selectorExpression
-                val receiverInfo = getIdForStableIdentifier(receiverExpression, bindingContext, containingDeclarationOrModule, languageVersionSettings)
-                val selectorInfo = getIdForStableIdentifier(selectorExpression, bindingContext, containingDeclarationOrModule, languageVersionSettings)
+                val receiverInfo =
+                    getIdForStableIdentifier(receiverExpression, bindingContext, containingDeclarationOrModule, languageVersionSettings)
+                val selectorInfo =
+                    getIdForStableIdentifier(selectorExpression, bindingContext, containingDeclarationOrModule, languageVersionSettings)
 
                 qualified(
                     receiverInfo, bindingContext.getType(receiverExpression),
@@ -211,7 +213,12 @@ constructor(private val languageVersionSettings: LanguageVersionSettings) : Data
                 val usageModuleDescriptor = DescriptorUtils.getContainingModuleOrNull(containingDeclarationOrModule)
                 val selectorInfo = IdentifierInfo.Variable(
                     declarationDescriptor,
-                    declarationDescriptor.variableKind(usageModuleDescriptor, bindingContext, simpleNameExpression, languageVersionSettings),
+                    declarationDescriptor.variableKind(
+                        usageModuleDescriptor,
+                        bindingContext,
+                        simpleNameExpression,
+                        languageVersionSettings
+                    ),
                     bindingContext[BindingContext.BOUND_INITIALIZER_VALUE, declarationDescriptor]
                 )
 
