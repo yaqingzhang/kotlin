@@ -19,10 +19,12 @@ class KotlinGradleMobileMultiplatformModuleBuilder :
 
     private val commonSourceName get() = "$commonName$productionSuffix"
     private val commonTestName get() = "$commonName$testSuffix"
+    private val jvmSourceName get() = "$jvmTargetName$productionSuffix"
+    private val jvmTestName get() = "$jvmTargetName$testSuffix"
     private val nativeSourceName get() = "$nativeTargetName$productionSuffix"
     private val nativeTestName get() = "$nativeTargetName$testSuffix"
-    private val androidSourceName get() = productionSuffix.toLowerCase()
-    private val androidTestName get() = testSuffix.toLowerCase()
+    private val mainSourceName get() = productionSuffix.toLowerCase()
+    private val mainTestName get() = testSuffix.toLowerCase()
 
     override fun getBuilderId() = "kotlin.gradle.multiplatform.mobile"
 
@@ -50,11 +52,11 @@ class KotlinGradleMobileMultiplatformModuleBuilder :
 
         val commonMain = src.createKotlinSampleFileWriter(commonSourceName)
         val commonTest = src.createKotlinSampleFileWriter(commonTestName, fileName = "SampleTests.kt")
-        val androidMain = src.createKotlinSampleFileWriter(androidSourceName, languageName = "java")
-        val androidTest = src.createKotlinSampleFileWriter(androidTestName, languageName = "java", fileName = "SampleTestsAndroid.kt")
+        val androidMain = src.createKotlinSampleFileWriter(mainSourceName, languageName = "java")
+        val androidTest = src.createKotlinSampleFileWriter(mainTestName, languageName = "java", fileName = "SampleTestsAndroid.kt")
 
         val androidLocalProperties = rootDir.createChildData(this, "local.properties").bufferedWriter()
-        val androidRoot = src.findChild(androidSourceName)!!
+        val androidRoot = src.findChild(mainSourceName)!!
         val androidManifest = androidRoot.createChildData(this, "AndroidManifest.xml").bufferedWriter()
         val androidResources = androidRoot.createChildDirectory(this, "res")
         val androidValues = androidResources.createChildDirectory(this, "values")
@@ -288,11 +290,7 @@ sdk.dir=PleaseSpecifyAndroidSdkPathHere
                 implementation fileTree(dir: 'libs', include: ['*.jar'])
                 implementation 'com.android.support:appcompat-v7:28.0.0-rc02'
                 implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-                testImplementation 'org.jetbrains.kotlin:kotlin-test'
-                testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
                 androidTestImplementation 'com.android.support.test:runner:1.0.2'
-
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib'
             }
 
             kotlin {
@@ -312,6 +310,17 @@ sdk.dir=PleaseSpecifyAndroidSdkPathHere
                         dependencies {
                     		implementation 'org.jetbrains.kotlin:kotlin-test-common'
                     		implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+                        }
+                    }
+                    $jvmSourceName {
+                        dependencies {
+                            implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                        }
+                    }
+                    $jvmTestName {
+                        dependencies {
+                            implementation 'org.jetbrains.kotlin:kotlin-test'
+                            implementation 'org.jetbrains.kotlin:kotlin-test-junit'
                         }
                     }
                     $nativeSourceName {
