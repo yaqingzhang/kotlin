@@ -422,7 +422,6 @@ class BasicCompletionSession(
                         val rvHelper = ReferenceVariantsHelper(
                             newContext,
                             resolutionFacade,
-                            moduleDescriptor,
                             isVisibleFilter,
                             NotPropertiesService.getNotProperties(position)
                         )

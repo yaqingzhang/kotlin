@@ -24,7 +24,6 @@ import com.intellij.codeInsight.template.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptorWithVisibility
 import org.jetbrains.kotlin.diagnostics.Diagnostic
@@ -98,7 +97,7 @@ class RenameUnresolvedReferenceFix(element: KtNameReferenceExpression): KotlinQu
         val resolutionFacade = element.getResolutionFacade()
         val context = resolutionFacade.analyze(element, BodyResolveMode.PARTIAL_WITH_CFA)
         val moduleDescriptor = resolutionFacade.moduleDescriptor
-        val variantsHelper = ReferenceVariantsHelper(context, resolutionFacade, moduleDescriptor, {
+        val variantsHelper = ReferenceVariantsHelper(context, resolutionFacade, {
             it !is DeclarationDescriptorWithVisibility || it.isVisible(element, null, context, resolutionFacade)
         }, NotPropertiesService.getNotProperties(element))
         val expectedTypes = patternExpression

@@ -17,7 +17,6 @@
 package org.jetbrains.kotlin.idea.util
 
 import org.jetbrains.kotlin.config.LanguageVersionSettings
-import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
@@ -58,12 +57,11 @@ fun KtFunctionLiteral.findLabelAndCall(): Pair<Name?, KtCallExpression?> {
 fun SmartCastManager.getSmartCastVariantsWithLessSpecificExcluded(
         receiverToCast: ReceiverValue,
         bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor,
         dataFlowInfo: DataFlowInfo,
         languageVersionSettings: LanguageVersionSettings,
         dataFlowValueFactory: DataFlowValueFactory
 ): List<KotlinType> {
-    val variants = getSmartCastVariants(receiverToCast, bindingContext, containingDeclarationOrModule, dataFlowInfo, languageVersionSettings, dataFlowValueFactory)
+    val variants = getSmartCastVariants(receiverToCast, bindingContext, dataFlowInfo, languageVersionSettings, dataFlowValueFactory)
     return variants.filter { type ->
         variants.all { another -> another === type || chooseMoreSpecific(type, another).let { it == null || it === type } }
     }

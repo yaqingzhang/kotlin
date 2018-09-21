@@ -64,7 +64,8 @@ abstract class BaseKotlinVariableMacro<TState> : KotlinMacro() {
 
         val state = initState(contextElement, bindingContext)
 
-        val helper = ReferenceVariantsHelper(bindingContext, resolutionFacade, resolutionFacade.moduleDescriptor, ::isVisible, NotPropertiesService.getNotProperties(contextElement))
+        val helper = ReferenceVariantsHelper(bindingContext, resolutionFacade,
+                                             ::isVisible, NotPropertiesService.getNotProperties(contextElement))
         return helper
                 .getReferenceVariants(contextElement, CallTypeAndReceiver.DEFAULT, DescriptorKindFilter.VARIABLES, { true })
                 .map { it as VariableDescriptor }

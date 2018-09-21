@@ -28,7 +28,6 @@ import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.ProcessingContext
-import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.caches.project.ModuleOrigin
 import org.jetbrains.kotlin.idea.caches.project.OriginCapability
@@ -38,7 +37,6 @@ import org.jetbrains.kotlin.idea.codeInsight.ReferenceVariantsHelper
 import org.jetbrains.kotlin.idea.core.*
 import org.jetbrains.kotlin.idea.imports.importableFqName
 import org.jetbrains.kotlin.idea.project.TargetPlatformDetector
-import org.jetbrains.kotlin.idea.project.languageVersionSettings
 import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.idea.util.*
 import org.jetbrains.kotlin.psi.*
@@ -133,7 +131,6 @@ abstract class CompletionSession(
 
     protected val referenceVariantsHelper = ReferenceVariantsHelper(bindingContext,
                                                                     resolutionFacade,
-                                                                    moduleDescriptor,
                                                                     isVisibleFilter,
                                                                     NotPropertiesService.getNotProperties(position))
 
@@ -406,7 +403,7 @@ abstract class CompletionSession(
                                       nameExpression: KtSimpleNameExpression,
                                       callTypeAndReceiver: CallTypeAndReceiver<*, *>): Collection<ReceiverType>? {
         var receiverTypes = callTypeAndReceiver.receiverTypesWithIndex(
-            bindingContext, nameExpression, moduleDescriptor, resolutionFacade,
+            bindingContext, nameExpression, resolutionFacade,
             stableSmartCastsOnly = true, /* we don't include smart cast receiver types for "unstable" receiver value to mark members grayed */
             withImplicitReceiversWhenExplicitPresent = true
         )

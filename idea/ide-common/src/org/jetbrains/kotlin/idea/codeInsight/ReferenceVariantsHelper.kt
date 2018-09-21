@@ -52,7 +52,6 @@ import java.util.*
 class ReferenceVariantsHelper(
         private val bindingContext: BindingContext,
         private val resolutionFacade: ResolutionFacade,
-        private val moduleDescriptor: ModuleDescriptor,
         private val visibilityFilter: (DeclarationDescriptor) -> Boolean,
         private val notProperties: Set<FqNameUnsafe> = setOf()
 ) {
@@ -175,7 +174,6 @@ class ReferenceVariantsHelper(
 
         val resolutionScope = contextElement.getResolutionScope(bindingContext, resolutionFacade)
         val dataFlowInfo = bindingContext.getDataFlowInfoBefore(contextElement)
-        val containingDeclaration = resolutionScope.ownerDescriptor
 
         val smartCastManager = resolutionFacade.frontendService<SmartCastManager>()
         val languageVersionSettings = resolutionFacade.frontendService<LanguageVersionSettings>()
@@ -186,7 +184,6 @@ class ReferenceVariantsHelper(
             smartCastManager.getSmartCastVariantsWithLessSpecificExcluded(
                 it.value,
                 bindingContext,
-                containingDeclaration,
                 dataFlowInfo,
                 languageVersionSettings,
                 resolutionFacade.frontendService<DataFlowValueFactory>()
@@ -206,7 +203,7 @@ class ReferenceVariantsHelper(
                 listOf(useReceiverType)
             }
             else {
-                callTypeAndReceiver.receiverTypes(bindingContext, contextElement, moduleDescriptor, resolutionFacade, stableSmartCastsOnly = false)!!
+                callTypeAndReceiver.receiverTypes(bindingContext, contextElement, resolutionFacade, stableSmartCastsOnly = false)!!
             }
 
             descriptors.processAll(implicitReceiverTypes, explicitReceiverTypes, resolutionScope, callType, kindFilter, nameFilter)
@@ -267,7 +264,7 @@ class ReferenceVariantsHelper(
                 listOf(useReceiverType)
             }
             else {
-                callTypeAndReceiver.receiverTypes(bindingContext, contextElement, moduleDescriptor, resolutionFacade, stableSmartCastsOnly = false)!!
+                callTypeAndReceiver.receiverTypes(bindingContext, contextElement, resolutionFacade, stableSmartCastsOnly = false)!!
             }
 
             val constructorFilter = { descriptor: ClassDescriptor -> if (isStatic) true else descriptor.isInner }

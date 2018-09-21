@@ -18,7 +18,6 @@ package org.jetbrains.kotlin.resolve.calls.smartcasts
 
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.config.LanguageVersionSettings
-import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.diagnostics.Errors
 import org.jetbrains.kotlin.diagnostics.Errors.SMARTCAST_IMPOSSIBLE
 import org.jetbrains.kotlin.psi.Call
@@ -40,13 +39,12 @@ class SmartCastManager {
     fun getSmartCastVariants(
         receiverToCast: ReceiverValue,
         bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor,
         dataFlowInfo: DataFlowInfo,
         languageVersionSettings: LanguageVersionSettings,
         dataFlowValueFactory: DataFlowValueFactory
     ): List<KotlinType> {
         val variants = getSmartCastVariantsExcludingReceiver(
-            bindingContext, containingDeclarationOrModule, dataFlowInfo, receiverToCast, languageVersionSettings, dataFlowValueFactory
+            bindingContext, dataFlowInfo, receiverToCast, languageVersionSettings, dataFlowValueFactory
         )
         val result = ArrayList<KotlinType>(variants.size + 1)
         result.add(receiverToCast.type)
@@ -63,7 +61,6 @@ class SmartCastManager {
     ): Collection<KotlinType> {
         return getSmartCastVariantsExcludingReceiver(
             context.trace.bindingContext,
-            context.scope.ownerDescriptor,
             context.dataFlowInfo,
             receiverToCast,
             context.languageVersionSettings,
@@ -76,7 +73,6 @@ class SmartCastManager {
      */
     private fun getSmartCastVariantsExcludingReceiver(
         bindingContext: BindingContext,
-        containingDeclarationOrModule: DeclarationDescriptor,
         dataFlowInfo: DataFlowInfo,
         receiverToCast: ReceiverValue,
         languageVersionSettings: LanguageVersionSettings,

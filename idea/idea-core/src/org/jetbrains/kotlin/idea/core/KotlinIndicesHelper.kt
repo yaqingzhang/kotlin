@@ -137,7 +137,7 @@ class KotlinIndicesHelper(
             bindingContext: BindingContext,
             nameFilter: (String) -> Boolean
     ): Collection<CallableDescriptor> {
-        val receiverTypes = callTypeAndReceiver.receiverTypes(bindingContext, position, moduleDescriptor, resolutionFacade, stableSmartCastsOnly = false)
+        val receiverTypes = callTypeAndReceiver.receiverTypes(bindingContext, position, resolutionFacade, stableSmartCastsOnly = false)
                             ?: return emptyList()
         return getCallableTopLevelExtensions(callTypeAndReceiver, receiverTypes, nameFilter)
     }

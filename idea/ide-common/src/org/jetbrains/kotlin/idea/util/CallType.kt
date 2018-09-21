@@ -228,17 +228,15 @@ data class ReceiverType(
 fun CallTypeAndReceiver<*, *>.receiverTypes(
         bindingContext: BindingContext,
         contextElement: PsiElement,
-        moduleDescriptor: ModuleDescriptor,
         resolutionFacade: ResolutionFacade,
         stableSmartCastsOnly: Boolean
 ): Collection<KotlinType>? {
-    return receiverTypesWithIndex(bindingContext, contextElement, moduleDescriptor, resolutionFacade, stableSmartCastsOnly)?.map { it.type }
+    return receiverTypesWithIndex(bindingContext, contextElement, resolutionFacade, stableSmartCastsOnly)?.map { it.type }
 }
 
 fun CallTypeAndReceiver<*, *>.receiverTypesWithIndex(
         bindingContext: BindingContext,
         contextElement: PsiElement,
-        moduleDescriptor: ModuleDescriptor,
         resolutionFacade: ResolutionFacade,
         stableSmartCastsOnly: Boolean,
         withImplicitReceiversWhenExplicitPresent: Boolean = false
@@ -256,7 +254,7 @@ fun CallTypeAndReceiver<*, *>.receiverTypesWithIndex(
                     is DoubleColonLHS.Expression -> {
                         val receiverValue = ExpressionReceiver.create(receiver, lhs.type, bindingContext)
                         return receiverValueTypes(receiverValue, lhs.dataFlowInfo, bindingContext,
-                                                  moduleDescriptor, stableSmartCastsOnly, languageVersionSettings,
+                                                  stableSmartCastsOnly, languageVersionSettings,
                                                   resolutionFacade.frontendService<DataFlowValueFactory>())
                                 .map { ReceiverType(it, 0) }
                     }
@@ -318,7 +316,7 @@ fun CallTypeAndReceiver<*, *>.receiverTypesWithIndex(
 
     fun addReceiverType(receiverValue: ReceiverValue, implicit: Boolean) {
         val types = receiverValueTypes(
-            receiverValue, dataFlowInfo, bindingContext, moduleDescriptor, stableSmartCastsOnly, languageVersionSettings,
+            receiverValue, dataFlowInfo, bindingContext, stableSmartCastsOnly, languageVersionSettings,
             resolutionFacade.frontendService<DataFlowValueFactory>()
         )
 
@@ -339,7 +337,6 @@ private fun receiverValueTypes(
         receiverValue: ReceiverValue,
         dataFlowInfo: DataFlowInfo,
         bindingContext: BindingContext,
-        moduleDescriptor: ModuleDescriptor,
         stableSmartCastsOnly: Boolean,
         languageVersionSettings: LanguageVersionSettings,
         dataFlowValueFactory: DataFlowValueFactory
@@ -349,7 +346,6 @@ private fun receiverValueTypes(
         SmartCastManager().getSmartCastVariantsWithLessSpecificExcluded(
                 receiverValue,
                 bindingContext,
-                moduleDescriptor,
                 dataFlowInfo,
                 languageVersionSettings,
                 dataFlowValueFactory
