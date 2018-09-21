@@ -37,7 +37,7 @@ abstract class KotlinGradleAbstractMultiplatformModuleBuilder(
         val buildGradle = moduleDir.createChildData(null, "build.gradle")
         val builder = BuildScriptDataBuilder(buildGradle)
         builder.setupAdditionalDependenciesForApplication()
-        GradleKotlinMPPFrameworkSupportProvider().addSupport(builder, module, sdk = null, specifyPluginVersionIfNeeded = false)
+        GradleKotlinMPPFrameworkSupportProvider().addSupport(builder, module, sdk = null, specifyPluginVersionIfNeeded = true)
         VfsUtil.saveText(buildGradle, builder.buildConfigurationPart() + builder.buildMainPart() + buildMultiPlatformPart())
         return moduleDir
     }
@@ -58,7 +58,6 @@ abstract class KotlinGradleAbstractMultiplatformModuleBuilder(
                 GradleKotlinMPPFrameworkSupportProvider().addSupport(builder, module, sdk = null, specifyPluginVersionIfNeeded = true)
                 builder.buildConfigurationPart() + builder.buildMainPart() + buildMultiPlatformPart()
             } else {
-                GradleKotlinJavaFrameworkSupportProvider().addSupport(builder, module, sdk = null, specifyPluginVersionIfNeeded = true)
                 builder.buildConfigurationPart() + builder.buildMainPart()
             }
             VfsUtil.saveText(buildGradle, buildGradleText)
