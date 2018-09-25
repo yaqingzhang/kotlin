@@ -22,7 +22,14 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 
 interface JavaClassFinder {
-    fun findClass(classId: ClassId): JavaClass?
+    data class Request(
+        val classId: ClassId,
+        val previouslyFoundClassFileContent: ByteArray? = null,
+        val outerClass: JavaClass? = null
+    )
+
+    fun findClass(request: Request): JavaClass?
+    fun findClass(classId: ClassId): JavaClass? = findClass(Request(classId))
 
     fun findPackage(fqName: FqName): JavaPackage?
 
