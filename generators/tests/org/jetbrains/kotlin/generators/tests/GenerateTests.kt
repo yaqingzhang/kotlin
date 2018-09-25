@@ -947,7 +947,7 @@ fun main(args: Array<String>) {
             model("incremental/classHierarchyAffected", extension = null, excludeParentDirs = true)
         }
 
-        actualizeMppJpsIncTestCaseDirs(testDataRoot, "incremental/multiModule/multiplatform/withGeneratedContent")
+//        actualizeMppJpsIncTestCaseDirs(testDataRoot, "incremental/multiModule/multiplatform/withGeneratedContent")
 
         testClass<AbstractIncrementalJsJpsTest> {
             model("incremental/multiModule/common", extension = null, excludeParentDirs = true)
