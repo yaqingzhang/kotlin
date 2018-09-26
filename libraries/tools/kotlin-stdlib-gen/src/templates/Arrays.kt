@@ -537,7 +537,7 @@ object ArrayOps : TemplateGroupBase() {
             on(Platform.JS) {
                 suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
                 signature("copyInto(destination: SELF, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size)")
-                inlineOnly()
+                inline(suppressWarning = true)
                 body {
                     val cast = ".unsafeCast<Array<$primitive>>()".takeIf { family == ArraysOfPrimitives } ?: ""
                     """
