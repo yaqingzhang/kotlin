@@ -57,7 +57,7 @@ fun getLibraryLanguageLevel(
 ): LanguageVersion {
     val minVersion = getRuntimeLibraryVersions(module, rootModel, platformKind.orDefault())
         .addReleaseVersionIfNecessary(coerceRuntimeLibraryVersionToReleased)
-        .minWith(VersionComparatorUtil.COMPARATOR)
+        .maxWith(VersionComparatorUtil.COMPARATOR)
     return getDefaultLanguageLevel(module, minVersion, coerceRuntimeLibraryVersionToReleased)
 }
 
