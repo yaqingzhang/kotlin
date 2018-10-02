@@ -216,7 +216,7 @@ private val EXPECTED_DECLARATION = MarkerType(
     { element -> element?.markerDeclaration?.let { getExpectedDeclarationTooltip(it) } },
     object : LineMarkerNavigator() {
         override fun browse(e: MouseEvent?, element: PsiElement?) {
-            element?.markerDeclaration?.let { navigateToExpectedDeclaration(it) }
+            element?.markerDeclaration?.let { navigateToExpectedDeclaration(e, it) }
         }
     }
 )
@@ -353,8 +353,9 @@ private fun Document?.areAnchorsOnOneLine(
     return firstAnchor.startLine(this) == secondAnchor.startLine(this)
 }
 
-private fun KtNamedDeclaration.requiresNoMarkers(): Boolean {
-    val document = PsiDocumentManager.getInstance(project).getDocument(containingFile)
+private fun KtNamedDeclaration.requiresNoMarkers(
+    document: Document? = PsiDocumentManager.getInstance(project).getDocument(containingFile)
+): Boolean {
     when (this) {
         is KtPrimaryConstructor -> {
             return true
@@ -365,6 +366,17 @@ private fun KtNamedDeclaration.requiresNoMarkers(): Boolean {
         }
     }
     return false
+}
+
+internal fun KtDeclaration.findMarkerBoundDeclarations(): List<KtNamedDeclaration> {
+    if (this !is KtClass) return emptyList()
+    val result = mutableListOf<KtNamedDeclaration>()
+    val document = PsiDocumentManager.getInstance(project).getDocument(containingFile)
+    result += primaryConstructor?.valueParameters?.filter { it.requiresNoMarkers(document) }.orEmpty()
+    if (this.isEnum()) {
+        result += this.body?.enumEntries?.filter { it.requiresNoMarkers(document) }.orEmpty()
+    }
+    return result
 }
 
 private fun collectActualMarkers(
