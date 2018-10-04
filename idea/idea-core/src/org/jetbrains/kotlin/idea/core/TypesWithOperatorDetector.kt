@@ -64,7 +64,7 @@ abstract class TypesWithOperatorDetector(
         for (function in functions) {
             if (!function.isValidOperator()) continue
 
-            var freeParameters = function.typeParameters
+            val freeParameters = function.typeParameters.toMutableList()
             val containingClass = function.containingDeclaration as? ClassDescriptor
             if (containingClass != null) {
                 freeParameters += containingClass.typeConstructor.parameters

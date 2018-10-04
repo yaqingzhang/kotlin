@@ -74,7 +74,7 @@ open class KotlinJavaModuleConfigurator protected constructor() : KotlinWithLibr
         get() = JvmPlatform
 
     override fun getLibraryJarDescriptors(sdk: Sdk?): List<LibraryJarDescriptor> {
-        var result = listOf(
+        val result = mutableListOf(
             LibraryJarDescriptor.RUNTIME_JAR,
             LibraryJarDescriptor.RUNTIME_SRC_JAR,
             LibraryJarDescriptor.REFLECT_JAR,

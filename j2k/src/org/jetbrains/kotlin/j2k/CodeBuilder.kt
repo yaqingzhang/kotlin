@@ -152,7 +152,7 @@ class CodeBuilder(private val topElement: PsiElement?, private var docConverter:
             assert(prototype !is PsiWhiteSpace)
             if (!topElement.isAncestor(prototype)) continue
             prefix += collectPrefixElements(prototype, inheritance, notInsideElements)
-            postfix += collectPostfixElements(prototype, inheritance, notInsideElements)
+            postfix = collectPostfixElements(prototype, inheritance, notInsideElements)
         }
 
         if (prefix.lineBreaksBefore > 0) {
