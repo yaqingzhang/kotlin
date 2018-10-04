@@ -40,11 +40,9 @@ object AddStarProjectionsFixFactory : KotlinSingleIntentionActionFactory() {
 
         if (typeReference.classDescriptor()?.isInner == true)
             return AddStartProjectionsForInnerClass(typeReference)
-        else {
-            val typeElement = typeReference.typeElement ?: return null
-            val unwrappedType = generateSequence(typeElement) { (it as? KtNullableType)?.innerType }.lastOrNull() as? KtUserType ?: return null
-            return AddStarProjectionsFix(unwrappedType, diagnosticWithParameters.a)
-        }
+        val typeElement = typeReference.typeElement ?: return null
+        val unwrappedType = generateSequence(typeElement) { (it as? KtNullableType)?.innerType }.lastOrNull() as? KtUserType ?: return null
+        return AddStarProjectionsFix(unwrappedType, diagnosticWithParameters.a)
     }
 }
 

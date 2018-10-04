@@ -247,23 +247,21 @@ object PreferMatchingItemWeigher : LookupElementWeigher("kotlin.preferMatching",
         if (element.lookupString != prefix) {
             return Weight.notExactMatch
         }
-        else {
-            val o = element.`object`
-            return when (o) {
-                is KeywordLookupObject -> Weight.keywordExactMatch
+        val o = element.`object`
+        return when (o) {
+            is KeywordLookupObject -> Weight.keywordExactMatch
 
-                is DeclarationLookupObject -> {
-                    val smartCompletionPriority = element.getUserData(SMART_COMPLETION_ITEM_PRIORITY_KEY)
-                    when {
-                        smartCompletionPriority != null && smartCompletionPriority != SmartCompletionItemPriority.DEFAULT -> Weight.specialExactMatch
-                        element.getUserData(NOT_IMPORTED_KEY) != null -> Weight.notImportedExactMatch
-                        o.descriptor is FunctionDescriptor -> Weight.functionExactMatch
-                        else -> Weight.defaultExactMatch
-                    }
+            is DeclarationLookupObject -> {
+                val smartCompletionPriority = element.getUserData(SMART_COMPLETION_ITEM_PRIORITY_KEY)
+                when {
+                    smartCompletionPriority != null && smartCompletionPriority != SmartCompletionItemPriority.DEFAULT -> Weight.specialExactMatch
+                    element.getUserData(NOT_IMPORTED_KEY) != null -> Weight.notImportedExactMatch
+                    o.descriptor is FunctionDescriptor -> Weight.functionExactMatch
+                    else -> Weight.defaultExactMatch
                 }
-
-                else -> Weight.defaultExactMatch
             }
+
+            else -> Weight.defaultExactMatch
         }
     }
 }

@@ -64,9 +64,7 @@ fun parse(lineText: String, reader: OutputLineReader, messages: MutableList<Mess
 
             return addMessage(createMessage(getMessageKind(severity), message), messages)
         }
-        else {
-            return addMessage(createMessage(getMessageKind(severity), lineWoSeverity.amendNextLinesIfNeeded(reader)), messages)
-        }
+        return addMessage(createMessage(getMessageKind(severity), lineWoSeverity.amendNextLinesIfNeeded(reader)), messages)
     }
 
     return false

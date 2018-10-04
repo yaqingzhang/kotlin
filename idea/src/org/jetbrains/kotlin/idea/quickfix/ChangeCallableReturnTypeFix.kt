@@ -81,9 +81,7 @@ abstract class ChangeCallableReturnTypeFix(
             }
             return "function $fullName"
         }
-        else {
-            return null
-        }
+        return null
     }
 
     class OnType(element: KtFunction, type: KotlinType) : ChangeCallableReturnTypeFix(element, type), HighPriorityAction {

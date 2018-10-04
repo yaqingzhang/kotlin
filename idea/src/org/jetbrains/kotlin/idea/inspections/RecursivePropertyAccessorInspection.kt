@@ -65,14 +65,13 @@ class RecursivePropertyAccessorInspection : AbstractKotlinInspection() {
                 }
                 return true
             }
-            else /* isSetter */ {
-                if (binaryExpr.isAssignmentTo(expression)) {
-                    return true
-                }
-                val unaryExpr = expression.getStrictParentOfType<KtUnaryExpression>()
-                if (unaryExpr?.operationToken.let { it == KtTokens.PLUSPLUS || it == KtTokens.MINUSMINUS }) {
-                    return true
-                }
+            /* isSetter */
+            if (binaryExpr.isAssignmentTo(expression)) {
+                return true
+            }
+            val unaryExpr = expression.getStrictParentOfType<KtUnaryExpression>()
+            if (unaryExpr?.operationToken.let { it == KtTokens.PLUSPLUS || it == KtTokens.MINUSMINUS }) {
+                return true
             }
             return false
         }

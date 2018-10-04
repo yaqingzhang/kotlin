@@ -81,9 +81,7 @@ class KotlinMultilineStringEnterHandler : EnterHandlerDelegateAdapter() {
         if (!inMultilineString(element, offset)) {
             return Result.Continue
         }
-        else {
-            wasInMultilineString = true
-        }
+        wasInMultilineString = true
 
         whiteSpaceAfterCaret = text.substring(offset).takeWhile { ch -> ch == ' ' || ch == '\t' }
         document.deleteString(offset, offset + whiteSpaceAfterCaret.length)

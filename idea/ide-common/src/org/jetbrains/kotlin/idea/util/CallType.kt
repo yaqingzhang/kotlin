@@ -262,9 +262,7 @@ fun CallTypeAndReceiver<*, *>.receiverTypesWithIndex(
                     }
                 }
             }
-            else {
-                return emptyList()
-            }
+            return emptyList()
         }
 
         is CallTypeAndReceiver.DEFAULT -> receiverExpression = null

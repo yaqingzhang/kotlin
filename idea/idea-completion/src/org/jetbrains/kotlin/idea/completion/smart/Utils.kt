@@ -329,9 +329,7 @@ fun DeclarationDescriptor.fuzzyTypesForSmartCompletion(
     else if (this is ClassDescriptor && kind.isSingleton) {
         return listOf(defaultType.toFuzzyType(emptyList()))
     }
-    else {
-        return emptyList()
-    }
+    return emptyList()
 }
 
 fun Collection<ExpectedInfo>.filterFunctionExpected()

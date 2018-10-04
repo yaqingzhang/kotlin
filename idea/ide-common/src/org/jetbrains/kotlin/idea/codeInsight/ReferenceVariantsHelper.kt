@@ -242,10 +242,8 @@ class ReferenceVariantsHelper(
             val qualifier = bindingContext[BindingContext.QUALIFIER, receiverExpression] ?: return emptyList()
             return qualifier.staticScope.collectStaticMembers(resolutionFacade, kindFilter, nameFilter)
         }
-        else {
-            val scope = contextElement.getResolutionScope(bindingContext, resolutionFacade)
-            return scope.collectDescriptorsFiltered(kindFilter, nameFilter, changeNamesForAliased = true)
-        }
+        val scope = contextElement.getResolutionScope(bindingContext, resolutionFacade)
+        return scope.collectDescriptorsFiltered(kindFilter, nameFilter, changeNamesForAliased = true)
     }
 
     private fun getVariantsForCallableReference(
@@ -305,10 +303,8 @@ class ReferenceVariantsHelper(
 
             return staticDescriptors + objectDescriptor.defaultType.memberScope.getDescriptorsFiltered(kindFilter, nameFilter)
         }
-        else {
-            val rootPackage = resolutionFacade.moduleDescriptor.getPackage(FqName.ROOT)
-            return rootPackage.memberScope.getDescriptorsFiltered(kindFilter, nameFilter)
-        }
+        val rootPackage = resolutionFacade.moduleDescriptor.getPackage(FqName.ROOT)
+        return rootPackage.memberScope.getDescriptorsFiltered(kindFilter, nameFilter)
     }
 
     private fun MutableSet<DeclarationDescriptor>.processAll(

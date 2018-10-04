@@ -159,31 +159,30 @@ sealed class SyntheticPropertyAccessorReference(expression: KtNameReferenceExpre
                 if (context == parent || context == null) {
                     val newSetterCall = fullExpression.createCall(psiFactory, newSetterName, incDecValue)
                     return unaryExpr.replaced(newSetterCall).getQualifiedElementSelector()
-                } else {
-                    val anchor = parent.parentsWithSelf.firstOrNull { it.parent == context }
-                    val validator = NewDeclarationNameValidator(
-                            context,
-                            anchor,
-                            NewDeclarationNameValidator.Target.VARIABLES
-                    )
-                    val varName = KotlinNameSuggester.suggestNamesByExpressionAndType(
-                            unaryExpr,
-                            null,
-                            unaryExpr.analyze(),
-                            validator,
-                            "p"
-                    ).first()
-                    val isPrefix = unaryExpr is KtPrefixExpression
-                    val varInitializer = if (isPrefix) incDecValue else originalValue
-                    val newVar = psiFactory.createDeclarationByPattern<KtProperty>("val $varName = $0", varInitializer)
-                    val setterArgument = psiFactory.createExpression(if (isPrefix) varName else "$varName.$operationName()")
-                    val newSetterCall = fullExpression.createCall(psiFactory, newSetterName, setterArgument)
-                    val newLine = psiFactory.createNewLine()
-                    context.addBefore(newVar, anchor)
-                    context.addBefore(newLine, anchor)
-                    context.addBefore(newSetterCall, anchor)
-                    return unaryExpr.replaced(psiFactory.createExpression(varName))
                 }
+                val anchor = parent.parentsWithSelf.firstOrNull { it.parent == context }
+                val validator = NewDeclarationNameValidator(
+                    context,
+                    anchor,
+                    NewDeclarationNameValidator.Target.VARIABLES
+                )
+                val varName = KotlinNameSuggester.suggestNamesByExpressionAndType(
+                    unaryExpr,
+                    null,
+                    unaryExpr.analyze(),
+                    validator,
+                    "p"
+                ).first()
+                val isPrefix = unaryExpr is KtPrefixExpression
+                val varInitializer = if (isPrefix) incDecValue else originalValue
+                val newVar = psiFactory.createDeclarationByPattern<KtProperty>("val $varName = $0", varInitializer)
+                val setterArgument = psiFactory.createExpression(if (isPrefix) varName else "$varName.$operationName()")
+                val newSetterCall = fullExpression.createCall(psiFactory, newSetterName, setterArgument)
+                val newLine = psiFactory.createNewLine()
+                context.addBefore(newVar, anchor)
+                context.addBefore(newLine, anchor)
+                context.addBefore(newSetterCall, anchor)
+                return unaryExpr.replaced(psiFactory.createExpression(varName))
             }
 
             return expression

@@ -137,9 +137,7 @@ class KotlinCallerTreeStructure(
                 buildChildren(rootElement, rootNodeDescriptor, callerToDescriptorMap)
             }.toTypedArray()
         }
-        else {
-            return buildChildren(element, nodeDescriptor, callerToDescriptorMap).toTypedArray()
-        }
+        return buildChildren(element, nodeDescriptor, callerToDescriptorMap).toTypedArray()
     }
 
     override fun isAlwaysShowPlus() = true

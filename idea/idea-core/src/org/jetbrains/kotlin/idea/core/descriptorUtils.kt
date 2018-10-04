@@ -69,10 +69,8 @@ private fun DeclarationDescriptorWithVisibility.isVisible(
         val explicitReceiver = ExpressionReceiver.create(receiverExpression, receiverType, bindingContext)
         return Visibilities.isVisible(explicitReceiver, this, from)
     }
-    else {
-        return resolutionScope.getImplicitReceiversHierarchy().any {
-            Visibilities.isVisible(it.value, this, from)
-        }
+    return resolutionScope.getImplicitReceiversHierarchy().any {
+        Visibilities.isVisible(it.value, this, from)
     }
 }
 

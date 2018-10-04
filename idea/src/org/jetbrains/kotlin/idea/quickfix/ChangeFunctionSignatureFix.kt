@@ -89,21 +89,19 @@ abstract class ChangeFunctionSignatureFix(
             if (data is ValueParameterDescriptor) {
                 return RemoveParameterFix(originalElement, functionDescriptor, data)
             }
-            else {
-                val parameters = functionDescriptor.valueParameters
-                val arguments = originalElement.valueArguments
+            val parameters = functionDescriptor.valueParameters
+            val arguments = originalElement.valueArguments
 
-                if (arguments.size > parameters.size) {
-                    val bindingContext = originalElement.analyze()
-                    val call = originalElement.getCall(bindingContext) ?: return null
-                    val argumentToParameter = call.mapArgumentsToParameters(functionDescriptor)
-                    val hasTypeMismatches = argumentToParameter.any {
-                        val (argument, parameter) = it
-                        val argumentType = argument.getArgumentExpression()?.let { bindingContext.getType(it) }
-                        argumentType == null || !KotlinTypeChecker.DEFAULT.isSubtypeOf(argumentType, parameter.type)
-                    }
-                    return AddFunctionParametersFix(originalElement, functionDescriptor, hasTypeMismatches)
+            if (arguments.size > parameters.size) {
+                val bindingContext = originalElement.analyze()
+                val call = originalElement.getCall(bindingContext) ?: return null
+                val argumentToParameter = call.mapArgumentsToParameters(functionDescriptor)
+                val hasTypeMismatches = argumentToParameter.any {
+                    val (argument, parameter) = it
+                    val argumentType = argument.getArgumentExpression()?.let { bindingContext.getType(it) }
+                    argumentType == null || !KotlinTypeChecker.DEFAULT.isSubtypeOf(argumentType, parameter.type)
                 }
+                return AddFunctionParametersFix(originalElement, functionDescriptor, hasTypeMismatches)
             }
 
             return null

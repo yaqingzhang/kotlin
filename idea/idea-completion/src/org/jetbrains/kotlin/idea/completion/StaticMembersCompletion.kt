@@ -122,9 +122,7 @@ class StaticMembersCompletion(
             val owner = parent.parent as? KtClass ?: return false
             return owner.isTopLevel()
         }
-        else {
-            return isTopLevel()
-        }
+        return isTopLevel()
     }
 
     fun completeFromImports(file: KtFile, collector: LookupElementsCollector) {

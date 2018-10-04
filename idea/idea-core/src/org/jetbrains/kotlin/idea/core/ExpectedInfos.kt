@@ -524,9 +524,7 @@ class ExpectedInfos(
             val subjectType = bindingContext.getType(subject) ?: return null
             return listOf(ExpectedInfo(subjectType, null, null, additionalData = WhenEntryAdditionalData(whenWithSubject = true)))
         }
-        else {
-            return listOf(ExpectedInfo(resolutionFacade.moduleDescriptor.builtIns.booleanType, null, null, additionalData = WhenEntryAdditionalData(whenWithSubject = false)))
-        }
+        return listOf(ExpectedInfo(resolutionFacade.moduleDescriptor.builtIns.booleanType, null, null, additionalData = WhenEntryAdditionalData(whenWithSubject = false)))
     }
 
     private fun calculateForExclOperand(expressionWithType: KtExpression): Collection<ExpectedInfo>? {

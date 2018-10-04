@@ -482,12 +482,10 @@ class KotlinIndicesHelper(
         if (containingKtFile.isCompiled) { //TODO: it's temporary while resolveToDescriptor does not work for compiled declarations
             return resolutionFacade.resolveImportReference(moduleDescriptor, fqName!!)
         }
-        else {
-            val translatedDeclaration = declarationTranslator(this) ?: return emptyList()
-            if (!psiFilter(translatedDeclaration)) return emptyList()
+        val translatedDeclaration = declarationTranslator(this) ?: return emptyList()
+        if (!psiFilter(translatedDeclaration)) return emptyList()
 
-            return listOfNotNull(resolutionFacade.resolveToDescriptor(translatedDeclaration))
-        }
+        return listOfNotNull(resolutionFacade.resolveToDescriptor(translatedDeclaration))
     }
 }
 

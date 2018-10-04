@@ -197,31 +197,29 @@ abstract class FilterTransformationBase : SequenceTransformation {
                 val newState = state.copy(statements = listOf(then))
                 return transformation to newState
             }
-            else {
-                val statement = then.blockExpressionsOrSingle().singleOrNull() ?: return null
-                when (statement) {
-                    is KtContinueExpression -> {
-                        if (statement.targetLoop() != state.innerLoop) return null
-                        val transformation = createFilterTransformation(
-                                state.outerLoop, state.inputVariable, state.indexVariable, Condition.create(condition, !negateCondition),
-                                reformat = state.reformat
-                        )
-                        val newState = state.copy(statements = restStatements)
-                        return transformation to newState
-                    }
-
-                    is KtBreakExpression -> {
-                        if (statement.targetLoop() != state.outerLoop) return null
-                        val transformation = TakeWhileTransformation(
-                                state.outerLoop, state.inputVariable,
-                                if (negateCondition) condition else condition.negate(reformat = state.reformat)
-                        )
-                        val newState = state.copy(statements = restStatements)
-                        return transformation to newState
-                    }
-
-                    else -> return null
+            val statement = then.blockExpressionsOrSingle().singleOrNull() ?: return null
+            when (statement) {
+                is KtContinueExpression -> {
+                    if (statement.targetLoop() != state.innerLoop) return null
+                    val transformation = createFilterTransformation(
+                        state.outerLoop, state.inputVariable, state.indexVariable, Condition.create(condition, !negateCondition),
+                        reformat = state.reformat
+                    )
+                    val newState = state.copy(statements = restStatements)
+                    return transformation to newState
                 }
+
+                is KtBreakExpression -> {
+                    if (statement.targetLoop() != state.outerLoop) return null
+                    val transformation = TakeWhileTransformation(
+                        state.outerLoop, state.inputVariable,
+                        if (negateCondition) condition else condition.negate(reformat = state.reformat)
+                    )
+                    val newState = state.copy(statements = restStatements)
+                    return transformation to newState
+                }
+
+                else -> return null
             }
         }
 

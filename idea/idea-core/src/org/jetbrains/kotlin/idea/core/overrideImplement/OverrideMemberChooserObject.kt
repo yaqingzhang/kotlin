@@ -240,27 +240,25 @@ fun generateUnsupportedOrSuperCall(
                                                descriptor.returnType?.let { IdeDescriptorRenderers.SOURCE_CODE.renderType(it) } ?: "Unit",
                                                null)
     }
-    else {
-        return buildString {
-            if (bodyType is OverrideMemberChooserObject.BodyType.Delegate) {
-                append(bodyType.receiverName)
+    return buildString {
+        if (bodyType is OverrideMemberChooserObject.BodyType.Delegate) {
+            append(bodyType.receiverName)
+        } else {
+            append("super")
+            if (bodyType == OverrideMemberChooserObject.BodyType.QUALIFIED_SUPER) {
+                val superClassFqName =
+                    IdeDescriptorRenderers.SOURCE_CODE.renderClassifierName(descriptor.containingDeclaration as ClassifierDescriptor)
+                append("<").append(superClassFqName).append(">")
             }
-            else {
-                append("super")
-                if (bodyType == OverrideMemberChooserObject.BodyType.QUALIFIED_SUPER) {
-                    val superClassFqName = IdeDescriptorRenderers.SOURCE_CODE.renderClassifierName(descriptor.containingDeclaration as ClassifierDescriptor)
-                    append("<").append(superClassFqName).append(">")
-                }
-            }
-            append(".").append(descriptor.name.render())
+        }
+        append(".").append(descriptor.name.render())
 
-            if (descriptor is FunctionDescriptor) {
-                val paramTexts = descriptor.valueParameters.map {
-                    val renderedName = it.name.render()
-                    if (it.varargElementType != null) "*$renderedName" else renderedName
-                }
-                paramTexts.joinTo(this, prefix = "(", postfix = ")")
+        if (descriptor is FunctionDescriptor) {
+            val paramTexts = descriptor.valueParameters.map {
+                val renderedName = it.name.render()
+                if (it.varargElementType != null) "*$renderedName" else renderedName
             }
+            paramTexts.joinTo(this, prefix = "(", postfix = ")")
         }
     }
 }

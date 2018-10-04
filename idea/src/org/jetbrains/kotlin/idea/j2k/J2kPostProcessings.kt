@@ -253,9 +253,7 @@ object J2KPostProcessingRegistrar {
             if (element is KtBinaryExpression && intention.isApplicableTo(element) && ConvertToStringTemplateIntention.shouldSuggestToConvert(element)) {
                 return { intention.applyTo(element, null) }
             }
-            else {
-                return null
-            }
+            return null
         }
     }
 

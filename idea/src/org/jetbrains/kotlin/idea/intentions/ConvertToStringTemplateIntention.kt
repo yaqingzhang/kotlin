@@ -108,11 +108,10 @@ open class ConvertToStringTemplateIntention : SelfTargetingOffsetIndependentInte
                     if (forceBraces) {
                         if (base.endsWith('$')) {
                             return base.dropLast(1) + "\\$"
-                        } else {
-                            val lastPart = expression.children.lastOrNull()
-                            if (lastPart is KtSimpleNameStringTemplateEntry) {
-                                return base.dropLast(lastPart.textLength) + "\${" + lastPart.text.drop(1) + "}"
-                            }
+                        }
+                        val lastPart = expression.children.lastOrNull()
+                        if (lastPart is KtSimpleNameStringTemplateEntry) {
+                            return base.dropLast(lastPart.textLength) + "\${" + lastPart.text.drop(1) + "}"
                         }
                     }
                     return base

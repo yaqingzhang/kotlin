@@ -224,23 +224,22 @@ abstract class FileRankingCalculator(
                 // It might be a static lambda field accessor
                 val containingClass = elementAt.getParentOfType<KtClassOrObject>(false) ?: return LOW
                 return rankingForClass(containingClass, className, location.virtualMachine())
-            } else {
-                val containingFunctionLiteral = findFunctionLiteralOnLine(elementAt) ?: return LOW
-
-                val containingCallable = findNonLocalCallableParent(containingFunctionLiteral) ?: return LOW
-                when (containingCallable) {
-                    is KtFunction -> if (containingCallable.name == methodName) overallRanking += MAJOR
-                    is KtProperty -> if (containingCallable.name == methodName) overallRanking += MAJOR
-                    is KtPropertyAccessor -> if (containingCallable.property.name == methodName) overallRanking += MAJOR
-                }
-
-                val containingClass = containingCallable.getParentOfType<KtClassOrObject>(false)
-                if (containingClass != null) {
-                    overallRanking += rankingForClass(containingClass, className, location.virtualMachine())
-                }
-
-                return overallRanking
             }
+            val containingFunctionLiteral = findFunctionLiteralOnLine(elementAt) ?: return LOW
+
+            val containingCallable = findNonLocalCallableParent(containingFunctionLiteral) ?: return LOW
+            when (containingCallable) {
+                is KtFunction -> if (containingCallable.name == methodName) overallRanking += MAJOR
+                is KtProperty -> if (containingCallable.name == methodName) overallRanking += MAJOR
+                is KtPropertyAccessor -> if (containingCallable.property.name == methodName) overallRanking += MAJOR
+            }
+
+            val containingClass = containingCallable.getParentOfType<KtClassOrObject>(false)
+            if (containingClass != null) {
+                overallRanking += rankingForClass(containingClass, className, location.virtualMachine())
+            }
+
+            return overallRanking
         }
 
         // TODO support <clinit>

@@ -157,17 +157,16 @@ class KotlinInlineValHandler(private val withPrompt: Boolean) : InlineActionHand
                 return null
             }
             return Initialization(initializerInDeclaration, assignment = null)
-        } else {
-            val assignment = writeUsages.singleOrNull()
-                ?.getAssignmentByLHS()
-                ?.takeIf { it.operationToken == KtTokens.EQ }
-            val initializer = assignment?.right
-            if (initializer == null) {
-                reportAmbiguousAssignment(project, editor, declaration.name!!, writeUsages)
-                return null
-            }
-            return Initialization(initializer, assignment)
         }
+        val assignment = writeUsages.singleOrNull()
+            ?.getAssignmentByLHS()
+            ?.takeIf { it.operationToken == KtTokens.EQ }
+        val initializer = assignment?.right
+        if (initializer == null) {
+            reportAmbiguousAssignment(project, editor, declaration.name!!, writeUsages)
+            return null
+        }
+        return Initialization(initializer, assignment)
     }
 
     private fun performRefactoring(

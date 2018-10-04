@@ -112,9 +112,7 @@ class KDocNameCompletionSession(
                         scope.getContributedDescriptors(nameFilter = nameFilter)
                     }
         }
-        else {
-            return contextScope.collectDescriptorsFiltered(DescriptorKindFilter.ALL, nameFilter, changeNamesForAliased = true)
-        }
+        return contextScope.collectDescriptorsFiltered(DescriptorKindFilter.ALL, nameFilter, changeNamesForAliased = true)
     }
 
     private fun addLinkCompletions(declarationDescriptor: DeclarationDescriptor, kDocLink: KDocLink) {

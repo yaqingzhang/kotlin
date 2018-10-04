@@ -278,17 +278,16 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
                         val importedFrom = import.importedReference?.getQualifiedElementSelector()?.mainReference?.resolve()
                                 as? KtClassOrObject ?: return true
                         return importedFrom.declarations.none { it is KtNamedDeclaration && hasNonTrivialUsages(it) }
-                    } else {
-                        if (import.importedFqName != declaration.fqName) {
-                            val importedDeclaration =
-                                import.importedReference?.getQualifiedElementSelector()?.mainReference?.resolve() as? KtNamedDeclaration
-                                        ?: return true
-                            if (declaration is KtObjectDeclaration ||
-                                (declaration is KtClass && declaration.isEnum()) ||
-                                importedDeclaration.containingClassOrObject is KtObjectDeclaration
-                            ) {
-                                return declaration !in importedDeclaration.parentsWithSelf && !hasNonTrivialUsages(importedDeclaration)
-                            }
+                    }
+                    if (import.importedFqName != declaration.fqName) {
+                        val importedDeclaration =
+                            import.importedReference?.getQualifiedElementSelector()?.mainReference?.resolve() as? KtNamedDeclaration
+                                ?: return true
+                        if (declaration is KtObjectDeclaration ||
+                            (declaration is KtClass && declaration.isEnum()) ||
+                            importedDeclaration.containingClassOrObject is KtObjectDeclaration
+                        ) {
+                            return declaration !in importedDeclaration.parentsWithSelf && !hasNonTrivialUsages(importedDeclaration)
                         }
                     }
                 }

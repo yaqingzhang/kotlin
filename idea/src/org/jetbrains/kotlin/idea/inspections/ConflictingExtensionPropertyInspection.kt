@@ -115,9 +115,7 @@ class ConflictingExtensionPropertyInspection : AbstractKotlinInspection() {
             val statement = (setter.bodyExpression as? KtBlockExpression)?.statements?.singleOrNull() ?: return false
             return statement.isSetMethodCall(setMethod, valueParameterName)
         }
-        else {
-            return setter.bodyExpression.isSetMethodCall(setMethod, valueParameterName)
-        }
+        return setter.bodyExpression.isSetMethodCall(setMethod, valueParameterName)
     }
 
     private fun KtExpression?.isGetMethodCall(getMethod: FunctionDescriptor): Boolean = when (this) {

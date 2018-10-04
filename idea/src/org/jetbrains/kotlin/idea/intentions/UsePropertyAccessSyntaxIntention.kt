@@ -265,10 +265,9 @@ class UsePropertyAccessSyntaxIntention :
                 reformat = reformat
             )
             return qualifiedExpression.replaced(newExpression)
-        } else {
-            val newExpression =
-                KtPsiFactory(callToConvert).createExpressionByPattern("$0=$1", propertyName, argument.getArgumentExpression()!!)
-            return callToConvert.replaced(newExpression)
         }
+        val newExpression =
+            KtPsiFactory(callToConvert).createExpressionByPattern("$0=$1", propertyName, argument.getArgumentExpression()!!)
+        return callToConvert.replaced(newExpression)
     }
 }

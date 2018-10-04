@@ -203,9 +203,7 @@ private fun getOuterScope(descriptor: DeclarationDescriptorWithSource, resolutio
         val facadeToUse = kotlinCacheService?.getResolutionFacade(listOf(containingFile)) ?: resolutionFacade
         return facadeToUse.getFileResolutionScope(containingFile)
     }
-    else {
-        return getKDocLinkResolutionScope(resolutionFacade, parent)
-    }
+    return getKDocLinkResolutionScope(resolutionFacade, parent)
 }
 
 fun getKDocLinkMemberScope(descriptor: DeclarationDescriptor, contextScope: LexicalScope): MemberScope {

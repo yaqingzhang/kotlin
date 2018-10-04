@@ -50,44 +50,42 @@ class InlineCallableUsagesSearcher(private val myDebugProcess: DebugProcess) {
         if (!checkIfInline(declaration, bindingContext)) {
             return ComputedClassNames.EMPTY
         }
-        else {
-            val searchResult = hashSetOf<PsiElement>()
-            val declarationName = runReadAction { declaration.name }
+        val searchResult = hashSetOf<PsiElement>()
+        val declarationName = runReadAction { declaration.name }
 
-            val task = Runnable {
-                ReferencesSearch.search(declaration, getScopeForInlineDeclarationUsages(declaration)).forEach {
-                    if (!runReadAction { it.isImportUsage() }) {
-                        val usage = (it.element as? KtElement)?.let(::getRelevantElement)
-                        if (usage != null && !runReadAction { declaration.isAncestor(usage) }) {
-                            searchResult.add(usage)
-                        }
+        val task = Runnable {
+            ReferencesSearch.search(declaration, getScopeForInlineDeclarationUsages(declaration)).forEach {
+                if (!runReadAction { it.isImportUsage() }) {
+                    val usage = (it.element as? KtElement)?.let(::getRelevantElement)
+                    if (usage != null && !runReadAction { declaration.isAncestor(usage) }) {
+                        searchResult.add(usage)
                     }
                 }
             }
-
-            var isSuccess = true
-            val applicationEx = ApplicationManagerEx.getApplicationEx()
-            if (applicationEx.isDispatchThread) {
-                isSuccess = ProgressManager.getInstance().runProcessWithProgressSynchronously(
-                        task,
-                        "Compute class names for declaration $declarationName",
-                        true,
-                        myDebugProcess.project)
-            }
-            else {
-                ProgressManager.getInstance().runProcess(task, EmptyProgressIndicator())
-            }
-
-            if (!isSuccess) {
-                XDebugSessionImpl.NOTIFICATION_GROUP.createNotification(
-                        "Debugger can skip some executions of $declarationName because the computation of class names was interrupted",
-                        MessageType.WARNING
-                ).notify(myDebugProcess.project)
-            }
-
-            val results = searchResult.map { transformer(it) }
-            return ComputedClassNames(results.flatMap { it.classNames }, shouldBeCached = results.all { it.shouldBeCached })
         }
+
+        var isSuccess = true
+        val applicationEx = ApplicationManagerEx.getApplicationEx()
+        if (applicationEx.isDispatchThread) {
+            isSuccess = ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                task,
+                "Compute class names for declaration $declarationName",
+                true,
+                myDebugProcess.project
+            )
+        } else {
+            ProgressManager.getInstance().runProcess(task, EmptyProgressIndicator())
+        }
+
+        if (!isSuccess) {
+            XDebugSessionImpl.NOTIFICATION_GROUP.createNotification(
+                "Debugger can skip some executions of $declarationName because the computation of class names was interrupted",
+                MessageType.WARNING
+            ).notify(myDebugProcess.project)
+        }
+
+        val results = searchResult.map { transformer(it) }
+        return ComputedClassNames(results.flatMap { it.classNames }, shouldBeCached = results.all { it.shouldBeCached })
     }
 
     private fun checkIfInline(declaration: KtDeclaration, bindingContext: BindingContext): Boolean {

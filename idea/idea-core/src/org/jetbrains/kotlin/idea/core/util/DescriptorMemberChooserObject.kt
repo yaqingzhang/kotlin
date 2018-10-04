@@ -94,9 +94,7 @@ open class DescriptorMemberChooserObject(
                     declaration.getIcon(flags)
                 }
             }
-            else {
-                return KotlinDescriptorIconProvider.getIcon(descriptor, declaration, 0)
-            }
+            return KotlinDescriptorIconProvider.getIcon(descriptor, declaration, 0)
         }
     }
 }

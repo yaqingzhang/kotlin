@@ -144,9 +144,8 @@ class ResolveElementCache(
         if (cachedFullResolve != null) {
             if (cachedFullResolve.isUpToDate(resolveElement)) {
                 return cachedFullResolve.bindingContext
-            } else {
-                fullResolveMap.remove(resolveElement) // remove outdated cache entry
             }
+            fullResolveMap.remove(resolveElement) // remove outdated cache entry
         }
 
         when (bodyResolveMode) {

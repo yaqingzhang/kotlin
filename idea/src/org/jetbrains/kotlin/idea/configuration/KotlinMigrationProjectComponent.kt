@@ -98,9 +98,8 @@ class KotlinMigrationProjectComponent(val project: Project) {
                 if (applicableMigrationTools(migrationInfo).isEmpty()) {
                     hasApplicableTools = false
                     return@executeOnPooledThread
-                } else {
-                    hasApplicableTools = true
                 }
+                hasApplicableTools = true
 
                 if (ApplicationManager.getApplication().isUnitTestMode) {
                     return@executeOnPooledThread

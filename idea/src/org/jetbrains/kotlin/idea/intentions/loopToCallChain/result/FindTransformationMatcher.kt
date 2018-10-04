@@ -256,81 +256,86 @@ object FindTransformationMatcher : TransformationMatcher {
             return null
 
         }
-        else {
-            val inputVariableCanHoldNull = (inputVariable.unsafeResolveToDescriptor() as VariableDescriptor).type.nullability() != TypeNullability.NOT_NULL
+        val inputVariableCanHoldNull = (inputVariable.unsafeResolveToDescriptor() as VariableDescriptor).type.nullability() != TypeNullability.NOT_NULL
 
-            fun FindOperationGenerator.useElvisOperatorIfNeeded(): FindOperationGenerator? {
-                if (valueIfNotFound.isNullExpression()) return this
+        fun FindOperationGenerator.useElvisOperatorIfNeeded(): FindOperationGenerator? {
+            if (valueIfNotFound.isNullExpression()) return this
 
-                // we cannot use ?: if found value can be null
-                if (inputVariableCanHoldNull) return null
+            // we cannot use ?: if found value can be null
+            if (inputVariableCanHoldNull) return null
 
-                return object : FindOperationGenerator(this) {
-                    override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
-                        val generated = this@useElvisOperatorIfNeeded.generate(chainedCallGenerator)
-                        return KtPsiFactory(generated).createExpressionByPattern(
-                                "$0\n ?: $1", generated, valueIfNotFound,
-                                reformat = chainedCallGenerator.reformat
-                        )
-                    }
+            return object : FindOperationGenerator(this) {
+                override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
+                    val generated = this@useElvisOperatorIfNeeded.generate(chainedCallGenerator)
+                    return KtPsiFactory(generated).createExpressionByPattern(
+                        "$0\n ?: $1", generated, valueIfNotFound,
+                        reformat = chainedCallGenerator.reformat
+                    )
                 }
             }
+        }
 
-            when {
-                valueIfFound.isVariableReference(inputVariable) -> {
-                    val functionName = if (findFirst) "firstOrNull" else "lastOrNull"
-                    val generator = SimpleGenerator(functionName, inputVariable, filterCondition?.asExpression(reformat))
-                    return generator.useElvisOperatorIfNeeded()
-                }
+        when {
+            valueIfFound.isVariableReference(inputVariable) -> {
+                val functionName = if (findFirst) "firstOrNull" else "lastOrNull"
+                val generator = SimpleGenerator(functionName, inputVariable, filterCondition?.asExpression(reformat))
+                return generator.useElvisOperatorIfNeeded()
+            }
 
-                valueIfFound.isTrueConstant() && valueIfNotFound.isFalseConstant() -> {
-                    return buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = false, reformat = reformat)
-                }
+            valueIfFound.isTrueConstant() && valueIfNotFound.isFalseConstant() -> {
+                return buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = false, reformat = reformat)
+            }
 
-                valueIfFound.isFalseConstant() && valueIfNotFound.isTrueConstant() -> {
-                    return buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = true, reformat = reformat)
-                }
+            valueIfFound.isFalseConstant() && valueIfNotFound.isTrueConstant() -> {
+                return buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = true, reformat = reformat)
+            }
 
-                inputVariable.hasUsages(valueIfFound) -> {
-                    if (!findFirst) return null // too dangerous because of side effects
+            inputVariable.hasUsages(valueIfFound) -> {
+                if (!findFirst) return null // too dangerous because of side effects
 
-                    // specially handle the case when the result expression is "<input variable>.<some call>" or "<input variable>?.<some call>"
-                    val qualifiedExpression = valueIfFound as? KtQualifiedExpression
-                    if (qualifiedExpression != null) {
-                        val receiver = qualifiedExpression.receiverExpression
-                        val selector = qualifiedExpression.selectorExpression
-                        if (receiver.isVariableReference(inputVariable) && selector != null && !inputVariable.hasUsages(selector)) {
-                            return object: FindOperationGenerator("firstOrNull", filterCondition != null, chainCallCount = 2) {
-                                override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
-                                    val findFirstCall = generateChainedCall(functionName, chainedCallGenerator, inputVariable, filterCondition?.asExpression(reformat))
-                                    return chainedCallGenerator.generate("$0", selector, receiver = findFirstCall, safeCall = true)
-                                }
-                            }.useElvisOperatorIfNeeded()
-                        }
+                // specially handle the case when the result expression is "<input variable>.<some call>" or "<input variable>?.<some call>"
+                val qualifiedExpression = valueIfFound as? KtQualifiedExpression
+                if (qualifiedExpression != null) {
+                    val receiver = qualifiedExpression.receiverExpression
+                    val selector = qualifiedExpression.selectorExpression
+                    if (receiver.isVariableReference(inputVariable) && selector != null && !inputVariable.hasUsages(selector)) {
+                        return object : FindOperationGenerator("firstOrNull", filterCondition != null, chainCallCount = 2) {
+                            override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
+                                val findFirstCall = generateChainedCall(
+                                    functionName,
+                                    chainedCallGenerator,
+                                    inputVariable,
+                                    filterCondition?.asExpression(reformat)
+                                )
+                                return chainedCallGenerator.generate("$0", selector, receiver = findFirstCall, safeCall = true)
+                            }
+                        }.useElvisOperatorIfNeeded()
                     }
-
-                    // in case of nullable input variable we cannot distinguish by the result of "firstOrNull" whether nothing was found or 'null' was found
-                    if (inputVariableCanHoldNull) return null
-
-                    return object : FindOperationGenerator("firstOrNull", filterCondition != null, chainCallCount = 2 /* also includes "let" */) {
-                        override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
-                            val findFirstCall = generateChainedCall(functionName, chainedCallGenerator, inputVariable, filterCondition?.asExpression(reformat))
-                            val letBody = generateLambda(inputVariable, valueIfFound, chainedCallGenerator.reformat)
-                            return chainedCallGenerator.generate("let $0:'{}'", letBody, receiver = findFirstCall, safeCall = true)
-                        }
-                    }.useElvisOperatorIfNeeded()
                 }
 
-                else -> {
-                    val generator = buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = false, reformat = reformat)
-                    return object : FindOperationGenerator(generator) {
-                        override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
-                            val chainedCall = generator.generate(chainedCallGenerator)
-                            return KtPsiFactory(chainedCall).createExpressionByPattern(
-                                    "if ($0) $1 else $2", chainedCall, valueIfFound, valueIfNotFound,
-                                    reformat = chainedCallGenerator.reformat
-                            )
-                        }
+                // in case of nullable input variable we cannot distinguish by the result of "firstOrNull" whether nothing was found or 'null' was found
+                if (inputVariableCanHoldNull) return null
+
+                return object :
+                    FindOperationGenerator("firstOrNull", filterCondition != null, chainCallCount = 2 /* also includes "let" */) {
+                    override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
+                        val findFirstCall =
+                            generateChainedCall(functionName, chainedCallGenerator, inputVariable, filterCondition?.asExpression(reformat))
+                        val letBody = generateLambda(inputVariable, valueIfFound, chainedCallGenerator.reformat)
+                        return chainedCallGenerator.generate("let $0:'{}'", letBody, receiver = findFirstCall, safeCall = true)
+                    }
+                }.useElvisOperatorIfNeeded()
+            }
+
+            else -> {
+                val generator = buildFoundFlagGenerator(loop, inputVariable, filterCondition, negated = false, reformat = reformat)
+                return object : FindOperationGenerator(generator) {
+                    override fun generate(chainedCallGenerator: ChainedCallGenerator): KtExpression {
+                        val chainedCall = generator.generate(chainedCallGenerator)
+                        return KtPsiFactory(chainedCall).createExpressionByPattern(
+                            "if ($0) $1 else $2", chainedCall, valueIfFound, valueIfNotFound,
+                            reformat = chainedCallGenerator.reformat
+                        )
                     }
                 }
             }

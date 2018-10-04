@@ -116,7 +116,8 @@ fun PsiReference.matchesTarget(candidateTarget: PsiElement): Boolean {
 
                 val labeledExpression = it.getLabeledParent(element.getReferencedName())
                 if (labeledExpression != null) {
-                    if (candidateTarget == labeledExpression) return true else return@forEach
+                    if (candidateTarget == labeledExpression) return true
+                    return@forEach
                 }
                 val calleeReference = it.getCalleeByLambdaArgument()?.mainReference ?: return@forEach
                 if (calleeReference.matchesTarget(candidateTarget)) return true

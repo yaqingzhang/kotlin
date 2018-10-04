@@ -208,12 +208,11 @@ class InvertIfConditionIntention : SelfTargetingIntention<KtIfExpression>(KtIfEx
             val lastStatement = parent.statements.last()
             if (expression == lastStatement) {
                 return exitStatementExecutedAfter(parent)
-            } else {
-                if (lastStatement.isExitStatement() && expression.siblings(withItself = false).firstIsInstance<KtExpression>() == lastStatement) {
-                    return lastStatement
-                }
-                return null
             }
+            if (lastStatement.isExitStatement() && expression.siblings(withItself = false).firstIsInstance<KtExpression>() == lastStatement) {
+                return lastStatement
+            }
+            return null
         }
 
         when (parent) {

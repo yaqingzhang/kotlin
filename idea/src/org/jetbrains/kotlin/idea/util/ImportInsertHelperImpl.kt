@@ -407,9 +407,7 @@ class ImportInsertHelperImpl(private val project: Project) : ImportInsertHelper(
                     importList.addAfter(newDirective, insertAfter) as KtImportDirective
                 }
             }
-            else {
-                error("Trying to insert import $fqName into a file ${file.name} of type ${file::class.java} with no import list.")
-            }
+            error("Trying to insert import $fqName into a file ${file.name} of type ${file::class.java} with no import list.")
         }
     }
 }

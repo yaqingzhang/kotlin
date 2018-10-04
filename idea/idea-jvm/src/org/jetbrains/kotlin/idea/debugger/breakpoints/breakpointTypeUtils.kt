@@ -75,9 +75,7 @@ fun canPutAt(file: VirtualFile, line: Int, project: Project, breakpointTypeClass
             }
             return false
         }
-        else {
-            result = KotlinLineBreakpointType::class.java
-        }
+        result = KotlinLineBreakpointType::class.java
 
         return true
     })

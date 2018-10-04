@@ -361,17 +361,14 @@ class KotlinBreadcrumbsInfoProvider : BreadcrumbsInfoProvider() {
                 if (isElse) {
                     return "else ->"
                 }
-                else {
-                    val condition = conditions.firstOrNull() ?: return "->"
-                    val firstConditionText = condition.buildText(kind)
+                val condition = conditions.firstOrNull() ?: return "->"
+                val firstConditionText = condition.buildText(kind)
 
-                    return if (conditions.size == 1) {
-                        firstConditionText + " ->"
-                    }
-                    else {
-                        //TODO: show all conditions for tooltip
-                        (if (firstConditionText.endsWith(ellipsis)) firstConditionText else firstConditionText + ",$ellipsis") + " ->"
-                    }
+                return if (conditions.size == 1) {
+                    firstConditionText + " ->"
+                } else {
+                    //TODO: show all conditions for tooltip
+                    (if (firstConditionText.endsWith(ellipsis)) firstConditionText else firstConditionText + ",$ellipsis") + " ->"
                 }
             }
         }
