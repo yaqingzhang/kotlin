@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.getStrictParentOfType
 import org.jetbrains.kotlin.resolve.calls.callUtil.getType
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
@@ -60,7 +61,7 @@ class SuspiciousCollectionReassignmentInspection : AbstractKotlinInspection() {
         override fun getFamilyName() = name
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-            val binaryExpression = descriptor.psiElement as? KtBinaryExpression ?: return
+            val binaryExpression = descriptor.psiElement.getStrictParentOfType<KtBinaryExpression>() ?: return
             val left = binaryExpression.left ?: return
             val right = binaryExpression.right ?: return
             val newOperation = when (binaryExpression.operationToken) {
@@ -84,7 +85,7 @@ class SuspiciousCollectionReassignmentInspection : AbstractKotlinInspection() {
         override fun getFamilyName() = name
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-            val binaryExpression = descriptor.psiElement as? KtBinaryExpression ?: return
+            val binaryExpression = descriptor.psiElement.getStrictParentOfType<KtBinaryExpression>() ?: return
             val left = binaryExpression.left ?: return
             val property = left.mainReference?.resolve() as? KtProperty ?: return
             val initializer = property.initializer ?: return
