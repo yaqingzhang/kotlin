@@ -2,7 +2,7 @@
 // WITH_RUNTIME
 fun test() {
     var set = foo()
-    set += 1<caret>
+    set <caret>+= 1
 }
 
 fun foo() = setOf(1)

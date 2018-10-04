@@ -2,5 +2,5 @@
 // WITH_RUNTIME
 fun test() {
     var set = setOf(1)
-    set += 1<caret>
+    set +<caret>= 1
 }

@@ -2,7 +2,7 @@
 // WITH_RUNTIME
 fun toMutableMap() {
     var map = foo()
-    map += 3 to 4<caret>
+    map <caret>+= 3 to 4
 }
 
 fun foo() = mapOf(1 to 2)

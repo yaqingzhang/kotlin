@@ -26,10 +26,12 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.kotlin.types.KotlinType
 
 class SuspiciousCollectionReassignmentInspection : AbstractKotlinInspection() {
-    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
-        binaryExpressionVisitor(fun(binaryExpression) {
+    private val augmentedAssignments = listOf(KtTokens.PLUSEQ, KtTokens.MINUSEQ)
+
+    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
+        return binaryExpressionVisitor(fun(binaryExpression) {
             if (binaryExpression.right == null) return
-            if (binaryExpression.operationToken !in listOf(KtTokens.PLUSEQ, KtTokens.MINUSEQ)) return
+            if (binaryExpression.operationToken !in augmentedAssignments) return
             val left = binaryExpression.left ?: return
             val property = left.mainReference?.resolve() as? KtProperty ?: return
             if (!property.isVar) return
@@ -44,12 +46,13 @@ class SuspiciousCollectionReassignmentInspection : AbstractKotlinInspection() {
             if (property.initializer != null && property.isLocal) fixes.add(ChangeTypeToMutable(type))
             val typeText = defaultType.toString().takeWhile { it != '<' }.toLowerCase()
             holder.registerProblem(
-                binaryExpression,
+                binaryExpression.operationReference ?: binaryExpression,
                 "'${binaryExpression.operationReference.text}' create new $typeText under the hood",
-                ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                 *fixes.toTypedArray()
             )
         })
+    }
 
     private class AssignToLocalVariableFix : LocalQuickFix {
         override fun getName() = "Assign to local variable"
