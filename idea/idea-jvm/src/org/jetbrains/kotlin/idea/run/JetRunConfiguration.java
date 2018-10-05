@@ -28,7 +28,7 @@ import com.intellij.execution.configurations.RefactoringListenerProvider;
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
-public abstract class JetRunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule>
+public abstract class JetRunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, Object>
         implements CommonJavaRunConfigurationParameters, RefactoringListenerProvider {
     public String MAIN_CLASS_NAME;
     public String WORKING_DIRECTORY;

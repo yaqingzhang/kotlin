@@ -34,7 +34,7 @@ class KotlinProtractorRunConfiguration(
         project: Project,
         factory: ConfigurationFactory,
         name: String
-) : LocatableConfigurationBase(project, factory, name) {
+) : LocatableConfigurationBase<Any>(project, factory, name) {
     var runSettings = KotlinProtractorRunSettings()
 
     val protractorPackage: NodePackage

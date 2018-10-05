@@ -41,7 +41,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
 
 class KotlinCoverageExtension : JavaCoverageEngineExtension() {
-    override fun isApplicableTo(conf: RunConfigurationBase?): Boolean = conf is KotlinRunConfiguration
+    override fun isApplicableTo(conf: RunConfigurationBase<*>?): Boolean = conf is KotlinRunConfiguration
 
     override fun suggestQualifiedName(sourceFile: PsiFile, classes: Array<out PsiClass>, names: MutableSet<String>): Boolean {
         if (sourceFile is KtFile) {
