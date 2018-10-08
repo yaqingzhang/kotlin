@@ -82,7 +82,7 @@ dependencies {
     fatJarContents(intellijDep()) { includeIntellijCoreJarDependencies(project, { !(it.startsWith("jdom") || it.startsWith("log4j")) }) }
     fatJarContents(intellijDep()) { includeJars("jna-platform", "lz4-1.3.0") }
     fatJarContentsStripServices(intellijDep("jps-standalone")) { includeJars("jps-model") }
-    fatJarContentsStripMetadata(intellijDep()) { includeJars("oro-2.0.8", "jdom", "log4j") }
+    fatJarContentsStripMetadata(intellijDep()) { includeJars("oro-2.0.8", "jdom", "log4j", "java-compatibility-1.0.1" ) }
 }
 
 noDefaultJar()
