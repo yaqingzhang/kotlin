@@ -228,7 +228,7 @@ public infix fun <T> Comparator<T>.thenDescending(comparator: Comparator<in T>):
  *
  * @sample samples.comparisons.Comparisons.nullsFirstLastWithComparator
  */
-public fun <T : Any> nullsFirst(comparator: Comparator<in T>): Comparator<T?> =
+public fun <T> nullsFirst(comparator: Comparator<in T>): Comparator<T?> =
     Comparator { a, b ->
         when {
             a === b -> 0
@@ -253,7 +253,7 @@ public inline fun <T : Comparable<T>> nullsFirst(): Comparator<T?> = nullsFirst(
  *
  * @sample samples.comparisons.Comparisons.nullsFirstLastWithComparator
  */
-public fun <T : Any> nullsLast(comparator: Comparator<in T>): Comparator<T?> =
+public fun <T> nullsLast(comparator: Comparator<in T>): Comparator<T?> =
     Comparator { a, b ->
         when {
             a === b -> 0

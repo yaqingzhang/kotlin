@@ -438,7 +438,7 @@ public fun <T> Sequence<T>.filterNot(predicate: (T) -> Boolean): Sequence<T> {
  *
  * The operation is _intermediate_ and _stateless_.
  */
-public fun <T : Any> Sequence<T?>.filterNotNull(): Sequence<T> {
+public fun <T> Sequence<T?>.filterNotNull(): Sequence<T> {
     @Suppress("UNCHECKED_CAST")
     return filterNot { it == null } as Sequence<T>
 }
@@ -448,7 +448,7 @@ public fun <T : Any> Sequence<T?>.filterNotNull(): Sequence<T> {
  *
  * The operation is _terminal_.
  */
-public fun <C : MutableCollection<in T>, T : Any> Sequence<T?>.filterNotNullTo(destination: C): C {
+public fun <C : MutableCollection<in T>, T> Sequence<T?>.filterNotNullTo(destination: C): C {
     for (element in this) if (element != null) destination.add(element)
     return destination
 }
@@ -865,7 +865,7 @@ public fun <T, R> Sequence<T>.mapIndexed(transform: (index: Int, T) -> R): Seque
  *
  * The operation is _intermediate_ and _stateless_.
  */
-public fun <T, R : Any> Sequence<T>.mapIndexedNotNull(transform: (index: Int, T) -> R?): Sequence<R> {
+public fun <T, R> Sequence<T>.mapIndexedNotNull(transform: (index: Int, T) -> R?): Sequence<R> {
     return TransformingIndexedSequence(this, transform).filterNotNull()
 }
 
@@ -877,7 +877,7 @@ public fun <T, R : Any> Sequence<T>.mapIndexedNotNull(transform: (index: Int, T)
  *
  * The operation is _terminal_.
  */
-public inline fun <T, R : Any, C : MutableCollection<in R>> Sequence<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C {
+public inline fun <T, R, C : MutableCollection<in R>> Sequence<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C {
     forEachIndexed { index, element -> transform(index, element)?.let { destination.add(it) } }
     return destination
 }
@@ -903,7 +903,7 @@ public inline fun <T, R, C : MutableCollection<in R>> Sequence<T>.mapIndexedTo(d
  *
  * The operation is _intermediate_ and _stateless_.
  */
-public fun <T, R : Any> Sequence<T>.mapNotNull(transform: (T) -> R?): Sequence<R> {
+public fun <T, R> Sequence<T>.mapNotNull(transform: (T) -> R?): Sequence<R> {
     return TransformingSequence(this, transform).filterNotNull()
 }
 
@@ -913,7 +913,7 @@ public fun <T, R : Any> Sequence<T>.mapNotNull(transform: (T) -> R?): Sequence<R
  *
  * The operation is _terminal_.
  */
-public inline fun <T, R : Any, C : MutableCollection<in R>> Sequence<T>.mapNotNullTo(destination: C, transform: (T) -> R?): C {
+public inline fun <T, R, C : MutableCollection<in R>> Sequence<T>.mapNotNullTo(destination: C, transform: (T) -> R?): C {
     forEach { element -> transform(element)?.let { destination.add(it) } }
     return destination
 }
@@ -1370,7 +1370,7 @@ public inline fun <T> Sequence<T>.sumByDouble(selector: (T) -> Double): Double {
  *
  * The operation is _intermediate_ and _stateless_.
  */
-public fun <T : Any> Sequence<T?>.requireNoNulls(): Sequence<T> {
+public fun <T> Sequence<T?>.requireNoNulls(): Sequence<T> {
     return map { it ?: throw IllegalArgumentException("null element found in $this.") }
 }
 

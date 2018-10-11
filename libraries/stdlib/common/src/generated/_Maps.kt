@@ -65,7 +65,7 @@ public inline fun <K, V, R> Map<out K, V>.map(transform: (Map.Entry<K, V>) -> R)
  * Returns a list containing only the non-null results of applying the given [transform] function
  * to each entry in the original map.
  */
-public inline fun <K, V, R : Any> Map<out K, V>.mapNotNull(transform: (Map.Entry<K, V>) -> R?): List<R> {
+public inline fun <K, V, R> Map<out K, V>.mapNotNull(transform: (Map.Entry<K, V>) -> R?): List<R> {
     return mapNotNullTo(ArrayList<R>(), transform)
 }
 
@@ -73,7 +73,7 @@ public inline fun <K, V, R : Any> Map<out K, V>.mapNotNull(transform: (Map.Entry
  * Applies the given [transform] function to each entry in the original map
  * and appends only the non-null results to the given [destination].
  */
-public inline fun <K, V, R : Any, C : MutableCollection<in R>> Map<out K, V>.mapNotNullTo(destination: C, transform: (Map.Entry<K, V>) -> R?): C {
+public inline fun <K, V, R, C : MutableCollection<in R>> Map<out K, V>.mapNotNullTo(destination: C, transform: (Map.Entry<K, V>) -> R?): C {
     forEach { element -> transform(element)?.let { destination.add(it) } }
     return destination
 }

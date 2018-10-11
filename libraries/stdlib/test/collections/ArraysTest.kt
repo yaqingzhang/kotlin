@@ -1401,6 +1401,11 @@ class ArraysTest {
 
         assertEquals(listOf(1, 2, 0), indices.sortedBy { values[it] })
     }
+    
+    fun <T> genericTest(c: Comparator<T>) {
+        val c1: Comparator<T?> = nullsFirst(c)
+        val c2: Comparator<T?> = nullsLast(c)
+    }
 
     @Test fun sortedNullableBy() {
         fun String.nullIfEmpty() = if (this.isEmpty()) null else this

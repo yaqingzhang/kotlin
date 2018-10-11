@@ -836,7 +836,7 @@ public inline fun <R> CharSequence.mapIndexed(transform: (index: Int, Char) -> R
  * @param [transform] function that takes the index of a character and the character itself
  * and returns the result of the transform applied to the character.
  */
-public inline fun <R : Any> CharSequence.mapIndexedNotNull(transform: (index: Int, Char) -> R?): List<R> {
+public inline fun <R> CharSequence.mapIndexedNotNull(transform: (index: Int, Char) -> R?): List<R> {
     return mapIndexedNotNullTo(ArrayList<R>(), transform)
 }
 
@@ -846,7 +846,7 @@ public inline fun <R : Any> CharSequence.mapIndexedNotNull(transform: (index: In
  * @param [transform] function that takes the index of a character and the character itself
  * and returns the result of the transform applied to the character.
  */
-public inline fun <R : Any, C : MutableCollection<in R>> CharSequence.mapIndexedNotNullTo(destination: C, transform: (index: Int, Char) -> R?): C {
+public inline fun <R, C : MutableCollection<in R>> CharSequence.mapIndexedNotNullTo(destination: C, transform: (index: Int, Char) -> R?): C {
     forEachIndexed { index, element -> transform(index, element)?.let { destination.add(it) } }
     return destination
 }
@@ -868,7 +868,7 @@ public inline fun <R, C : MutableCollection<in R>> CharSequence.mapIndexedTo(des
  * Returns a list containing only the non-null results of applying the given [transform] function
  * to each character in the original char sequence.
  */
-public inline fun <R : Any> CharSequence.mapNotNull(transform: (Char) -> R?): List<R> {
+public inline fun <R> CharSequence.mapNotNull(transform: (Char) -> R?): List<R> {
     return mapNotNullTo(ArrayList<R>(), transform)
 }
 
@@ -876,7 +876,7 @@ public inline fun <R : Any> CharSequence.mapNotNull(transform: (Char) -> R?): Li
  * Applies the given [transform] function to each character in the original char sequence
  * and appends only the non-null results to the given [destination].
  */
-public inline fun <R : Any, C : MutableCollection<in R>> CharSequence.mapNotNullTo(destination: C, transform: (Char) -> R?): C {
+public inline fun <R, C : MutableCollection<in R>> CharSequence.mapNotNullTo(destination: C, transform: (Char) -> R?): C {
     forEach { element -> transform(element)?.let { destination.add(it) } }
     return destination
 }

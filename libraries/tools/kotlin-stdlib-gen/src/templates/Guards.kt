@@ -16,7 +16,7 @@ object Guards : TemplateGroupBase() {
     } builder {
         doc { "Returns an original collection containing all the non-`null` elements, throwing an [IllegalArgumentException] if there are any `null` elements." }
         sequenceClassification(intermediate, stateless)
-        typeParam("T : Any")
+        typeParam("T")
         toNullableT = true
         returns("SELF")
         body {

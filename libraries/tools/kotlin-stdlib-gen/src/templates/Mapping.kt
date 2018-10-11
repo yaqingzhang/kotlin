@@ -111,7 +111,7 @@ object Mapping : TemplateGroupBase() {
         include(Iterables, ArraysOfObjects, Sequences, Maps, CharSequences)
     } builder {
         inline()
-        typeParam("R : Any")
+        typeParam("R")
         returns("List<R>")
         doc {
             """
@@ -137,7 +137,7 @@ object Mapping : TemplateGroupBase() {
         include(Iterables, ArraysOfObjects, Sequences, CharSequences)
     } builder {
         inline()
-        typeParam("R : Any")
+        typeParam("R")
         returns("List<R>")
         doc {
             """
@@ -218,7 +218,7 @@ object Mapping : TemplateGroupBase() {
         include(Iterables, ArraysOfObjects, Sequences, Maps, CharSequences)
     } builder {
         inline()
-        typeParam("R : Any")
+        typeParam("R")
         typeParam("C : MutableCollection<in R>")
         returns("C")
         doc {
@@ -239,7 +239,7 @@ object Mapping : TemplateGroupBase() {
         include(Iterables, ArraysOfObjects, Sequences, CharSequences)
     } builder {
         inline()
-        typeParam("R : Any")
+        typeParam("R")
         typeParam("C : MutableCollection<in R>")
         returns("C")
         doc {

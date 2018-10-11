@@ -713,14 +713,14 @@ public inline fun <T> Iterable<T>.filterNot(predicate: (T) -> Boolean): List<T> 
 /**
  * Returns a list containing all elements that are not `null`.
  */
-public fun <T : Any> Iterable<T?>.filterNotNull(): List<T> {
+public fun <T> Iterable<T?>.filterNotNull(): List<T> {
     return filterNotNullTo(ArrayList<T>())
 }
 
 /**
  * Appends all elements that are not `null` to the given [destination].
  */
-public fun <C : MutableCollection<in T>, T : Any> Iterable<T?>.filterNotNullTo(destination: C): C {
+public fun <C : MutableCollection<in T>, T> Iterable<T?>.filterNotNullTo(destination: C): C {
     for (element in this) if (element != null) destination.add(element)
     return destination
 }
@@ -1301,7 +1301,7 @@ public inline fun <T, R> Iterable<T>.mapIndexed(transform: (index: Int, T) -> R)
  * @param [transform] function that takes the index of an element and the element itself
  * and returns the result of the transform applied to the element.
  */
-public inline fun <T, R : Any> Iterable<T>.mapIndexedNotNull(transform: (index: Int, T) -> R?): List<R> {
+public inline fun <T, R> Iterable<T>.mapIndexedNotNull(transform: (index: Int, T) -> R?): List<R> {
     return mapIndexedNotNullTo(ArrayList<R>(), transform)
 }
 
@@ -1311,7 +1311,7 @@ public inline fun <T, R : Any> Iterable<T>.mapIndexedNotNull(transform: (index: 
  * @param [transform] function that takes the index of an element and the element itself
  * and returns the result of the transform applied to the element.
  */
-public inline fun <T, R : Any, C : MutableCollection<in R>> Iterable<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C {
+public inline fun <T, R, C : MutableCollection<in R>> Iterable<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C {
     forEachIndexed { index, element -> transform(index, element)?.let { destination.add(it) } }
     return destination
 }
@@ -1333,7 +1333,7 @@ public inline fun <T, R, C : MutableCollection<in R>> Iterable<T>.mapIndexedTo(d
  * Returns a list containing only the non-null results of applying the given [transform] function
  * to each element in the original collection.
  */
-public inline fun <T, R : Any> Iterable<T>.mapNotNull(transform: (T) -> R?): List<R> {
+public inline fun <T, R> Iterable<T>.mapNotNull(transform: (T) -> R?): List<R> {
     return mapNotNullTo(ArrayList<R>(), transform)
 }
 
@@ -1341,7 +1341,7 @@ public inline fun <T, R : Any> Iterable<T>.mapNotNull(transform: (T) -> R?): Lis
  * Applies the given [transform] function to each element in the original collection
  * and appends only the non-null results to the given [destination].
  */
-public inline fun <T, R : Any, C : MutableCollection<in R>> Iterable<T>.mapNotNullTo(destination: C, transform: (T) -> R?): C {
+public inline fun <T, R, C : MutableCollection<in R>> Iterable<T>.mapNotNullTo(destination: C, transform: (T) -> R?): C {
     forEach { element -> transform(element)?.let { destination.add(it) } }
     return destination
 }
@@ -1854,7 +1854,7 @@ public inline fun <T> Iterable<T>.sumByDouble(selector: (T) -> Double): Double {
 /**
  * Returns an original collection containing all the non-`null` elements, throwing an [IllegalArgumentException] if there are any `null` elements.
  */
-public fun <T : Any> Iterable<T?>.requireNoNulls(): Iterable<T> {
+public fun <T> Iterable<T?>.requireNoNulls(): Iterable<T> {
     for (element in this) {
         if (element == null) {
             throw IllegalArgumentException("null element found in $this.")
@@ -1867,7 +1867,7 @@ public fun <T : Any> Iterable<T?>.requireNoNulls(): Iterable<T> {
 /**
  * Returns an original collection containing all the non-`null` elements, throwing an [IllegalArgumentException] if there are any `null` elements.
  */
-public fun <T : Any> List<T?>.requireNoNulls(): List<T> {
+public fun <T> List<T?>.requireNoNulls(): List<T> {
     for (element in this) {
         if (element == null) {
             throw IllegalArgumentException("null element found in $this.")

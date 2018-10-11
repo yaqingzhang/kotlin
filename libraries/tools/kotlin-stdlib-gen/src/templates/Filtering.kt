@@ -705,7 +705,7 @@ object Filtering : TemplateGroupBase() {
         include(Iterables, Sequences, ArraysOfObjects)
     } builder {
         doc { "Returns a list containing all elements that are not `null`." }
-        typeParam("T : Any")
+        typeParam("T")
         returns("List<T>")
         toNullableT = true
         body {
@@ -732,7 +732,7 @@ object Filtering : TemplateGroupBase() {
         doc { "Appends all elements that are not `null` to the given [destination]." }
         returns("C")
         typeParam("C : TCollection")
-        typeParam("T : Any")
+        typeParam("T")
         toNullableT = true
         body {
             """
