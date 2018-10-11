@@ -64,14 +64,14 @@ fun <@OnlyInputTypes T> assertNotSame(illegal: T, actual: T, message: String? = 
 }
 
 /** Asserts that the [actual] value is not `null`, with an optional [message]. */
-fun <T : Any> assertNotNull(actual: T?, message: String? = null): T {
+fun <T> assertNotNull(actual: T?, message: String? = null): T {
     contract { returns() implies (actual != null) }
     asserter.assertNotNull(message, actual)
     return actual!!
 }
 
 /** Asserts that the [actual] value is not `null`, with an optional [message] and a function [block] to process the not-null value. */
-fun <T : Any, R> assertNotNull(actual: T?, message: String? = null, block: (T) -> R) {
+fun <T, R> assertNotNull(actual: T?, message: String? = null, block: (T) -> R) {
     contract { returns() implies (actual != null) }
     asserter.assertNotNull(message, actual)
     if (actual != null) {

@@ -43,7 +43,7 @@ public inline fun require(value: Boolean, lazyMessage: () -> Any): Unit {
  * Throws an [IllegalArgumentException] if the [value] is null. Otherwise returns the not null value.
  */
 @kotlin.internal.InlineOnly
-public inline fun <T : Any> requireNotNull(value: T?): T {
+public inline fun <T> requireNotNull(value: T?): T {
     contract {
         returns() implies (value != null)
     }
@@ -57,7 +57,7 @@ public inline fun <T : Any> requireNotNull(value: T?): T {
  * @sample samples.misc.Preconditions.failRequireWithLazyMessage
  */
 @kotlin.internal.InlineOnly
-public inline fun <T : Any> requireNotNull(value: T?, lazyMessage: () -> Any): T {
+public inline fun <T> requireNotNull(value: T?, lazyMessage: () -> Any): T {
     contract {
         returns() implies (value != null)
     }
@@ -106,7 +106,7 @@ public inline fun check(value: Boolean, lazyMessage: () -> Any): Unit {
  * @sample samples.misc.Preconditions.failCheckWithLazyMessage
  */
 @kotlin.internal.InlineOnly
-public inline fun <T : Any> checkNotNull(value: T?): T {
+public inline fun <T> checkNotNull(value: T?): T {
     contract {
         returns() implies (value != null)
     }
@@ -120,7 +120,7 @@ public inline fun <T : Any> checkNotNull(value: T?): T {
  * @sample samples.misc.Preconditions.failCheckWithLazyMessage
  */
 @kotlin.internal.InlineOnly
-public inline fun <T : Any> checkNotNull(value: T?, lazyMessage: () -> Any): T {
+public inline fun <T> checkNotNull(value: T?, lazyMessage: () -> Any): T {
     contract {
         returns() implies (value != null)
     }
