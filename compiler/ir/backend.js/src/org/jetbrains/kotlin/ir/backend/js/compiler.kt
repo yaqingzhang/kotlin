@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.descriptors.impl.ModuleDescriptorImpl
 import org.jetbrains.kotlin.ir.backend.js.lower.*
+import org.jetbrains.kotlin.ir.backend.js.lower.calls.CallsLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.coroutines.CoroutineIntrinsicLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.coroutines.SuspendFunctionsLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.inline.FunctionInlining
@@ -22,15 +23,6 @@ import org.jetbrains.kotlin.ir.backend.js.lower.inline.RemoveInlineFunctionsWith
 import org.jetbrains.kotlin.ir.backend.js.lower.inline.ReturnableBlockLowering
 import org.jetbrains.kotlin.ir.backend.js.lower.inline.replaceUnboundSymbols
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
-import org.jetbrains.kotlin.ir.declarations.*
-import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
-import org.jetbrains.kotlin.ir.expressions.IrBlock
-import org.jetbrains.kotlin.ir.expressions.IrReturnableBlock
-import org.jetbrains.kotlin.ir.symbols.*
-import org.jetbrains.kotlin.ir.symbols.impl.*
-import org.jetbrains.kotlin.ir.util.*
-import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
-import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.util.ExternalDependenciesGenerator
@@ -84,7 +76,6 @@ fun compile(
 
     MoveExternalDeclarationsToSeparatePlace().lower(moduleFragment.files)
 
-
     moduleFragment.files.forEach(CoroutineIntrinsicLowering(context)::lower)
     moduleFragment.files.forEach { ArrayInlineConstructorLowering(context).lower(it) }
 
@@ -111,14 +102,15 @@ private fun JsIrBackendContext.performInlining(moduleFragment: IrModuleFragment)
 }
 
 private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependencies: List<IrModuleFragment>) {
+    moduleFragment.files.forEach(UnitMaterializationLowering(this)::lower)
+    moduleFragment.files.forEach(EnumClassLowering(this)::runOnFilePostfix)
+    moduleFragment.files.forEach(EnumUsageLowering(this)::lower)
     moduleFragment.files.forEach(VarargLowering(this)::lower)
     moduleFragment.files.forEach(LateinitLowering(this, true)::lower)
     moduleFragment.files.forEach(DefaultArgumentStubGenerator(this)::runOnFilePostfix)
     moduleFragment.files.forEach(DefaultParameterInjector(this)::runOnFilePostfix)
     moduleFragment.files.forEach(DefaultParameterCleaner(this)::runOnFilePostfix)
     moduleFragment.files.forEach(SharedVariablesLowering(this)::runOnFilePostfix)
-    moduleFragment.files.forEach(EnumClassLowering(this)::runOnFilePostfix)
-    moduleFragment.files.forEach(EnumUsageLowering(this)::lower)
     moduleFragment.files.forEach(ReturnableBlockLowering(this)::lower)
     moduleFragment.files.forEach(LocalDelegatedPropertiesLowering()::lower)
     moduleFragment.files.forEach(LocalDeclarationsLowering(this)::runOnFilePostfix)
@@ -140,7 +132,8 @@ private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependenc
     moduleFragment.files.forEach(clble.getReferenceReplacer())
     moduleFragment.files.forEach(ClassReferenceLowering(this)::lower)
     moduleFragment.files.forEach(PrimitiveCompanionLowering(this)::lower)
-    moduleFragment.files.forEach(IntrinsicifyCallsLowering(this)::lower)
+    moduleFragment.files.forEach(ConstLowering(this)::lower)
+    moduleFragment.files.forEach(CallsLowering(this)::lower)
 }
 
 private fun FileLoweringPass.lower(files: List<IrFile>) = files.forEach { lower(it) }

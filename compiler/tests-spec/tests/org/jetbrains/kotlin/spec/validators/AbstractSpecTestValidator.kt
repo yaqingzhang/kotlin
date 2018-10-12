@@ -108,10 +108,10 @@ abstract class AbstractSpecTestValidator<T : AbstractSpecTest>(private val testD
         val lineSeparator: String = System.lineSeparator()
         val testAreaRegex = """(?<testArea>${TestArea.values().joinToString("|").replace("_", " ")})"""
         val testTypeRegex = """(?<testType>${TestType.values().joinToString("|")})"""
-        val multilineCommentRegex = """\/\*\s*%s\s+\*\/$lineSeparator*"""
-        private val singlelineCommentRegex = """\/\/\s*%s$lineSeparator*"""
+        val multilineCommentRegex = """\/\*\s*%s\s+\*\/(?:$lineSeparator)*"""
+        private val singlelineCommentRegex = """\/\/\s*%s(?:$lineSeparator)*"""
         private val testInfoElementPattern: Pattern = Pattern.compile("""\s*(?<name>[A-Z ]+?)(?::\s*(?<value>.*?))?$lineSeparator""")
-        private val testCaseInfoRegex = """(?<infoElements>CASE DESCRIPTION:[\s\S]*?$lineSeparator)$lineSeparator*"""
+        private val testCaseInfoRegex = """(?<infoElements>CASE DESCRIPTION:[\s\S]*?$lineSeparator)(?:$lineSeparator)*"""
         private val testPathBaseRegexTemplate =
             """^.*?$pathSeparator(?<testArea>diagnostics|psi|(?:codegen${pathSeparator}box))$pathSeparator%s"""
         val testPathRegexTemplate = """$testPathBaseRegexTemplate$pathSeparator(?<testType>pos|neg)$pathSeparator%s$"""

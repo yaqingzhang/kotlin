@@ -1,5 +1,6 @@
 package org.jetbrains.kotlin.gradle.tasks
 
+import groovy.lang.Closure
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -20,6 +21,10 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.defaultSourceSetName
 import org.jetbrains.kotlin.gradle.plugin.mpp.isMainCompilation
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
+import org.jetbrains.kotlin.konan.target.CompilerOutputKind.DYNAMIC
+import org.jetbrains.kotlin.konan.target.CompilerOutputKind.FRAMEWORK
+import org.jetbrains.kotlin.konan.target.CompilerOutputKind.PROGRAM
+import org.jetbrains.kotlin.konan.target.CompilerOutputKind.STATIC
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
@@ -78,19 +83,11 @@ private fun FileCollection.filterOutPublishableInteropLibs(project: Project): Fi
     }
 }
 
-
 // endregion
-
 
 open class KotlinNativeCompile : AbstractCompile() {
 
     init {
-        @Suppress("LeakingThis")
-        setDestinationDir(project.provider {
-            val output = outputFile.get()
-            if (output.isDirectory) output else output.parentFile
-        })
-
         sourceCompatibility = "1.6"
         targetCompatibility = "1.6"
     }
@@ -115,7 +112,7 @@ open class KotlinNativeCompile : AbstractCompile() {
         @InputFiles get() = compilation.compileDependencyFiles.filterOutPublishableInteropLibs(project)
 
     private val friendModule: FileCollection?
-        get() = compilation.friendCompilation?.output
+        get() = compilation.friendCompilation?.output?.allOutputs
 
     override fun getClasspath(): FileCollection = libraries
     override fun setClasspath(configuration: FileCollection?) {
@@ -165,7 +162,7 @@ open class KotlinNativeCompile : AbstractCompile() {
         override var suppressWarnings: Boolean = false
         override var verbose: Boolean = false
 
-        // Delegate for compilations's exptra options.
+        // Delegate for compilations's extra options.
         override var freeCompilerArgs: List<String>
             get() = compilation.extraOpts
             set(value) { compilation.extraOpts = value.toMutableList() }
@@ -173,14 +170,35 @@ open class KotlinNativeCompile : AbstractCompile() {
 
     @Internal val kotlinOptions: KotlinCommonToolOptions = NativeCompilerOpts()
 
+    fun kotlinOptions(fn: KotlinCommonToolOptions.() -> Unit) {
+        kotlinOptions.fn()
+    }
+
+    fun kotlinOptions(fn: Closure<*>) {
+        fn.delegate = kotlinOptions
+        fn.call()
+    }
+
     // endregion.
 
     val kotlinNativeVersion: String
         @Input get() = project.konanVersion.toString()
 
-    // We manually register this property as output file or directory depending on output kind.
+    // OutputFile is located under the destinationDir, so there is no need to register it as a separate output.
     @Internal
-    val outputFile: Property<File> = project.objects.property(File::class.java)
+    val outputFile: Provider<File> = project.provider {
+        val konanTarget = compilation.target.konanTarget
+
+        val prefix = outputKind.prefix(konanTarget)
+        val suffix = outputKind.suffix(konanTarget)
+        val baseName = if (compilation.isMainCompilation) project.name else compilation.name
+        var filename = "$prefix$baseName$suffix"
+        if (outputKind in listOf(FRAMEWORK, STATIC, DYNAMIC) || outputKind == PROGRAM && konanTarget == KonanTarget.WASM32) {
+            filename = filename.replace('-', '_')
+        }
+
+        destinationDir.resolve(filename)
+    }
 
     // endregion
     @Internal
@@ -336,6 +354,8 @@ open class CInteropProcess: DefaultTask() {
     val extraOpts: List<String>
         @Input get() = settings.extraOpts
 
+    val kotlinNativeVersion: String
+        @Input get() = project.konanVersion.toString()
 
     // Task action.
     @TaskAction

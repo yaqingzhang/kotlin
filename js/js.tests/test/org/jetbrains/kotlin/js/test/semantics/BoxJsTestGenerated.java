@@ -1584,6 +1584,11 @@ public class BoxJsTestGenerated extends AbstractBoxJsTest {
             runTest("js/js.translator/testData/box/enum/simpleEnum.kt");
         }
 
+        @TestMetadata("standardFunctions.kt")
+        public void testStandardFunctions() throws Exception {
+            runTest("js/js.translator/testData/box/enum/standardFunctions.kt");
+        }
+
         @TestMetadata("standardMethods.kt")
         public void testStandardMethods() throws Exception {
             runTest("js/js.translator/testData/box/enum/standardMethods.kt");
@@ -3998,6 +4003,11 @@ public class BoxJsTestGenerated extends AbstractBoxJsTest {
         @TestMetadata("kt26466.kt")
         public void testKt26466() throws Exception {
             runTest("js/js.translator/testData/box/inline/kt26466.kt");
+        }
+
+        @TestMetadata("kt26787.kt")
+        public void testKt26787() throws Exception {
+            runTest("js/js.translator/testData/box/inline/kt26787.kt");
         }
 
         @TestMetadata("lambdaInLambda.kt")

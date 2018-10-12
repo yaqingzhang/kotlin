@@ -663,6 +663,20 @@ class NewMultiplatformIT : BaseGradleIT() {
             "build/bin/$nativeHostTargetName/main/release/static/$staticPrefix${baseName}_api.h"
         )
 
+        val klibPrefix = CompilerOutputKind.LIBRARY.prefix(HostManager.host)
+        val klibSuffix = CompilerOutputKind.LIBRARY.suffix(HostManager.host)
+        val klibPath = "${targetClassesDir(nativeHostTargetName)}${klibPrefix}native-lib$klibSuffix"
+
+        val frameworkPrefix = CompilerOutputKind.FRAMEWORK.prefix(HostManager.host)
+        val frameworkSuffix = CompilerOutputKind.FRAMEWORK.suffix(HostManager.host)
+        val frameworkPaths = listOf(
+            "build/bin/$nativeHostTargetName/main/debug/framework/$frameworkPrefix$baseName$frameworkSuffix.dSYM",
+            "build/bin/$nativeHostTargetName/main/debug/framework/$frameworkPrefix$baseName$frameworkSuffix",
+            "build/bin/$nativeHostTargetName/main/release/framework/$frameworkPrefix$baseName$frameworkSuffix"
+        )
+            .takeIf { HostManager.hostIsMac }
+            .orEmpty()
+
         val taskSuffix = nativeHostTargetName.capitalize()
         val linkTasks = listOf(
             ":linkDebugShared$taskSuffix",
@@ -671,25 +685,48 @@ class NewMultiplatformIT : BaseGradleIT() {
             ":linkReleaseStatic$taskSuffix"
         )
 
+        val klibTask = ":compileKotlin$taskSuffix"
+
+        val frameworkTasks = listOf(":linkDebugFramework$taskSuffix", ":linkReleaseFramework$taskSuffix")
+            .takeIf { HostManager.hostIsMac }
+            .orEmpty()
+
+        // Building
         build("assemble") {
             assertSuccessful()
 
             sharedPaths.forEach { assertFileExists(it) }
             staticPaths.forEach { assertFileExists(it) }
             headerPaths.forEach { assertFileExists(it) }
+            frameworkPaths.forEach { assertFileExists(it) }
+            assertFileExists(klibPath)
         }
 
+        // Test that all up-to date checks are correct
         build("assemble") {
             assertSuccessful()
             assertTasksUpToDate(linkTasks)
+            assertTasksUpToDate(frameworkTasks)
+            assertTasksUpToDate(klibTask)
         }
 
+        // Remove outputs and check that they are rebuilt.
         assertTrue(projectDir.resolve(headerPaths[0]).delete())
+        assertTrue(projectDir.resolve(klibPath).delete())
+        if (HostManager.hostIsMac) {
+            assertTrue(projectDir.resolve(frameworkPaths[0]).deleteRecursively())
+        }
 
         build("assemble") {
             assertSuccessful()
             assertTasksUpToDate(linkTasks.drop(1))
             assertTasksExecuted(linkTasks[0])
+            assertTasksExecuted(klibTask)
+
+            if (HostManager.hostIsMac) {
+                assertTasksUpToDate(frameworkTasks.drop(1))
+                assertTasksExecuted(frameworkTasks[0])
+            }
         }
     }
 
@@ -776,6 +813,23 @@ class NewMultiplatformIT : BaseGradleIT() {
             assertSuccessful()
             assertTrue(output.contains("Dependent: Project print"), "No test output found")
             assertTrue(output.contains("Dependent: Published print"), "No test output found")
+        }
+
+        // Check that changing the compiler version in properties causes interop reprocessing and source recompilation.
+        build(":projectLibrary:build") {
+            assertSuccessful()
+            assertTasksUpToDate(
+                ":projectLibrary:cinteropStdio${host.capitalize()}",
+                ":projectLibrary:compileKotlin${host.capitalize()}"
+            )
+        }
+
+        build(":projectLibrary:build", "-Porg.jetbrains.kotlin.native.version=0.9.2") {
+            assertSuccessful()
+            assertTasksExecuted(
+                ":projectLibrary:cinteropStdio${host.capitalize()}",
+                ":projectLibrary:compileKotlin${host.capitalize()}"
+            )
         }
     }
 
@@ -864,6 +918,37 @@ class NewMultiplatformIT : BaseGradleIT() {
 
             assertFileExists("$pathPrefix/kotlin.js")
             assertTrue(fileInWorkingDir("$pathPrefix/kotlin.js").length() < 500 * 1000, "Looks like kotlin.js file was not minified by DCE")
+        }
+    }
+
+
+    @Test
+    fun testStaleOutputCleanup() = with(Project("new-mpp-lib-with-tests", gradleVersion)) {
+        setupWorkingDir()
+        // Check that output directories of Kotlin compilations are registered for Gradle stale outputs cleanup.
+        // One way to check that is to run a Gradle build with no Gradle history (no .gradle directory) and see that the compilation
+        // output directories are cleaned up, even those outside the project's buildDir
+
+        gradleBuildScript().appendText(
+            "\n" + """
+            kotlin.targets.js.compilations.main.output.classesDirs.from("foo") // should affect Gradle's behavior wrt stale output cleanup
+            task('foo') {
+                outputs.dir("foo")
+                doFirst {
+                    println 'hello'
+                    file("foo/2.txt").text = System.currentTimeMillis()
+                }
+            }
+            """.trimIndent()
+        )
+
+        val staleFilePath = "foo/1.txt"
+        projectDir.resolve(staleFilePath).run { parentFile.mkdirs(); createNewFile() }
+
+        build("foo") {
+            assertSuccessful()
+            assertNoSuchFile(staleFilePath)
+            assertFileExists("foo/2.txt")
         }
     }
 }
