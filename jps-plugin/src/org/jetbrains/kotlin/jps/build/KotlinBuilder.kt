@@ -419,16 +419,16 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
 
         val compilationErrors = Utils.ERRORS_DETECTED_KEY[context, false]
         if (compilationErrors) {
-            LOG.info("Compiled with errors")
+            LOG.info("Compiled with errors (${kotlinChunk.presentableShortName})")
             return ABORT
-        } else {
-            LOG.info("Compiled successfully")
         }
+
+        LOG.info("Compiled successfully (${kotlinChunk.presentableShortName})")
 
         val generatedFiles = getGeneratedFiles(context, chunk, environment.outputItemsCollector)
 
         registerOutputItems(outputConsumer, generatedFiles)
-        kotlinChunk.saveVersions()
+        kotlinChunk.commitCacheFormatVersion()
 
         if (targets.any { kotlinContext.hasKotlinMarker[it] == null }) {
             fsOperations.markChunk(recursively = false, kotlinOnly = true, excludeFiles = kotlinDirtyFilesHolder.allDirtyFiles)
@@ -451,31 +451,29 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
             incrementalCaches
         )
 
-        if (!representativeTarget.isIncrementalCompilationEnabled) {
-            return OK
-        }
+        if (representativeTarget.isIncrementalCompilationEnabled) {
+            context.checkCanceled()
 
-        context.checkCanceled()
+            environment.withProgressReporter { progress ->
+                progress.progress("performing incremental compilation analysis")
 
-        environment.withProgressReporter { progress ->
-            progress.progress("performing incremental compilation analysis")
+                val changesCollector = ChangesCollector()
 
-            val changesCollector = ChangesCollector()
+                for ((target, files) in generatedFiles) {
+                    val kotlinModuleBuilderTarget = kotlinContext.targetsBinding[target]!!
+                    kotlinModuleBuilderTarget.updateCaches(incrementalCaches[kotlinModuleBuilderTarget]!!, files, changesCollector, environment)
+                }
 
-            for ((target, files) in generatedFiles) {
-                val kotlinModuleBuilderTarget = kotlinContext.targetsBinding[target]!!
-                kotlinModuleBuilderTarget.updateCaches(incrementalCaches[kotlinModuleBuilderTarget]!!, files, changesCollector, environment)
-            }
+                updateLookupStorage(lookupTracker, dataManager, kotlinDirtyFilesHolder)
 
-            updateLookupStorage(lookupTracker, dataManager, kotlinDirtyFilesHolder)
-
-            if (!isChunkRebuilding) {
-                changesCollector.processChangesUsingLookups(
-                    kotlinDirtyFilesHolder.allDirtyFiles,
-                    dataManager,
-                    fsOperations,
-                    incrementalCaches.values
-                )
+                if (!isChunkRebuilding) {
+                    changesCollector.processChangesUsingLookups(
+                        kotlinDirtyFilesHolder.allDirtyFiles,
+                        dataManager,
+                        fsOperations,
+                        incrementalCaches.values
+                    )
+                }
             }
         }
 

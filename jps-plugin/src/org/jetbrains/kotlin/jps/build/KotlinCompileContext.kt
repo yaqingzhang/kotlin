@@ -215,12 +215,16 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
 
         targetsIndex.chunks.forEach { chunk ->
             chunk.targets.forEach { target ->
-                if (target.initialLocalCacheAttributesDiff.status == CacheStatus.SHOULD_BE_CLEARED) {
-                    KotlinBuilder.LOG.info(
-                        "$target caches is cleared as not required anymore: ${target.initialLocalCacheAttributesDiff}"
-                    )
-                    testingLogger?.invalidOrUnusedCache(null, target, target.initialLocalCacheAttributesDiff)
-                    dataManager.getKotlinCache(target)?.clean()
+                val cache = target.cache
+                if (cache != null) {
+                    val cacheFormatVersionDiff = cache.formatVersionDiff
+                    if (cacheFormatVersionDiff.status == CacheStatus.SHOULD_BE_CLEARED) {
+                        KotlinBuilder.LOG.info(
+                            "$target caches is cleared as not required anymore: $cacheFormatVersionDiff"
+                        )
+                        testingLogger?.invalidOrUnusedCache(null, target, cacheFormatVersionDiff)
+                        cache.clean()
+                    }
                 }
             }
         }

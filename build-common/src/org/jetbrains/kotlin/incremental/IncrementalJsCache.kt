@@ -17,12 +17,17 @@
 package org.jetbrains.kotlin.incremental
 
 import com.intellij.util.io.DataExternalizer
+import org.jetbrains.kotlin.config.IncrementalCompilation
 import org.jetbrains.kotlin.incremental.js.IncrementalResultsConsumerImpl
 import org.jetbrains.kotlin.incremental.js.TranslationResultValue
 import org.jetbrains.kotlin.incremental.storage.BasicStringMap
 import org.jetbrains.kotlin.incremental.storage.DirtyClassesFqNameMap
 import org.jetbrains.kotlin.incremental.storage.SourceToFqNameMap
 import org.jetbrains.kotlin.incremental.storage.StringToLongMapExternalizer
+import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
+import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
+import org.jetbrains.kotlin.incremental.storage.version.loadDiff
+import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
 import org.jetbrains.kotlin.metadata.ProtoBuf
 import org.jetbrains.kotlin.metadata.deserialization.NameResolverImpl
 import org.jetbrains.kotlin.metadata.deserialization.getExtensionOrNull
@@ -61,6 +66,9 @@ open class IncrementalJsCache(cachesDir: File) : AbstractIncrementalCache<FqName
             cachesDir.mkdirs()
             headerFile.writeBytes(value)
         }
+
+    override var formatVersionDiff: CacheAttributesDiff<*> =
+        localCacheVersionManager(cachesDir, IncrementalCompilation.isEnabledForJs()).loadDiff()
 
     override fun markDirty(removedAndCompiledSources: Collection<File>) {
         super.markDirty(removedAndCompiledSources)

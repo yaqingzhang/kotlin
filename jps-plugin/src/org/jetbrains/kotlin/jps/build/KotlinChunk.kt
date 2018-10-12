@@ -76,10 +76,13 @@ class KotlinChunk internal constructor(val context: KotlinCompileContext, val ta
                 return true
             }
 
-            if (target.initialLocalCacheAttributesDiff.status == CacheStatus.INVALID) {
-                context.testingLogger?.invalidOrUnusedCache(this, null, target.initialLocalCacheAttributesDiff)
-                KotlinBuilder.LOG.info("$target cache is invalid ${target.initialLocalCacheAttributesDiff}, rebuilding $this")
-                return true
+            val cache = target.cache
+            if (cache != null) {
+                if (cache.formatVersionDiff.status == CacheStatus.INVALID) {
+                    context.testingLogger?.invalidOrUnusedCache(this, null, cache.formatVersionDiff)
+                    KotlinBuilder.LOG.info("$target cache is invalid ${cache.formatVersionDiff}, rebuilding $this")
+                    return true
+                }
             }
         }
 
@@ -92,16 +95,12 @@ class KotlinChunk internal constructor(val context: KotlinCompileContext, val ta
             representativeTarget.buildMetaInfoFileName
         )
 
-    fun saveVersions() {
+    fun commitCacheFormatVersion() {
         context.ensureLookupsCacheAttributesSaved()
 
-        targets.forEach {
-            it.initialLocalCacheAttributesDiff.saveExpectedIfNeeded()
-        }
-
         val serializedMetaInfo = representativeTarget.buildMetaInfoFactory.serializeToString(compilerArguments)
-
         targets.forEach {
+            it.cache?.commitFormatVersion()
             buildMetaInfoFile(it.jpsModuleBuildTarget).writeText(serializedMetaInfo)
         }
     }

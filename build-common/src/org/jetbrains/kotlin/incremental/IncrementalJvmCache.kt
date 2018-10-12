@@ -25,7 +25,9 @@ import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.build.GeneratedJvmClass
 import org.jetbrains.kotlin.config.IncrementalCompilation
 import org.jetbrains.kotlin.incremental.storage.*
-import org.jetbrains.kotlin.incremental.storage.version.clean
+import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
+import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
+import org.jetbrains.kotlin.incremental.storage.version.loadDiff
 import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
 import org.jetbrains.kotlin.inline.inlineFunctionsJvmNames
 import org.jetbrains.kotlin.load.kotlin.header.KotlinClassHeader
@@ -77,6 +79,9 @@ open class IncrementalJvmCache(
     private val outputDir by lazy(LazyThreadSafetyMode.NONE) { requireNotNull(targetOutputDir) { "Target is expected to have output directory" } }
 
     protected open fun debugLog(message: String) {}
+
+    override var formatVersionDiff: CacheAttributesDiff<*> =
+        localCacheVersionManager(targetDataRoot, IncrementalCompilation.isEnabledForJvm()).loadDiff()
 
     fun isTrackedFile(file: File) = sourceToClassesMap.contains(file)
 
@@ -262,11 +267,6 @@ open class IncrementalJvmCache(
 
     override fun getModuleMappingData(): ByteArray? {
         return protoMap[JvmClassName.byInternalName(MODULE_MAPPING_FILE_NAME)]?.bytes
-    }
-
-    override fun clean() {
-        super.clean()
-        localCacheVersionManager(targetDataRoot, IncrementalCompilation.isEnabledForJvm()).clean()
     }
 
     private inner class ProtoMap(storageFile: File) : BasicStringMap<ProtoMapValue>(storageFile, ProtoMapValueExternalizer) {

@@ -17,7 +17,12 @@
 package org.jetbrains.kotlin.incremental
 
 import com.intellij.util.io.EnumeratorStringDescriptor
+import org.jetbrains.kotlin.config.IncrementalCompilation
 import org.jetbrains.kotlin.incremental.storage.*
+import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
+import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
+import org.jetbrains.kotlin.incremental.storage.version.loadDiff
+import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
 import org.jetbrains.kotlin.metadata.ProtoBuf
 import org.jetbrains.kotlin.metadata.deserialization.NameResolver
 import org.jetbrains.kotlin.metadata.deserialization.TypeTable
@@ -31,6 +36,7 @@ import java.util.*
  * Incremental cache common for JVM and JS, ClassName type aware
  */
 interface IncrementalCacheCommon {
+    val formatVersionDiff: CacheAttributesDiff<*>
     val thisWithDependentCaches: Iterable<AbstractIncrementalCache<*>>
     fun classesFqNamesBySources(files: Iterable<File>): Collection<FqName>
     fun getSubtypesOf(className: FqName): Sequence<FqName>
@@ -40,10 +46,11 @@ interface IncrementalCacheCommon {
     fun clearComplementaryFilesMapping(dirtyFiles: Collection<File>): Collection<File>
     fun registerComplementaryFiles(expectActualTracker: ExpectActualTrackerImpl)
     fun dump(): String
+    fun commitFormatVersion()
 }
 
 /**
- * Incremental cache common for JVM and JS for specifit ClassName type
+ * Incremental cache common for JVM and JS for specific ClassName type
  */
 abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMapsOwner(workingDir), IncrementalCacheCommon {
     companion object {
@@ -78,6 +85,9 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
      * TODO: provide a better solution (maintain an index of expect/actual declarations akin to IncrementalPackagePartProvider)
      */
     private val complementaryFilesMap = registerMap(FilesMap(COMPLEMENTARY_FILES.storageFile))
+
+    abstract override var formatVersionDiff: CacheAttributesDiff<*>
+        protected set
 
     override fun classesFqNamesBySources(files: Iterable<File>): Collection<FqName> =
         files.flatMapTo(HashSet()) { sourceToClassesMap.getFqNames(it) }
@@ -188,5 +198,16 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
         for ((actual, expects) in actualToExpect) {
             complementaryFilesMap[actual] = expects
         }
+    }
+
+    override fun clean() {
+        super.clean()
+
+        formatVersionDiff = formatVersionDiff.copy(expected = null)
+        formatVersionDiff = formatVersionDiff.saveExpectedIfNeeded()
+    }
+
+    override fun commitFormatVersion() {
+        formatVersionDiff = formatVersionDiff.saveExpectedIfNeeded()
     }
 }

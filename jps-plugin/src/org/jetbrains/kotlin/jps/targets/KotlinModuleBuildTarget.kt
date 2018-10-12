@@ -27,11 +27,9 @@ import org.jetbrains.kotlin.incremental.ChangesCollector
 import org.jetbrains.kotlin.incremental.ExpectActualTrackerImpl
 import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
-import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
-import org.jetbrains.kotlin.incremental.storage.version.loadDiff
-import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
 import org.jetbrains.kotlin.jps.build.*
 import org.jetbrains.kotlin.jps.incremental.JpsIncrementalCache
+import org.jetbrains.kotlin.jps.incremental.getKotlinCache
 import org.jetbrains.kotlin.jps.model.productionOutputFilePath
 import org.jetbrains.kotlin.jps.model.testOutputFilePath
 import org.jetbrains.kotlin.modules.TargetId
@@ -66,13 +64,11 @@ abstract class KotlinModuleBuildTarget<BuildMetaInfoType : BuildMetaInfo> intern
 
     open fun isEnabled(chunkCompilerArguments: CommonCompilerArguments): Boolean = true
 
-    @Suppress("LeakingThis")
-    val localCacheVersionManager = localCacheVersionManager(
-        kotlinContext.dataPaths.getTargetDataRoot(jpsModuleBuildTarget),
-        isIncrementalCompilationEnabled
-    )
+    val dataRoot: File
+        get() = kotlinContext.dataPaths.getTargetDataRoot(jpsModuleBuildTarget)
 
-    val initialLocalCacheAttributesDiff: CacheAttributesDiff<*> = localCacheVersionManager.loadDiff()
+    val cache: JpsIncrementalCache?
+        get() = kotlinContext.dataManager.getKotlinCache(this)
 
     val module: JpsModule
         get() = jpsModuleBuildTarget.module
