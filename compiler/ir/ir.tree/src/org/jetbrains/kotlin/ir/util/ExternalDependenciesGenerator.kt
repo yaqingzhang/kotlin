@@ -65,7 +65,12 @@ class ExternalDependenciesGenerator(
                 stubGenerator.generateOrGetTypeParameterStub(it.descriptor)
             }
 
-            assert(symbolTable.unboundClasses.isEmpty())
+            if(!symbolTable.unboundClasses.isEmpty()) {
+                ArrayList(symbolTable.unboundClasses).forEach {
+                    println("unbound: ${it.descriptor}")
+                    error("that's all")
+                }
+            }
             assert(symbolTable.unboundConstructors.isEmpty())
             assert(symbolTable.unboundEnumEntries.isEmpty())
             assert(symbolTable.unboundFields.isEmpty())

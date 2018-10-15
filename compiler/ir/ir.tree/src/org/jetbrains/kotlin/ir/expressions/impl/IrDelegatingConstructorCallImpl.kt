@@ -30,16 +30,26 @@ class IrDelegatingConstructorCallImpl(
     type: IrType,
     override val symbol: IrConstructorSymbol,
     override val descriptor: ClassConstructorDescriptor,
-    typeArgumentsCount: Int
+    typeArgumentsCount: Int,
+    valueArgumentsCount: Int
 ) :
     IrCallWithIndexedArgumentsBase(
         startOffset,
         endOffset,
         type,
         typeArgumentsCount = typeArgumentsCount,
-        valueArgumentsCount = symbol.descriptor.valueParameters.size
+        valueArgumentsCount = valueArgumentsCount
     ),
     IrDelegatingConstructorCall {
+
+    constructor(
+        startOffset: Int,
+        endOffset: Int,
+        type: IrType,
+        symbol: IrConstructorSymbol,
+        descriptor: ClassConstructorDescriptor,
+        typeArgumentsCount: Int
+    ) : this(startOffset, endOffset, type, symbol, descriptor, typeArgumentsCount, symbol.descriptor.valueParameters.size)
 
     constructor(
         startOffset: Int,
