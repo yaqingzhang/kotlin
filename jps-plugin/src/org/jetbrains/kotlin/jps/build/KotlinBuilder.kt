@@ -428,7 +428,7 @@ class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR) {
         val generatedFiles = getGeneratedFiles(context, chunk, environment.outputItemsCollector)
 
         registerOutputItems(outputConsumer, generatedFiles)
-        kotlinChunk.commitCacheFormatVersion()
+        kotlinChunk.saveVersions()
 
         if (targets.any { kotlinContext.hasKotlinMarker[it] == null }) {
             fsOperations.markChunk(recursively = false, kotlinOnly = true, excludeFiles = kotlinDirtyFilesHolder.allDirtyFiles)

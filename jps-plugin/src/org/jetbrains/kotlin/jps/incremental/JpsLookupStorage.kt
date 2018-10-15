@@ -27,7 +27,10 @@ import java.io.IOException
 
 private object LookupStorageLock
 
-fun BuildDataManager.cleanLookupStorage(log: Logger) {
+/**
+ * Should be called only through KotlinCompileContext.clearLookupCache
+ */
+internal fun BuildDataManager.cleanLookupStorage(log: Logger) {
     synchronized(LookupStorageLock) {
         try {
             cleanTargetStorages(KotlinDataContainerTarget)
@@ -54,4 +57,13 @@ private object JpsLookupStorageProvider : StorageProvider<JpsLookupStorage>() {
     override fun createStorage(targetDataDir: File): JpsLookupStorage = JpsLookupStorage(targetDataDir)
 }
 
-private class JpsLookupStorage(targetDataDir: File) : StorageOwner, LookupStorage(targetDataDir)
+class JpsLookupStorage(targetDataDir: File) : StorageOwner, LookupStorage(targetDataDir) {
+    val attributesManager = CompositeLookupsCacheAttributesManager(targetDataDir, setOf())
+
+    var previousAttributes: CompositeLookupsCacheAttributes? = attributesManager.loadActual()
+    var requiredAttributes: CompositeLookupsCacheAttributes? = null
+
+    fun saveAttributes() {
+        if (previousAttributes != requiredAttributes)
+    }
+}

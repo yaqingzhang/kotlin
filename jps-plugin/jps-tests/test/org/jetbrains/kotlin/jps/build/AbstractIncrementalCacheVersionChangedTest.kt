@@ -31,6 +31,10 @@ abstract class AbstractIncrementalCacheVersionChangedTest : AbstractIncrementalJ
             targets.forEach { hasKotlin.clean(it) }
         }
 
+        if (modifiedFiles.any { it.endsWith("rebuild") }) {
+            targets.forEach { it. }
+        }
+
         if (modifiedFiles.none { it.endsWith("do-not-change-cache-versions") }) {
             val versions = targets.flatMap {
                 getVersionManagersToTest(kotlinCompileContext.targetsBinding[it]!!)
@@ -45,5 +49,5 @@ abstract class AbstractIncrementalCacheVersionChangedTest : AbstractIncrementalJ
     }
 
     protected open fun getVersionManagersToTest(target: KotlinModuleBuildTarget<*>): List<CacheVersionManager> =
-        listOf(target.localCacheVersionManager)
+        listOf(target.cache!!.formatVersionDiff.manager as CacheVersionManager)
 }

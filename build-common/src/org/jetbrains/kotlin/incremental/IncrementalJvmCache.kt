@@ -25,10 +25,7 @@ import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.build.GeneratedJvmClass
 import org.jetbrains.kotlin.config.IncrementalCompilation
 import org.jetbrains.kotlin.incremental.storage.*
-import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
-import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
-import org.jetbrains.kotlin.incremental.storage.version.loadDiff
-import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
+import org.jetbrains.kotlin.incremental.storage.version.*
 import org.jetbrains.kotlin.inline.inlineFunctionsJvmNames
 import org.jetbrains.kotlin.load.kotlin.header.KotlinClassHeader
 import org.jetbrains.kotlin.load.kotlin.incremental.components.IncrementalCache
@@ -80,7 +77,7 @@ open class IncrementalJvmCache(
 
     protected open fun debugLog(message: String) {}
 
-    override var formatVersionDiff: CacheAttributesDiff<*> =
+    override var formatVersionDiff: CacheAttributesDiff<CacheVersion> =
         localCacheVersionManager(targetDataRoot, IncrementalCompilation.isEnabledForJvm()).loadDiff()
 
     fun isTrackedFile(file: File) = sourceToClassesMap.contains(file)

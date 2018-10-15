@@ -61,7 +61,7 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
 
     val lookupsCacheAttributesManager: CompositeLookupsCacheAttributesManager = makeLookupsCacheAttributesManager()
 
-    val initialLookupsCacheStateDiff: CacheAttributesDiff<*> = loadLookupsCacheStateDiff()
+    var lookupsCacheStateDiff: CacheAttributesDiff<*> = loadLookupsCacheStateDiff()
 
     val shouldCheckCacheVersions = System.getProperty(KotlinBuilder.SKIP_CACHE_VERSION_CHECK_PROPERTY) == null
 
@@ -118,13 +118,13 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
     }
 
     fun checkCacheVersions() {
-        when (initialLookupsCacheStateDiff.status) {
+        when (lookupsCacheStateDiff.status) {
             CacheStatus.INVALID -> {
                 // global cache needs to be rebuilt
 
-                testingLogger?.invalidOrUnusedCache(null, null, initialLookupsCacheStateDiff)
+                testingLogger?.invalidOrUnusedCache(null, null, lookupsCacheStateDiff)
 
-                if (initialLookupsCacheStateDiff.actual != null) {
+                if (lookupsCacheStateDiff.actual != null) {
                     markAllKotlinForRebuild("Kotlin incremental cache settings or format was changed")
                     clearLookupCache()
                 } else {
@@ -133,8 +133,8 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
             }
             CacheStatus.VALID -> Unit
             CacheStatus.SHOULD_BE_CLEARED -> {
-                jpsContext.testingContext?.buildLogger?.invalidOrUnusedCache(null, null, initialLookupsCacheStateDiff)
-                KotlinBuilder.LOG.info("Removing global cache as it is not required anymore: $initialLookupsCacheStateDiff")
+                jpsContext.testingContext?.buildLogger?.invalidOrUnusedCache(null, null, lookupsCacheStateDiff)
+                KotlinBuilder.LOG.info("Removing global cache as it is not required anymore: $lookupsCacheStateDiff")
 
                 clearAllCaches()
             }
@@ -149,7 +149,7 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
      */
     fun ensureLookupsCacheAttributesSaved() {
         if (lookupAttributesSaved.compareAndSet(false, true)) {
-            initialLookupsCacheStateDiff.saveExpectedIfNeeded()
+            lookupsCacheStateDiff = lookupsCacheStateDiff.saveExpectedIfNeeded()
         }
     }
 
@@ -172,13 +172,11 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
 
         KotlinBuilder.LOG.info("Rebuilding all Kotlin: $reason")
 
-        val dataManager = jpsContext.projectDescriptor.dataManager
-
         targetsIndex.chunks.forEach {
             markChunkForRebuildBeforeBuild(it)
         }
 
-        dataManager.cleanLookupStorage(KotlinBuilder.LOG)
+        clearLookupCache()
     }
 
     private fun markChunkForRebuildBeforeBuild(chunk: KotlinChunk) {
@@ -207,7 +205,7 @@ class KotlinCompileContext(val jpsContext: CompileContext) {
     private fun clearLookupCache() {
         KotlinBuilder.LOG.info("Clearing lookup cache")
         dataManager.cleanLookupStorage(KotlinBuilder.LOG)
-        initialLookupsCacheStateDiff.saveExpectedIfNeeded()
+        lookupsCacheStateDiff = lookupsCacheStateDiff.copy(actual = null)
     }
 
     fun cleanupCaches() {

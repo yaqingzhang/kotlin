@@ -24,10 +24,7 @@ import org.jetbrains.kotlin.incremental.storage.BasicStringMap
 import org.jetbrains.kotlin.incremental.storage.DirtyClassesFqNameMap
 import org.jetbrains.kotlin.incremental.storage.SourceToFqNameMap
 import org.jetbrains.kotlin.incremental.storage.StringToLongMapExternalizer
-import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
-import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
-import org.jetbrains.kotlin.incremental.storage.version.loadDiff
-import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
+import org.jetbrains.kotlin.incremental.storage.version.*
 import org.jetbrains.kotlin.metadata.ProtoBuf
 import org.jetbrains.kotlin.metadata.deserialization.NameResolverImpl
 import org.jetbrains.kotlin.metadata.deserialization.getExtensionOrNull
@@ -67,7 +64,7 @@ open class IncrementalJsCache(cachesDir: File) : AbstractIncrementalCache<FqName
             headerFile.writeBytes(value)
         }
 
-    override var formatVersionDiff: CacheAttributesDiff<*> =
+    override var formatVersionDiff: CacheAttributesDiff<CacheVersion> =
         localCacheVersionManager(cachesDir, IncrementalCompilation.isEnabledForJs()).loadDiff()
 
     override fun markDirty(removedAndCompiledSources: Collection<File>) {

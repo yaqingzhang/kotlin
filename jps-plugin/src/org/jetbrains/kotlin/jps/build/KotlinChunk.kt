@@ -95,7 +95,7 @@ class KotlinChunk internal constructor(val context: KotlinCompileContext, val ta
             representativeTarget.buildMetaInfoFileName
         )
 
-    fun commitCacheFormatVersion() {
+    fun saveVersions() {
         context.ensureLookupsCacheAttributesSaved()
 
         val serializedMetaInfo = representativeTarget.buildMetaInfoFactory.serializeToString(compilerArguments)

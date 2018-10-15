@@ -17,12 +17,10 @@
 package org.jetbrains.kotlin.incremental
 
 import com.intellij.util.io.EnumeratorStringDescriptor
-import org.jetbrains.kotlin.config.IncrementalCompilation
 import org.jetbrains.kotlin.incremental.storage.*
 import org.jetbrains.kotlin.incremental.storage.version.CacheAttributesDiff
+import org.jetbrains.kotlin.incremental.storage.version.CacheVersion
 import org.jetbrains.kotlin.incremental.storage.version.CacheVersionManager
-import org.jetbrains.kotlin.incremental.storage.version.loadDiff
-import org.jetbrains.kotlin.incremental.storage.version.localCacheVersionManager
 import org.jetbrains.kotlin.metadata.ProtoBuf
 import org.jetbrains.kotlin.metadata.deserialization.NameResolver
 import org.jetbrains.kotlin.metadata.deserialization.TypeTable
@@ -36,7 +34,7 @@ import java.util.*
  * Incremental cache common for JVM and JS, ClassName type aware
  */
 interface IncrementalCacheCommon {
-    val formatVersionDiff: CacheAttributesDiff<*>
+    val formatVersionDiff: CacheAttributesDiff<CacheVersion>
     val thisWithDependentCaches: Iterable<AbstractIncrementalCache<*>>
     fun classesFqNamesBySources(files: Iterable<File>): Collection<FqName>
     fun getSubtypesOf(className: FqName): Sequence<FqName>
@@ -58,14 +56,17 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
         private val SUPERTYPES = "supertypes"
         private val CLASS_FQ_NAME_TO_SOURCE = "class-fq-name-to-source"
         private val COMPLEMENTARY_FILES = "complementary-files"
-        @JvmStatic protected val SOURCE_TO_CLASSES = "source-to-classes"
-        @JvmStatic protected val DIRTY_OUTPUT_CLASSES = "dirty-output-classes"
+        @JvmStatic
+        protected val SOURCE_TO_CLASSES = "source-to-classes"
+        @JvmStatic
+        protected val DIRTY_OUTPUT_CLASSES = "dirty-output-classes"
     }
 
     private val dependents = arrayListOf<AbstractIncrementalCache<ClassName>>()
     fun addDependentCache(cache: AbstractIncrementalCache<ClassName>) {
         dependents.add(cache)
     }
+
     override val thisWithDependentCaches: Iterable<AbstractIncrementalCache<ClassName>> by lazy {
         val result = arrayListOf(this)
         result.addAll(dependents)
@@ -86,17 +87,17 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
      */
     private val complementaryFilesMap = registerMap(FilesMap(COMPLEMENTARY_FILES.storageFile))
 
-    abstract override var formatVersionDiff: CacheAttributesDiff<*>
+    abstract override var formatVersionDiff: CacheAttributesDiff<CacheVersion>
         protected set
 
     override fun classesFqNamesBySources(files: Iterable<File>): Collection<FqName> =
         files.flatMapTo(HashSet()) { sourceToClassesMap.getFqNames(it) }
 
     override fun getSubtypesOf(className: FqName): Sequence<FqName> =
-            subtypesMap[className].asSequence()
+        subtypesMap[className].asSequence()
 
     override fun getSourceFileIfClass(fqName: FqName): File? =
-            classFqNameToSourceMap[fqName]
+        classFqNameToSourceMap[fqName]
 
     override fun markDirty(removedAndCompiledSources: Collection<File>) {
         for (sourceFile in removedAndCompiledSources) {
@@ -112,8 +113,8 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
     protected fun addToClassStorage(proto: ProtoBuf.Class, nameResolver: NameResolver, srcFile: File) {
         val supertypes = proto.supertypes(TypeTable(proto.typeTable))
         val parents = supertypes.map { nameResolver.getClassId(it.className).asSingleFqName() }
-                .filter { it.asString() != "kotlin.Any" }
-                .toSet()
+            .filter { it.asString() != "kotlin.Any" }
+            .toSet()
         val child = nameResolver.getClassId(proto.fqName).asSingleFqName()
 
         parents.forEach { subtypesMap.add(it, child) }
@@ -160,13 +161,14 @@ abstract class AbstractIncrementalCache<ClassName>(workingDir: File) : BasicMaps
         removedFqNames.forEach { classFqNameToSourceMap.remove(it) }
     }
 
-    protected class ClassFqNameToSourceMap(storageFile: File) : BasicStringMap<String>(storageFile, EnumeratorStringDescriptor(), PathStringDescriptor) {
+    protected class ClassFqNameToSourceMap(storageFile: File) :
+        BasicStringMap<String>(storageFile, EnumeratorStringDescriptor(), PathStringDescriptor) {
         operator fun set(fqName: FqName, sourceFile: File) {
             storage[fqName.asString()] = sourceFile.canonicalPath
         }
 
         operator fun get(fqName: FqName): File? =
-                storage[fqName.asString()]?.let(::File)
+            storage[fqName.asString()]?.let(::File)
 
         fun remove(fqName: FqName) {
             storage.remove(fqName.asString())
