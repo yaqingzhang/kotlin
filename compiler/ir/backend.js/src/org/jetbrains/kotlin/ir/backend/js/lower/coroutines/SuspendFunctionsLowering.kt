@@ -755,7 +755,7 @@ internal class SuspendFunctionsLowering(val context: JsIrBackendContext): FileLo
         }
 
         private fun addField(name: Name, type: IrType, isMutable: Boolean): IrField {
-            val descriptor = WrappedPropertyDescriptor()
+            val descriptor = WrappedFieldDescriptor()
             val symbol = IrFieldSymbolImpl(descriptor)
             return IrFieldImpl(
                 irFunction.startOffset,
