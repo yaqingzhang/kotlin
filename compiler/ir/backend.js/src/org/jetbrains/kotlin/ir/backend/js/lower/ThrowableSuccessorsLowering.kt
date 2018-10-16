@@ -182,8 +182,8 @@ class ThrowableSuccessorsLowering(context: JsIrBackendContext) : FileLoweringPas
             expression.transformChildren(this, data)
 
             val superField = when {
-                expression.symbol.owner.isSameOrFakeOverride(messageGetter) -> successor.message
-                expression.symbol.owner.isSameOrFakeOverride(causeGetter) -> successor.cause
+                expression.symbol.owner == messageGetter -> successor.message
+                expression.symbol.owner == causeGetter -> successor.cause
                 else -> error("Unknown accessor")
             }
 
@@ -277,9 +277,8 @@ class ThrowableSuccessorsLowering(context: JsIrBackendContext) : FileLoweringPas
 
     private fun isDirectChildOfThrowable(irClass: IrClass) = irClass.superTypes.any { it.isThrowable() }
     private fun ownPropertyAccessor(irClass: IrClass, irBase: IrFunction) =
-        irClass.declarations.filterIsInstance<IrProperty>()
-            .mapNotNull { it.getter }
-            .single { it.overriddenSymbols.any { s -> s.owner.descriptor == irBase.descriptor } }
+        irClass.declarations.filterIsInstance<IrProperty>().mapNotNull { it.getter }
+            .single { it.overriddenSymbols.any { s -> s.owner == irBase } }
 
     inner class ThrowablePropertiesTransformer : IrElementTransformerVoid() {
         override fun visitCall(expression: IrCall): IrExpression {
@@ -290,14 +289,14 @@ class ThrowableSuccessorsLowering(context: JsIrBackendContext) : FileLoweringPas
             expression.transformChildrenVoid(this)
 
             val owner = expression.symbol.owner
-            return when {
-                owner.isSameOrFakeOverride(messageGetter) -> {
+            return when (owner) {
+                messageGetter -> {
                     IrCallImpl(expression.startOffset, expression.endOffset, expression.type, propertyGetter).apply {
                         putValueArgument(0, expression.dispatchReceiver!!)
                         putValueArgument(1, messageName)
                     }
                 }
-                owner.isSameOrFakeOverride(causeGetter) -> {
+                causeGetter -> {
                     IrCallImpl(expression.startOffset, expression.endOffset, expression.type, propertyGetter).apply {
                         putValueArgument(0, expression.dispatchReceiver!!)
                         putValueArgument(1, causeName)
@@ -306,10 +305,5 @@ class ThrowableSuccessorsLowering(context: JsIrBackendContext) : FileLoweringPas
                 else -> expression
             }
         }
-    }
-
-    private fun IrFunction.isSameOrFakeOverride(base: IrFunction): Boolean {
-        // TODO: fix issue between LazyIr and multiple declarations per descriptor
-        return descriptor == base.descriptor
     }
 }
