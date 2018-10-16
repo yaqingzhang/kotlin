@@ -29,7 +29,7 @@ class ExternalDependenciesGenerator(
     val deserializer: IrDeserializer? = null
 ) {
     private val stubGenerator = DeclarationStubGenerator(
-        moduleDescriptor, symbolTable, IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, irBuiltIns.languageVersionSettings
+        moduleDescriptor, symbolTable, IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, irBuiltIns.languageVersionSettings, deserializer
     )
 
     fun generateUnboundSymbolsAsDependencies(irModule: IrModuleFragment, bindingContext: BindingContext? = null) {
@@ -41,27 +41,31 @@ class ExternalDependenciesGenerator(
         fun run() {
             stubGenerator.unboundSymbolGeneration = true
             ArrayList(symbolTable.unboundClasses).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
-                stubGenerator.generateClassStub(it.descriptor)
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                val cls = stubGenerator.generateClassStub(it.descriptor)
+                if (it.descriptor.name.toString() == "StringBuilder") {
+                    println("after: $it.descriptor@${it.descriptor.hashCode()} , ${cls.symbol}, ${cls.symbol.isBound}")
+
+                }
             }
             ArrayList(symbolTable.unboundConstructors).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateConstructorStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundEnumEntries).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateEnumEntryStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundFields).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generatePropertyStub(it.descriptor, bindingContext)
             }
             ArrayList(symbolTable.unboundSimpleFunctions).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateFunctionStub(it.descriptor)
             }
             ArrayList(symbolTable.unboundTypeParameters).forEach {
-                deserializer?.findDeserializedDeclaration(it.descriptor) ?:
+                //deserializer?.findDeserializedDeclaration(it.descriptor) ?:
                 stubGenerator.generateOrGetTypeParameterStub(it.descriptor)
             }
 

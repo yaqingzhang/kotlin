@@ -34,7 +34,8 @@ class DeclarationStubGenerator(
     moduleDescriptor: ModuleDescriptor,
     val symbolTable: SymbolTable,
     val origin: IrDeclarationOrigin,
-    val languageVersionSettings: LanguageVersionSettings
+    val languageVersionSettings: LanguageVersionSettings,
+    val deserializer: IrDeserializer? = null
 ) {
 
     private val lazyTable = symbolTable.lazyWrapper
@@ -145,7 +146,10 @@ class DeclarationStubGenerator(
             UNDEFINED_OFFSET, UNDEFINED_OFFSET,
             origin,
             descriptor.original
-        ) { IrLazyFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator) }
+        ) {
+            deserializer?.findDeserializedDeclaration(descriptor)  as IrSimpleFunction? ?:
+            IrLazyFunction(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator)
+        }
     }
 
     internal fun generateConstructorStub(descriptor: ClassConstructorDescriptor): IrConstructor {
@@ -156,7 +160,10 @@ class DeclarationStubGenerator(
 
         return symbolTable.declareConstructor(
             UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, descriptor.original
-        ) { IrLazyConstructor(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator) }
+        ) {
+            deserializer?.findDeserializedDeclaration(descriptor)  as IrConstructor? ?:
+            IrLazyConstructor(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator)
+        }
     }
 
     private fun KotlinType.toIrType() = typeTranslator.translateType(this)
@@ -180,12 +187,17 @@ class DeclarationStubGenerator(
 
     internal fun generateClassStub(descriptor: ClassDescriptor): IrClass {
         val referenceClass = symbolTable.referenceClass(descriptor)
+
         if (referenceClass.isBound) {
             return referenceClass.owner
         }
+
         return symbolTable.declareClass(
             UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, descriptor
-        ) { IrLazyClass(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator) }
+        ) {
+            deserializer?.findDeserializedDeclaration(descriptor)  as IrClass? ?:
+            IrLazyClass(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator)
+        }
     }
 
     internal fun generateEnumEntryStub(descriptor: ClassDescriptor): IrEnumEntry {
@@ -194,6 +206,7 @@ class DeclarationStubGenerator(
             return referenced.owner
         }
         return symbolTable.declareEnumEntry(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, descriptor) {
+            deserializer?.findDeserializedDeclaration(descriptor)  as IrEnumEntry? ?:
             IrLazyEnumEntryImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, it, this, typeTranslator)
         }
     }
@@ -204,6 +217,8 @@ class DeclarationStubGenerator(
             return referenced.owner
         }
         return symbolTable.declareGlobalTypeParameter(UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin, descriptor) {
+            deserializer?.findDeserializedDeclaration(descriptor)  as IrTypeParameter? ?:
+
             IrLazyTypeParameter(
                 UNDEFINED_OFFSET, UNDEFINED_OFFSET, origin,
                 it, this, typeTranslator

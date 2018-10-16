@@ -62,6 +62,12 @@ private class StringConcatenationTransformer(val lower: StringConcatenationLower
     private val nameToString = Name.identifier("toString")
     private val nameAppend = Name.identifier("append")
 
+    init {
+        val descriptor =    context.ir.symbols.stringBuilder.descriptor
+        val symbol =  context.ir.symbols.stringBuilder
+        println("generateClassStub: $descriptor@${descriptor.hashCode()} , $symbol, ${symbol.isBound}")
+
+    }
     private val stringBuilder = context.ir.symbols.stringBuilder.owner
 
     //TODO: calculate and pass string length to the constructor.

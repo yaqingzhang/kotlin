@@ -224,7 +224,7 @@ open class SymbolTable : ReferenceSymbolTable {
     ): IrClass {
         return classSymbolTable.declare(
             descriptor,
-            { IrClassSymbolImpl(descriptor) },
+            { println("new symbol"); IrClassSymbolImpl(descriptor) },
             classFactory
         )
     }
