@@ -215,7 +215,7 @@ class TypeOperatorLowering(val context: JsIrBackendContext) : FileLoweringPass {
                 assert(!toType.isMarkedNullable())
                 return when {
                     toType.isAny() -> generateIsObjectCheck(argument)
-                    toType.isNothing() -> litFalse
+                    toType.isNothing() -> JsIrBuilder.buildComposite(context.irBuiltIns.booleanType, listOf(argument, litFalse))
                     isTypeOfCheckingType(toType) -> generateTypeOfCheck(argument, toType)
 //                    toType.isChar() -> generateCheckForChar(argument)
                     toType.isNumber() -> generateNumberCheck(argument)
