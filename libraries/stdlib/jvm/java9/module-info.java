@@ -35,6 +35,7 @@ module kotlin.stdlib {
     opens kotlin to kotlin.reflect;
     opens kotlin.annotation to kotlin.reflect;
     opens kotlin.collections to kotlin.reflect;
+    opens kotlin.coroutines to kotlin.reflect;
     opens kotlin.internal to kotlin.reflect;
     opens kotlin.ranges to kotlin.reflect;
     opens kotlin.reflect to kotlin.reflect;
