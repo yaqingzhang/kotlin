@@ -12,7 +12,7 @@ public final annotation class A : kotlin.Annotation {
 }
 
 public final expect annotation class Anno : kotlin.Annotation {
-    public constructor Anno(/*0*/ b: kotlin.Byte = ..., /*1*/ c: kotlin.Char = ..., /*2*/ d: kotlin.Double = ..., /*3*/ f: kotlin.Float = ..., /*4*/ i: kotlin.Int = ..., /*5*/ j: kotlin.Long = ..., /*6*/ j2: kotlin.Long = ..., /*7*/ s: kotlin.Short = ..., /*8*/ z: kotlin.Boolean = ..., /*9*/ ba: kotlin.ByteArray = ..., /*10*/ ca: kotlin.CharArray = ..., /*11*/ da: kotlin.DoubleArray = ..., /*12*/ fa: kotlin.FloatArray = ..., /*13*/ ia: kotlin.IntArray = ..., /*14*/ ja: kotlin.LongArray = ..., /*15*/ sa: kotlin.ShortArray = ..., /*16*/ za: kotlin.BooleanArray = ..., /*17*/ str: kotlin.String = ..., /*18*/ e: E = ..., /*19*/ stra: kotlin.Array<kotlin.String> = ..., /*20*/ ea: kotlin.Array<E> = ...)
+    public constructor Anno(/*0*/ b: kotlin.Byte = ..., /*1*/ c: kotlin.Char = ..., /*2*/ d: kotlin.Double = ..., /*3*/ f: kotlin.Float = ..., /*4*/ i: kotlin.Int = ..., /*5*/ j: kotlin.Long = ..., /*6*/ j2: kotlin.Long = ..., /*7*/ s: kotlin.Short = ..., /*8*/ z: kotlin.Boolean = ..., /*9*/ ba: kotlin.ByteArray = ..., /*10*/ ca: kotlin.CharArray = ..., /*11*/ da: kotlin.DoubleArray = ..., /*12*/ fa: kotlin.FloatArray = ..., /*13*/ ia: kotlin.IntArray = ..., /*14*/ ja: kotlin.LongArray = ..., /*15*/ sa: kotlin.ShortArray = ..., /*16*/ za: kotlin.BooleanArray = ..., /*17*/ str: kotlin.String = ..., /*18*/ k: kotlin.reflect.KClass<*> = ..., /*19*/ e: E = ..., /*20*/ stra: kotlin.Array<kotlin.String> = ..., /*21*/ ka: kotlin.Array<kotlin.reflect.KClass<*>> = ..., /*22*/ ea: kotlin.Array<E> = ...)
     public expect final val b: kotlin.Byte
     public expect final val ba: kotlin.ByteArray
     public expect final val c: kotlin.Char
@@ -28,6 +28,8 @@ public final expect annotation class Anno : kotlin.Annotation {
     public expect final val j: kotlin.Long
     public expect final val j2: kotlin.Long
     public expect final val ja: kotlin.LongArray
+    public expect final val k: kotlin.reflect.KClass<*>
+    public expect final val ka: kotlin.Array<kotlin.reflect.KClass<*>>
     public expect final val s: kotlin.Short
     public expect final val sa: kotlin.ShortArray
     public expect final val str: kotlin.String
@@ -98,7 +100,7 @@ public final enum class E : kotlin.Enum<E> {
 }
 
 public final annotation class Jnno : kotlin.Annotation {
-    public constructor Jnno(/*0*/ b: kotlin.Byte = ..., /*1*/ c: kotlin.Char = ..., /*2*/ d: kotlin.Double = ..., /*3*/ f: kotlin.Float = ..., /*4*/ i: kotlin.Int = ..., /*5*/ j: kotlin.Long = ..., /*6*/ j2: kotlin.Long = ..., /*7*/ s: kotlin.Short = ..., /*8*/ z: kotlin.Boolean = ..., /*9*/ ba: kotlin.ByteArray = ..., /*10*/ ca: kotlin.CharArray = ..., /*11*/ da: kotlin.DoubleArray = ..., /*12*/ fa: kotlin.FloatArray = ..., /*13*/ ia: kotlin.IntArray = ..., /*14*/ ja: kotlin.LongArray = ..., /*15*/ sa: kotlin.ShortArray = ..., /*16*/ za: kotlin.BooleanArray = ..., /*17*/ str: kotlin.String = ..., /*18*/ e: E = ..., /*19*/ stra: kotlin.Array<kotlin.String> = ..., /*20*/ ea: kotlin.Array<E> = ...)
+    public constructor Jnno(/*0*/ b: kotlin.Byte = ..., /*1*/ c: kotlin.Char = ..., /*2*/ d: kotlin.Double = ..., /*3*/ f: kotlin.Float = ..., /*4*/ i: kotlin.Int = ..., /*5*/ j: kotlin.Long = ..., /*6*/ j2: kotlin.Long = ..., /*7*/ s: kotlin.Short = ..., /*8*/ z: kotlin.Boolean = ..., /*9*/ ba: kotlin.ByteArray = ..., /*10*/ ca: kotlin.CharArray = ..., /*11*/ da: kotlin.DoubleArray = ..., /*12*/ fa: kotlin.FloatArray = ..., /*13*/ ia: kotlin.IntArray = ..., /*14*/ ja: kotlin.LongArray = ..., /*15*/ sa: kotlin.ShortArray = ..., /*16*/ za: kotlin.BooleanArray = ..., /*17*/ str: kotlin.String = ..., /*18*/ k: kotlin.reflect.KClass<*> = ..., /*19*/ e: E = ..., /*20*/ stra: kotlin.Array<kotlin.String> = ..., /*21*/ ka: kotlin.Array<kotlin.reflect.KClass<*>> = ..., /*22*/ ea: kotlin.Array<E> = ...)
     public final val b: kotlin.Byte
     public final val ba: kotlin.ByteArray
     public final val c: kotlin.Char
@@ -114,6 +116,8 @@ public final annotation class Jnno : kotlin.Annotation {
     public final val j: kotlin.Long
     public final val j2: kotlin.Long
     public final val ja: kotlin.LongArray
+    public final val k: kotlin.reflect.KClass<*>
+    public final val ka: kotlin.Array<kotlin.reflect.KClass<*>>
     public final val s: kotlin.Short
     public final val sa: kotlin.ShortArray
     public final val str: kotlin.String

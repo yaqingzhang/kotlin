@@ -23,11 +23,11 @@ expect annotation class Anno(
     val sa: ShortArray = [(-43).toShort()],
     val za: BooleanArray = [false, true],
     val str: String = "fizz",
-    // TODO: val k: KClass<*> = Number::class,
+    val k: KClass<*> = Number::class,
     val e: E = E.E1,
     // TODO: val a: A = A("1"),
     val stra: Array<String> = ["bu", "zz"],
-    // TODO: val ka: Array<KClass<*>> = [Double::class, String::class, LongArray::class, Array<Array<Array<Int>>>::class],
+    val ka: Array<KClass<*>> = [Double::class, String::class, LongArray::class, Array<Array<Array<Int>>>::class],
     val ea: Array<E> = [E.E2, E.E3]
     // TODO: val aa: Array<A> = [A("2"), A("3")]
 )
@@ -65,11 +65,11 @@ public @interface Jnno {
     short[] sa() default {-43};
     boolean[] za() default {false, true};
     String str() default "fizz";
-    // TODO: Class<?> k() default Number.class;
+    Class<?> k() default Number.class;
     E e() default E.E1;
     // TODO: A a() default @A("1");
     String[] stra() default {"bu", "zz"};
-    // TODO: Class<?>[] ka() default {double.class, String.class, long[].class, Integer[][][].class};
+    Class<?>[] ka() default {double.class, String.class, long[].class, Integer[][][].class};
     E[] ea() default {E.E2, E.E3};
     // TODO: A[] aa() default {@A("2"), @A("3")};
 }
