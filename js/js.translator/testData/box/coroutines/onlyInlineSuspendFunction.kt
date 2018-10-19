@@ -1,3 +1,4 @@
+// IGNORE_BACKEND: JS_IR
 // EXPECTED_REACHABLE_NODES: 1280
 
 // MODULE: lib
@@ -6,7 +7,7 @@ import kotlin.coroutines.*
 
 var resume: () -> Unit = {}
 
-suspend fun dummy(msg: String): String {
+suspend fun suspendAndReturn(msg: String): String {
     return suspendCoroutine<String> { cont ->
         resume = {
             cont.resume(msg)
@@ -18,7 +19,7 @@ suspend fun dummy(msg: String): String {
 // FILE: libInline.kt
 
 suspend inline fun foo(): String {
-    return dummy("O") + dummy("K")
+    return suspendAndReturn("O") + suspendAndReturn("K")
 }
 
 // MODULE: main(libInline, lib)

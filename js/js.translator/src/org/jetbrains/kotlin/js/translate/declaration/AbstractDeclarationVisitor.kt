@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.js.backend.ast.JsExpression
 import org.jetbrains.kotlin.js.backend.ast.JsFunction
 import org.jetbrains.kotlin.js.backend.ast.JsName
 import org.jetbrains.kotlin.js.backend.ast.metadata.coroutineMetadata
+import org.jetbrains.kotlin.js.backend.ast.metadata.descriptor
 import org.jetbrains.kotlin.js.backend.ast.metadata.isInlineableCoroutineBody
 import org.jetbrains.kotlin.js.descriptorUtils.shouldBeExported
 import org.jetbrains.kotlin.js.translate.context.TranslationContext
@@ -32,6 +33,7 @@ import org.jetbrains.kotlin.js.translate.expression.translateAndAliasParameters
 import org.jetbrains.kotlin.js.translate.expression.translateFunction
 import org.jetbrains.kotlin.js.translate.expression.wrapWithInlineMetadata
 import org.jetbrains.kotlin.js.translate.general.TranslatorVisitor
+import org.jetbrains.kotlin.js.translate.general.rename
 import org.jetbrains.kotlin.js.translate.utils.*
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.descriptorUtil.isExtensionProperty
@@ -100,17 +102,28 @@ abstract class AbstractDeclarationVisitor : TranslatorVisitor<Unit>()  {
         else {
             null
         }
-        addFunction(descriptor, functionAndContext?.first, expression)
 
         if (descriptor.isSuspend && descriptor.isInline && descriptor.shouldBeExported(context.config) && functionAndContext != null) {
+            // Special case: function declaration should be split into two parts.
+            // First: state machine, will be exported and potentially used without inlining
+            // Second: Inliner-friendly declaration. Non-executable, used for inlining only.
             val innerContext = functionAndContext.second
-            val inlineFunction = functionAndContext.first.deepCopy() as JsFunction
+            val inlineFunction = functionAndContext.first as JsFunction
+
+            // Prepare the noinline function, which will be transformed into a state machine and might be used from JS.
+            // All imported JsName's should be replaced with global imports
+            val exportedFunction = innerContext.inlineFunctionContext!!.imports.values.associate { name ->
+                name to context.getInnerNameForDescriptor(name.descriptor!!)
+            }.rename(inlineFunction.deepCopy())
+            addFunction(descriptor, exportedFunction, expression)
+
+            // Yield the inline function declaration. Make sure it doesn't get transformed into a state machine.
             inlineFunction.name = null
             inlineFunction.coroutineMetadata = null
             inlineFunction.isInlineableCoroutineBody = true
-            val metadata = InlineMetadata.compose(inlineFunction, descriptor, innerContext)
-            val functionWithMetadata = metadata.functionWithMetadata(context, descriptor.source.getPsi())
-            context.addDeclarationStatement(functionWithMetadata.makeStmt())
+            context.addDeclarationStatement(innerContext.wrapWithInlineMetadata(context, inlineFunction, descriptor).makeStmt())
+        } else {
+            addFunction(descriptor, functionAndContext?.first, expression)
         }
     }
 

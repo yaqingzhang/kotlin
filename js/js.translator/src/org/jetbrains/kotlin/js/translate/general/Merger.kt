@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.js.backend.ast.metadata.coroutineMetadata
 import org.jetbrains.kotlin.js.backend.ast.metadata.exportedPackage
 import org.jetbrains.kotlin.js.backend.ast.metadata.exportedTag
 import org.jetbrains.kotlin.js.backend.ast.metadata.localAlias
+import org.jetbrains.kotlin.js.inline.util.transitiveStaticRef
 import org.jetbrains.kotlin.js.translate.context.Namer
 import org.jetbrains.kotlin.js.translate.utils.JsAstUtils
 import org.jetbrains.kotlin.js.translate.utils.createPrototypeStatements
@@ -62,8 +63,6 @@ class Merger(private val rootFunction: JsFunction, val internalModuleName: JsNam
 
     val importedModules: List<JsImportedModule>
         get() = importedModulesImpl
-
-    private fun Map<JsName, JsName>.rename(name: JsName): JsName = getOrElse(name) { name }
 
     // Builds mapping to map names from different fragments into single name when they denote single declaration
     private fun buildNameMap(fragment: JsProgramFragment): Map<JsName, JsName> {
@@ -111,54 +110,6 @@ class Merger(private val rootFunction: JsFunction, val internalModuleName: JsNam
             }
             exportBlock.statements += nameMap.rename(statement.deepCopy())
         }
-    }
-
-    private fun Map<JsName, JsName>.rename(fragment: JsProgramFragment) {
-        rename(fragment.declarationBlock)
-        rename(fragment.exportBlock)
-        rename(fragment.initializerBlock)
-
-        fragment.nameBindings.forEach { it.name = rename(it.name) }
-        fragment.imports.entries.forEach { it.setValue(rename(it.value)) }
-
-        fragment.importedModules.forEach { import ->
-            import.internalName = rename(import.internalName)
-            import.plainReference?.let { rename(it) }
-        }
-
-        val classes = fragment.classes.values.map { cls ->
-            JsClassModel(rename(cls.name), cls.superName?.let { rename(it) }).apply {
-                postDeclarationBlock.statements += rename(cls.postDeclarationBlock).statements
-                cls.interfaces.mapTo(interfaces) { rename(it) }
-            }
-        }
-        fragment.classes.clear()
-        fragment.classes += classes.map { it.name to it }
-
-        fragment.inlineModuleMap.forEach { (_, value) -> rename(value) }
-    }
-
-    private fun <T: JsNode> Map<JsName, JsName>.rename(rootNode: T): T {
-        rootNode.accept(object : RecursiveJsVisitor() {
-            override fun visitElement(node: JsNode) {
-                super.visitElement(node)
-                if (node is HasName) {
-                    val oldName = node.name
-                    node.name = oldName?.let { rename(it) }
-                    node.name?.localAlias = oldName?.localAlias?.let { rename(it) }
-                }
-                if (node is JsFunction) {
-                    val coroutineMetadata = node.coroutineMetadata
-                    if (coroutineMetadata != null) {
-                        node.coroutineMetadata = coroutineMetadata.copy(
-                                baseClassRef = rename(coroutineMetadata.baseClassRef),
-                                suspendObjectRef = rename(coroutineMetadata.suspendObjectRef)
-                        )
-                    }
-                }
-            }
-        })
-        return rootNode
     }
 
     // Adds different boilerplate code (like imports, class prototypes, etc) to resulting program.
@@ -219,4 +170,54 @@ class Merger(private val rootFunction: JsFunction, val internalModuleName: JsNam
         cls.interfaces.forEach { addClassPostDeclarations(it, visited, statements) }
         statements += cls.postDeclarationBlock.statements
     }
+}
+
+private fun Map<JsName, JsName>.rename(name: JsName): JsName = getOrElse(name) { name }
+
+private fun Map<JsName, JsName>.rename(fragment: JsProgramFragment) {
+    rename(fragment.declarationBlock)
+    rename(fragment.exportBlock)
+    rename(fragment.initializerBlock)
+
+    fragment.nameBindings.forEach { it.name = rename(it.name) }
+    fragment.imports.entries.forEach { it.setValue(rename(it.value)) }
+
+    fragment.importedModules.forEach { import ->
+        import.internalName = rename(import.internalName)
+        import.plainReference?.let { rename(it) }
+    }
+
+    val classes = fragment.classes.values.map { cls ->
+        JsClassModel(rename(cls.name), cls.superName?.let { rename(it) }).apply {
+            postDeclarationBlock.statements += rename(cls.postDeclarationBlock).statements
+            cls.interfaces.mapTo(interfaces) { rename(it) }
+        }
+    }
+    fragment.classes.clear()
+    fragment.classes += classes.map { it.name to it }
+
+    fragment.inlineModuleMap.forEach { (_, value) -> rename(value) }
+}
+
+internal fun <T: JsNode> Map<JsName, JsName>.rename(rootNode: T): T {
+    rootNode.accept(object : RecursiveJsVisitor() {
+        override fun visitElement(node: JsNode) {
+            super.visitElement(node)
+            if (node is HasName) {
+                val oldName = node.name
+                node.name = oldName?.let { rename(it) }
+                node.name?.localAlias = oldName?.localAlias?.let { rename(it) }
+            }
+            if (node is JsFunction) {
+                val coroutineMetadata = node.coroutineMetadata
+                if (coroutineMetadata != null) {
+                    node.coroutineMetadata = coroutineMetadata.copy(
+                        baseClassRef = rename(coroutineMetadata.baseClassRef),
+                        suspendObjectRef = rename(coroutineMetadata.suspendObjectRef)
+                    )
+                }
+            }
+        }
+    })
+    return rootNode
 }
