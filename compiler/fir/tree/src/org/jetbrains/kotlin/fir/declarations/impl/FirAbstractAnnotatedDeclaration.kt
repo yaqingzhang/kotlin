@@ -10,12 +10,10 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.expressions.FirAnnotationCall
 import org.jetbrains.kotlin.fir.expressions.FirAnnotationContainer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 
 abstract class FirAbstractAnnotatedDeclaration(
     final override val session: FirSession,
-    final override val psi: PsiElement?,
-    final override val declarationKind: IrDeclarationKind
+    final override val psi: PsiElement?
 ) : FirAnnotationContainer, FirDeclaration {
     final override val annotations = mutableListOf<FirAnnotationCall>()
 }

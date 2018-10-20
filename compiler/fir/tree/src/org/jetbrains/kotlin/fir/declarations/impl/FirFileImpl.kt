@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.fir.declarations.FirFile
 import org.jetbrains.kotlin.fir.declarations.FirImport
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.FqName
 
 class FirFileImpl(
@@ -21,7 +20,7 @@ class FirFileImpl(
     psi: PsiElement?,
     override val name: String,
     override val packageFqName: FqName
-) : FirAbstractAnnotatedDeclaration(session, psi, IrDeclarationKind.FILE), FirFile {
+) : FirAbstractAnnotatedDeclaration(session, psi), FirFile {
     override val imports = mutableListOf<FirImport>()
 
     override val declarations = mutableListOf<FirDeclaration>()

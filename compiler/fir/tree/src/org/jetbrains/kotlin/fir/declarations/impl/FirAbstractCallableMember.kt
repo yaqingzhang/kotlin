@@ -16,13 +16,11 @@ import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 
 abstract class FirAbstractCallableMember(
     session: FirSession,
     psi: PsiElement?,
-    declarationKind: IrDeclarationKind,
     name: Name,
     visibility: Visibility,
     modality: Modality?,
@@ -30,7 +28,7 @@ abstract class FirAbstractCallableMember(
     final override val isOverride: Boolean,
     final override var receiverType: FirType?,
     final override var returnType: FirType
-) : FirAbstractMemberDeclaration(session, psi, declarationKind, name, visibility, modality, platformStatus), FirCallableMember {
+) : FirAbstractMemberDeclaration(session, psi, name, visibility, modality, platformStatus), FirCallableMember {
 
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {
         receiverType = receiverType?.transformSingle(transformer, data)

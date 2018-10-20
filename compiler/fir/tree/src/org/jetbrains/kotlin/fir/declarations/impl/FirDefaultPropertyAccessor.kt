@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.types.impl.FirUnitType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 
 abstract class FirDefaultPropertyAccessor(
     final override val session: FirSession,
@@ -30,9 +29,6 @@ abstract class FirDefaultPropertyAccessor(
 
     final override val body: FirBody? =
         null
-
-    final override val declarationKind =
-        IrDeclarationKind.PROPERTY_ACCESSOR
 
     final override val annotations: List<FirAnnotationCall>
         get() = emptyList()

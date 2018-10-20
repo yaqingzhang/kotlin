@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.Variance
 
@@ -24,7 +23,7 @@ class FirTypeParameterImpl(
     name: Name,
     override val variance: Variance,
     override val isReified: Boolean
-) : FirAbstractNamedAnnotatedDeclaration(session, psi, IrDeclarationKind.TYPE_PARAMETER, name), FirTypeParameter {
+) : FirAbstractNamedAnnotatedDeclaration(session, psi, name), FirTypeParameter {
     init {
         symbol.bind(this)
     }

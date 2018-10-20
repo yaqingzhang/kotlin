@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.fir.symbols.ConeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.visitors.FirVisitorVoid
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.utils.Printer
@@ -191,10 +190,13 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
     }
 
     override fun visitDeclaration(declaration: FirDeclaration) {
-        if (declaration is FirClass && declaration.declarationKind == IrDeclarationKind.CLASS) {
-            print(declaration.classKind.name.toLowerCase().replace("_", " "))
-        } else {
-            print(declaration.declarationKind.name.toLowerCase().replace("_", " "))
+        when (declaration) {
+            is FirClass -> print(declaration.classKind.name.toLowerCase().replace("_", " "))
+            is FirTypeAlias -> print("typealias")
+            is FirFunction -> print("function")
+            is FirProperty -> print("property")
+            // TODO
+            else -> print("unknown")
         }
     }
 

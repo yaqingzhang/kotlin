@@ -16,18 +16,16 @@ import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 
 abstract class FirAbstractMemberDeclaration(
     session: FirSession,
     psi: PsiElement?,
-    declarationKind: IrDeclarationKind,
     name: Name,
     final override val visibility: Visibility,
     override val modality: Modality?,
     override val platformStatus: FirMemberPlatformStatus
-) : FirAbstractNamedAnnotatedDeclaration(session, psi, declarationKind, name), FirMemberDeclaration {
+) : FirAbstractNamedAnnotatedDeclaration(session, psi, name), FirMemberDeclaration {
     final override val typeParameters = mutableListOf<FirTypeParameter>()
 
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {

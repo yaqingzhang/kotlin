@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.fir.expressions.FirBody
 import org.jetbrains.kotlin.fir.expressions.FirDelegatedConstructorCall
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 
 open class FirConstructorImpl(
     session: FirSession,
@@ -22,7 +21,7 @@ open class FirConstructorImpl(
     final override val visibility: Visibility,
     final override var delegatedConstructor: FirDelegatedConstructorCall?,
     body: FirBody?
-) : FirAbstractFunction(session, psi, IrDeclarationKind.CONSTRUCTOR, body), FirConstructor {
+) : FirAbstractFunction(session, psi, body), FirConstructor {
 
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {
         delegatedConstructor = delegatedConstructor?.transformSingle(transformer, data)

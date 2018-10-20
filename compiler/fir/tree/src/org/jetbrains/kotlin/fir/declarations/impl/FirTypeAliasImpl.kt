@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind.TYPEALIAS
 import org.jetbrains.kotlin.name.Name
 
 class FirTypeAliasImpl(
@@ -28,7 +27,7 @@ class FirTypeAliasImpl(
     visibility: Visibility,
     platformStatus: FirMemberPlatformStatus,
     override var expandedType: FirType
-) : FirAbstractMemberDeclaration(session, psi, TYPEALIAS, name, visibility, Modality.FINAL, platformStatus), FirTypeAlias {
+) : FirAbstractMemberDeclaration(session, psi, name, visibility, Modality.FINAL, platformStatus), FirTypeAlias {
 
     init {
         symbol.bind(this)

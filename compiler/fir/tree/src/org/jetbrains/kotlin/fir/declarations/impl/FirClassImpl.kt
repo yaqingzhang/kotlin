@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 
 open class FirClassImpl(
@@ -33,7 +32,7 @@ open class FirClassImpl(
     final override val isCompanion: Boolean,
     final override val isData: Boolean,
     override val isInline: Boolean
-) : FirAbstractMemberDeclaration(session, psi, IrDeclarationKind.CLASS, name, visibility, modality, platformStatus), FirClass {
+) : FirAbstractMemberDeclaration(session, psi, name, visibility, modality, platformStatus), FirClass {
 
     init {
         symbol.bind(this)

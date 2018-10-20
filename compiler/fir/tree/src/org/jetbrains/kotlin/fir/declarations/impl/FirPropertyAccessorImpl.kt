@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.fir.expressions.FirBody
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 
 class FirPropertyAccessorImpl(
     session: FirSession,
@@ -23,7 +22,7 @@ class FirPropertyAccessorImpl(
     override val visibility: Visibility,
     override var returnType: FirType,
     body: FirBody?
-) : FirAbstractFunction(session, psi, IrDeclarationKind.PROPERTY_ACCESSOR, body), FirPropertyAccessor {
+) : FirAbstractFunction(session, psi, body), FirPropertyAccessor {
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {
         returnType = returnType.transformSingle(transformer, data)
 

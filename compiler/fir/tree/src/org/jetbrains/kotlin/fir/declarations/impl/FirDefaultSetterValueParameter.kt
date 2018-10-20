@@ -13,14 +13,13 @@ import org.jetbrains.kotlin.fir.expressions.FirExpression
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 
 class FirDefaultSetterValueParameter(
     session: FirSession,
     psi: PsiElement?,
     override var returnType: FirType
-) : FirAbstractNamedAnnotatedDeclaration(session, psi, IrDeclarationKind.VALUE_PARAMETER, name), FirValueParameter {
+) : FirAbstractNamedAnnotatedDeclaration(session, psi, name), FirValueParameter {
     override val isCrossinline = false
 
     override val isNoinline = false

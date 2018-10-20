@@ -17,13 +17,11 @@ import org.jetbrains.kotlin.fir.expressions.FirBody
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.name.Name
 
 class FirMemberFunctionImpl(
     session: FirSession,
     psi: PsiElement?,
-    declarationKind: IrDeclarationKind,
     name: Name,
     visibility: Visibility,
     modality: Modality?,
@@ -38,7 +36,7 @@ class FirMemberFunctionImpl(
     returnType: FirType,
     override val body: FirBody?
 ) : FirAbstractCallableMember(
-    session, psi, declarationKind, name, visibility, modality,
+    session, psi, name, visibility, modality,
     platformStatus, isOverride, receiverType, returnType
 ), FirNamedFunction {
     override val valueParameters = mutableListOf<FirValueParameter>()

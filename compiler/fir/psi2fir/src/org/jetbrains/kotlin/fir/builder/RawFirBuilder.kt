@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.types.FirTypeProjection
 import org.jetbrains.kotlin.fir.types.impl.*
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -360,7 +359,6 @@ class RawFirBuilder(val session: FirSession) {
             val firFunction = FirMemberFunctionImpl(
                 session,
                 function,
-                IrDeclarationKind.FUNCTION,
                 function.nameAsSafeName,
                 function.visibility,
                 function.modality,

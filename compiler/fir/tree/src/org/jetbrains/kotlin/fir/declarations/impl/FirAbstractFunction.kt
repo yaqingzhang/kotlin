@@ -13,14 +13,12 @@ import org.jetbrains.kotlin.fir.declarations.FirValueParameter
 import org.jetbrains.kotlin.fir.expressions.FirBody
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind
 
 abstract class FirAbstractFunction(
     session: FirSession,
     psi: PsiElement?,
-    declarationKind: IrDeclarationKind,
     final override val body: FirBody?
-) : FirAbstractAnnotatedDeclaration(session, psi, declarationKind), FirFunction {
+) : FirAbstractAnnotatedDeclaration(session, psi), FirFunction {
     final override val valueParameters = mutableListOf<FirValueParameter>()
 
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {

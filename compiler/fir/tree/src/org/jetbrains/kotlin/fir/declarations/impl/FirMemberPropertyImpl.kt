@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.fir.expressions.FirExpression
 import org.jetbrains.kotlin.fir.transformSingle
 import org.jetbrains.kotlin.fir.types.FirType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationKind.PROPERTY
 import org.jetbrains.kotlin.name.Name
 
 class FirMemberPropertyImpl(
@@ -37,7 +36,7 @@ class FirMemberPropertyImpl(
     override var getter: FirPropertyAccessor,
     override var setter: FirPropertyAccessor,
     override val delegate: FirExpression?
-) : FirAbstractCallableMember(session, psi, PROPERTY, name, visibility, modality, platformStatus, isOverride, receiverType, returnType),
+) : FirAbstractCallableMember(session, psi, name, visibility, modality, platformStatus, isOverride, receiverType, returnType),
     FirProperty {
     override fun <D> transformChildren(transformer: FirTransformer<D>, data: D): FirElement {
         getter = getter.transformSingle(transformer, data)
