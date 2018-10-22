@@ -20,20 +20,17 @@ import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.isOverridable
-import org.jetbrains.kotlin.js.backend.ast.JsExpression
-import org.jetbrains.kotlin.js.backend.ast.JsFunction
-import org.jetbrains.kotlin.js.backend.ast.JsName
+import org.jetbrains.kotlin.js.backend.ast.*
 import org.jetbrains.kotlin.js.backend.ast.metadata.coroutineMetadata
-import org.jetbrains.kotlin.js.backend.ast.metadata.descriptor
 import org.jetbrains.kotlin.js.backend.ast.metadata.isInlineableCoroutineBody
 import org.jetbrains.kotlin.js.descriptorUtils.shouldBeExported
+import org.jetbrains.kotlin.js.inline.util.FunctionWithWrapper
 import org.jetbrains.kotlin.js.translate.context.TranslationContext
 import org.jetbrains.kotlin.js.translate.expression.InlineMetadata
 import org.jetbrains.kotlin.js.translate.expression.translateAndAliasParameters
 import org.jetbrains.kotlin.js.translate.expression.translateFunction
 import org.jetbrains.kotlin.js.translate.expression.wrapWithInlineMetadata
 import org.jetbrains.kotlin.js.translate.general.TranslatorVisitor
-import org.jetbrains.kotlin.js.translate.general.rename
 import org.jetbrains.kotlin.js.translate.utils.*
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.descriptorUtil.isExtensionProperty
@@ -109,13 +106,29 @@ abstract class AbstractDeclarationVisitor : TranslatorVisitor<Unit>()  {
             // Second: Inliner-friendly declaration. Non-executable, used for inlining only.
             val innerContext = functionAndContext.second
             val inlineFunction = functionAndContext.first as JsFunction
+            val exportedFunction = inlineFunction.deepCopy()
 
             // Prepare the noinline function, which will be transformed into a state machine and might be used from JS.
             // All imported JsName's should be replaced with global imports
-            val exportedFunction = innerContext.inlineFunctionContext!!.imports.values.associate { name ->
-                name to context.getInnerNameForDescriptor(name.descriptor!!)
-            }.rename(inlineFunction.deepCopy())
-            addFunction(descriptor, exportedFunction, expression)
+            val block =
+                innerContext.inlineFunctionContext!!.let {
+                    JsBlock(
+                        it.importBlock.deepCopy().statements +
+                                it.prototypeBlock.deepCopy().statements +
+                                it.declarationsBlock.deepCopy().statements +
+                                JsReturn(exportedFunction)
+                    )
+                }
+            addFunction(descriptor, InlineMetadata.wrapFunction(context, FunctionWithWrapper(exportedFunction, block), descriptor.source.getPsi()), expression)
+
+//            val exportedFunction = innerContext.inlineFunctionContext!!.imports.entries.associate { (tag, name) ->
+//                name.descriptor.let {
+//                    name to context.getInnerNameForDescriptor(it)
+//                } ?: {
+//                    context.getInnerNameForDescriptor()
+//                }
+//            }.rename(inlineFunction.deepCopy())
+//            addFunction(descriptor, exportedFunction, expression)
 
             // Yield the inline function declaration. Make sure it doesn't get transformed into a state machine.
             inlineFunction.name = null

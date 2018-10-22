@@ -15,11 +15,29 @@ suspend fun suspendAndReturn(msg: String): String {
     }
 }
 
+suspend fun <T> runSus(block: suspend () -> T): T = block()
+
+abstract class A {
+    fun f() = o()
+
+    abstract fun o(): String
+}
+
 // MODULE: libInline(lib)
 // FILE: libInline.kt
 
 suspend inline fun foo(): String {
-    return suspendAndReturn("O") + suspendAndReturn("K")
+    val a = object : A() {
+        override fun o(): String = "O"
+    }
+    val k = "K"
+
+    return suspendAndReturn(a.f()) + runSus {
+        val b = object : A() {
+            override fun o(): String = k
+        }
+        runSus { suspendAndReturn(b.f()) }
+    }
 }
 
 // MODULE: main(libInline, lib)
