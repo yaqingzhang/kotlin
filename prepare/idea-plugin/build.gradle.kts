@@ -37,7 +37,7 @@ val projectsToShadow by extra(listOf(
         ":idea:ide-common",
         ":idea",
         ":idea:idea-native",
-        ":idea:fir-view",
+        //":idea:fir-view",
         ":idea:idea-core",
         ":idea:idea-gradle",
         ":idea:idea-gradle-native",
