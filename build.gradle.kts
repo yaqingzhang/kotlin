@@ -162,7 +162,6 @@ extra["compilerModules"] = arrayOf(
         ":compiler:resolution",
         ":compiler:serialization",
         ":compiler:psi",
-        ":compiler:fir",
         ":compiler:fir:tree",
         ":compiler:fir:psi2fir",
         ":compiler:frontend",
