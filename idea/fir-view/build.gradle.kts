@@ -3,16 +3,19 @@
  * that can be found in the license/LICENSE.txt file.
  */
 
+import org.gradle.jvm.tasks.Jar
 
-apply { plugin("kotlin") }
-apply { plugin("jps-compatible") }
+plugins {
+    kotlin("jvm")
+    id("jps-compatible")
+}
 
 dependencies {
-    val compile by configurations
-    val compileOnly by configurations
+//    val compile by configurations
+//    val compileOnly by configurations
 
 
-    compile(projectDist(":kotlin-stdlib"))
+    compile(project(":kotlin-stdlib-jre8"))
     compileOnly(project(":kotlin-reflect-api"))
     compile(project(":core:descriptors"))
     compile(project(":compiler:fir:tree"))
@@ -20,8 +23,8 @@ dependencies {
 
     compile(project(":idea:idea-core"))
 
-    compileOnly(intellijCoreDep()) { includeJars("intellij-core") }
-    compileOnly(intellijDep()) { includeJars("util", "openapi", "idea", "asm-all", "jdom", "annotations", "trove4j", "guava", rootProject = rootProject) }
+    compileOnly(intellijCoreDep()) { includeJars("intellij-core", "annotations") }
+    compileOnly(intellijDep()) { includeJars("util", "openapi", "idea", "asm-all", "jdom", "trove4j", "guava", rootProject = rootProject) }
     compileOnly(intellijPluginDep("gradle")) { includeJars("gradle-tooling-api", "gradle", rootProject = rootProject) }
 }
 
