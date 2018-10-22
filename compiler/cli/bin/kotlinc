@@ -64,6 +64,12 @@ if [ -n "$KOTLIN_RUNNER" ];
 then
     java_args=("${java_args[@]}" "-Dkotlin.home=${KOTLIN_HOME}")
     kotlin_app=("${KOTLIN_HOME}/lib/kotlin-runner.jar" "org.jetbrains.kotlin.runner.Main")
+elif [ -n "$KOTLIN_TOOL" ];
+then
+    [ -n "$KOTLIN_COMPILER" ] || KOTLIN_COMPILER=org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+    java_args=("${java_args[@]}" "-noverify")
+
+    kotlin_app=("${KOTLIN_HOME}/lib/kotlin-preloader.jar" "org.jetbrains.kotlin.preloading.Preloader" "-cp" "${KOTLIN_HOME}/lib/kotlin-compiler.jar:${KOTLIN_HOME}/lib/${KOTLIN_TOOL}" $KOTLIN_COMPILER)
 else
     [ -n "$KOTLIN_COMPILER" ] || KOTLIN_COMPILER=org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
     java_args=("${java_args[@]}" "-noverify")
