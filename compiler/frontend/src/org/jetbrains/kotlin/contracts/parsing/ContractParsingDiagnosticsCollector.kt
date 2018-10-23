@@ -19,17 +19,19 @@ interface ContractParsingDiagnosticsCollector {
     fun unsupportedFeature(languageVersionSettings: LanguageVersionSettings)
     fun contractNotAllowed(message: String)
     fun badDescription(message: String, reportOn: KtElement)
+    fun addFallbackErrorIfNecessary()
 
-    fun flushDiagnostics(parsingFailed: Boolean)
+    fun flushDiagnostics()
     fun hasErrors(): Boolean
 
 
     object EMPTY : ContractParsingDiagnosticsCollector {
         override fun contractNotAllowed(message: String) {}
         override fun badDescription(message: String, reportOn: KtElement) {}
-        override fun unsupportedFeature(languageVersionSettings: LanguageVersionSettings) { }
+        override fun unsupportedFeature(languageVersionSettings: LanguageVersionSettings) {}
+        override fun addFallbackErrorIfNecessary() { }
 
-        override fun flushDiagnostics(parsingFailed: Boolean) {}
+        override fun flushDiagnostics() {}
 
         override fun hasErrors(): Boolean = false
     }
@@ -54,11 +56,12 @@ class TraceBasedCollector(private val bindingTrace: BindingTrace, mainCall: KtEx
         )
     }
 
-    override fun flushDiagnostics(parsingFailed: Boolean) {
-        if (parsingFailed && diagnostics.isEmpty()) {
+    override fun addFallbackErrorIfNecessary() {
+        if (diagnostics.isEmpty())
             diagnostics += Errors.ERROR_IN_CONTRACT_DESCRIPTION.on(mainCallReportTarget, "Error in contract description")
-        }
+    }
 
+    override fun flushDiagnostics() {
         diagnostics.forEach { bindingTrace.report(it) }
     }
 
