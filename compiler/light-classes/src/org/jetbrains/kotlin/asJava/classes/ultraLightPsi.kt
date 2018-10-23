@@ -126,7 +126,7 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
                     generateUniqueName(companion.name.orEmpty()),
                     this,
                     support,
-                    setOf(PsiModifier.STATIC, PsiModifier.FINAL, simpleVisibility(companion))
+                    setOf(PsiModifier.STATIC, PsiModifier.FINAL, PsiModifier.PUBLIC)
                 )
             )
 
@@ -393,10 +393,13 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
 
         fun needsAccessor(accessor: KtPropertyAccessor?): Boolean {
             if (!onlyJvmStatic || isJvmStatic(declaration) || accessor != null && isJvmStatic(accessor)) {
-                if (isInterface && accessor?.hasModifier(PRIVATE_KEYWORD) == true) {
+                if (declaration is KtProperty && declaration.hasDelegate()) {
+                    return true
+                }
+                if (accessor?.hasModifier(PRIVATE_KEYWORD) == true) {
                     return false
                 }
-                if (!isPrivate || accessor?.hasBody() == true || declaration is KtProperty && declaration.hasDelegate()) {
+                if (!isPrivate || accessor?.hasBody() == true) {
                     return true
                 }
             }
