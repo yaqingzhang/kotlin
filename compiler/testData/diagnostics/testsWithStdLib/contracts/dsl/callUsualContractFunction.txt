@@ -1,0 +1,12 @@
+package
+
+public object F {
+    private constructor F()
+    public final fun contract(): kotlin.Unit
+    public final fun contract(/*0*/ block: () -> kotlin.Unit): kotlin.Unit
+    public final fun contract(/*0*/ i: kotlin.Int): kotlin.Unit
+    public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+    public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+    public final fun test(): kotlin.Unit
+    public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+}

@@ -39,6 +39,9 @@ class ContractParsingServices(val languageVersionSettings: LanguageVersionSettin
 
         val collector = TraceBasedCollector(trace, expression)
         val callContext = ContractCallContext(expression, isFirstStatement, scope, trace.bindingContext)
+
+        if (!callContext.isContractDescriptionCallPreciseCheck()) return
+
         val parsedContract = doCheckContract(collector, callContext)
 
         collector.flushDiagnostics(parsingFailed = parsedContract == null)
@@ -51,12 +54,10 @@ class ContractParsingServices(val languageVersionSettings: LanguageVersionSettin
             contractProviderIfAny?.setContractDescription(parsedContract)
     }
 
+    private fun ContractCallContext.isContractDescriptionCallPreciseCheck(): Boolean =
+        contractCallExpression.isContractDescriptionCallPreciseCheck(bindingContext)
+
     private fun doCheckContract(collector: ContractParsingDiagnosticsCollector, callContext: ContractCallContext): ContractDescription? {
-        val expression = callContext.contractCallExpression
-        val bindingContext = callContext.bindingContext
-
-        if (!expression.isContractDescriptionCallPreciseCheck(bindingContext)) return null
-
         checkFeatureEnabled(collector)
         checkContractAllowedHere(collector, callContext)
 
