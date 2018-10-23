@@ -18,7 +18,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <externalProjectDataService implementation="org.jetbrains.kotlin.idea.configuration.KotlinSourceSetDataService"/>
-        <externalProjectDataService implementation="org.jetbrains.kotlin.idea.configuration.KotlinTargetDataService"/>
         <externalProjectDataService implementation="org.jetbrains.kotlin.idea.configuration.KotlinGradleProjectSettingsDataService"/>
     </extensions>
 
