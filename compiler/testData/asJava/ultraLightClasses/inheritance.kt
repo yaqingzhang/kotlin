@@ -24,3 +24,8 @@ abstract class AnotherDerived(override val x: Int, override val y: Int, override
     abstract fun noReturn(s: String)
     abstract val abstractProp: Int
 }
+
+private class Private {
+    override val overridesNothing: Boolean
+        get() = false
+}

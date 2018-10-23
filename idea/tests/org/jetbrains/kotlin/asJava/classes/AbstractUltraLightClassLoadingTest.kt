@@ -5,12 +5,16 @@
 
 package org.jetbrains.kotlin.asJava.classes
 
+import com.intellij.testFramework.LightProjectDescriptor
 import org.jetbrains.kotlin.idea.perf.UltraLightChecker
 import org.jetbrains.kotlin.idea.test.KotlinLightCodeInsightFixtureTestCase
+import org.jetbrains.kotlin.idea.test.KotlinWithJdkAndRuntimeLightProjectDescriptor
 import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
 
 abstract class AbstractUltraLightClassLoadingTest : KotlinLightCodeInsightFixtureTestCase() {
+    override fun getProjectDescriptor(): LightProjectDescriptor = KotlinWithJdkAndRuntimeLightProjectDescriptor.INSTANCE
+
     fun doTest(testDataPath: String) {
         val file = myFixture.addFileToProject(testDataPath, File(testDataPath).readText()) as KtFile
         for (ktClass in UltraLightChecker.allClasses(file)) {

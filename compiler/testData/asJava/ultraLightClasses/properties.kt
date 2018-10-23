@@ -39,6 +39,7 @@ class Foo(a: Int, val b:Foo, var c:Boolean, private val d: List, protected val e
   lateinit var subject: Unresolved
   internal lateinit var internalVarPrivateSet: String
     private set
+  protected lateinit var protectedLateinitVar: String
 
   var delegatedProp: String by Delegate()
   var delegatedProp2 by MyProperty()

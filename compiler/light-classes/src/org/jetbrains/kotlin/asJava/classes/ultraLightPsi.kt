@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.codegen.PropertyCodegen
 import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor
+import org.jetbrains.kotlin.descriptors.annotations.AnnotationUseSiteTarget
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.lexer.KtTokens.*
 import org.jetbrains.kotlin.load.java.JvmAbi
@@ -170,6 +171,7 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
 
         val visibility = when {
             property.hasModifier(PRIVATE_KEYWORD) -> PsiModifier.PRIVATE
+            property.hasModifier(PROTECTED_KEYWORD) && property.hasModifier(LATEINIT_KEYWORD) -> PsiModifier.PROTECTED
             property.hasModifier(CONST_KEYWORD) || (property.hasModifier(LATEINIT_KEYWORD) && property.setter == null) -> PsiModifier.PUBLIC
             else -> PsiModifier.PRIVATE
         }
@@ -269,7 +271,7 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
     )
 
     private fun isHiddenByDeprecation(declaration: KtDeclaration): Boolean {
-        val deprecated = support.findAnnotation(declaration, FqName("kotlin.Deprecated"))
+        val deprecated = support.findAnnotation(declaration, FqName("kotlin.Deprecated"))?.second
         return (deprecated?.argumentValue("level") as? EnumValue)?.enumEntryName?.asString() == "HIDDEN"
     }
 
@@ -328,10 +330,10 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
                         }
 
                         if (outer.hasModifier(OVERRIDE_KEYWORD)) {
-                            when ((outer.resolve() as? CallableDescriptor)?.effectiveVisibility()) {
-                                EffectiveVisibility.Public -> return name == PsiModifier.PUBLIC
-                                EffectiveVisibility.Private -> return name == PsiModifier.PRIVATE
-                                is EffectiveVisibility.Protected, is EffectiveVisibility.InternalProtected -> return name == PsiModifier.PROTECTED
+                            when ((outer.resolve() as? CallableDescriptor)?.visibility) {
+                                Visibilities.PUBLIC -> return name == PsiModifier.PUBLIC
+                                Visibilities.PRIVATE -> return name == PsiModifier.PRIVATE
+                                Visibilities.PROTECTED -> return name == PsiModifier.PROTECTED
                             }
                         }
 
@@ -350,6 +352,7 @@ class KtUltraLightClass(classOrObject: KtClassOrObject, private val support: Ult
 
                 fun KtDeclaration.isPrivate() =
                     hasModifier(PRIVATE_KEYWORD) ||
+                            this is KtConstructor<*> && classOrObject.hasModifier(SEALED_KEYWORD) ||
                             this is KtFunction && typeParameters.any { it.hasModifier(REIFIED_KEYWORD) }
             }
         ).setConstructor(declaration is KtConstructor<*>)
@@ -459,9 +462,18 @@ private class KtUltraLightField(
 ) : LightFieldBuilder(name, PsiType.NULL, declaration), KtLightField {
     private val modList = object : KtLightSimpleModifierList(this, modifiers) {
         override fun hasModifierProperty(name: String): Boolean = when (name) {
-            PsiModifier.VOLATILE -> support.findAnnotation(declaration, VOLATILE_ANNOTATION_FQ_NAME) != null
-            PsiModifier.TRANSIENT -> support.findAnnotation(declaration, TRANSIENT_ANNOTATION_FQ_NAME) != null
+            PsiModifier.VOLATILE -> hasFieldAnnotation(VOLATILE_ANNOTATION_FQ_NAME)
+            PsiModifier.TRANSIENT -> hasFieldAnnotation(TRANSIENT_ANNOTATION_FQ_NAME)
             else -> super.hasModifierProperty(name)
+        }
+
+        private fun hasFieldAnnotation(fqName: FqName): Boolean {
+            val annotation = support.findAnnotation(declaration, fqName)?.first ?: return false
+            val target = annotation.useSiteTarget?.getAnnotationUseSiteTarget() ?: return true
+            val expectedTarget =
+                if (declaration is KtProperty && declaration.hasDelegate()) AnnotationUseSiteTarget.PROPERTY_DELEGATE_FIELD
+                else AnnotationUseSiteTarget.FIELD
+            return target == expectedTarget
         }
     }
 
@@ -625,7 +637,11 @@ internal class KtUltraLightParameter(
             return kotlinType
         }
         if (kotlinOrigin is KtParameter) {
-            if (kotlinOrigin.typeReference != null || kotlinOrigin.parent?.parent is KtPropertyAccessor) {
+            val reference = kotlinOrigin.typeReference
+            if (kotlinOrigin.isVarArg && reference != null) {
+                LightClassGenerationSupport.getInstance(project).analyze(reference)[BindingContext.TYPE, reference]?.let { return it }
+            }
+            if (reference != null || kotlinOrigin.parent?.parent is KtPropertyAccessor) {
                 return kotlinType
             }
         }
@@ -636,6 +652,6 @@ internal class KtUltraLightParameter(
 
 interface UltraLightSupport {
     val moduleName: String
-    fun findAnnotation(owner: KtAnnotated, fqName: FqName): AnnotationDescriptor?
+    fun findAnnotation(owner: KtAnnotated, fqName: FqName): Pair<KtAnnotationEntry, AnnotationDescriptor>?
     fun isTooComplexForUltraLightGeneration(element: KtClassOrObject): Boolean
 }

@@ -12,3 +12,5 @@ private class TopLevelPrivate {}
 sealed class Season {
     class Nested: Season()
 }
+
+sealed class SealedWithArgs(val a: Int)

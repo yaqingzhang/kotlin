@@ -88,11 +88,16 @@ class IDELightClassGenerationSupport(private val project: Project) : LightClassG
 
             override val moduleName: String = module.name
 
-            override fun findAnnotation(owner: KtAnnotated, fqName: FqName): AnnotationDescriptor? = owner
-                .annotationEntries
-                .filter { it.shortName == fqName.shortName() || hasAlias(owner, fqName.shortName()) }
-                .mapNotNull { analyze(it).get(BindingContext.ANNOTATION, it) }
-                .find { it.fqName == fqName }
+            override fun findAnnotation(owner: KtAnnotated, fqName: FqName): Pair<KtAnnotationEntry, AnnotationDescriptor>? {
+                val candidates = owner.annotationEntries.filter { it.shortName == fqName.shortName() || hasAlias(owner, fqName.shortName()) }
+                for (entry in candidates) {
+                    val descriptor = analyze(entry).get(BindingContext.ANNOTATION, entry)
+                    if (descriptor?.fqName == fqName) {
+                        return Pair(entry, descriptor)
+                    }
+                }
+                return null
+            }
         })
     }
 
@@ -115,6 +120,8 @@ class IDELightClassGenerationSupport(private val project: Project) : LightClassG
 
         if (declaration is KtClassOrObject) {
             declaration.superTypeListEntries.find { it is KtDelegatedSuperTypeEntry }?.let { return it }
+
+            declaration.primaryConstructor?.let { findTooComplexDeclaration(it) }?.let { return it }
 
             for (d in declaration.declarations) {
                 if (d is KtClassOrObject && !(d is KtObjectDeclaration && d.isCompanion())) continue
@@ -157,11 +164,11 @@ class IDELightClassGenerationSupport(private val project: Project) : LightClassG
     }
 
     private fun implementsKotlinCollection(classOrObject: KtClassOrObject): Boolean {
-        val implementsInterfaces = classOrObject.superTypeListEntries.any { it is KtSuperTypeEntry }
-        return implementsInterfaces &&
-                (resolveToDescriptor(classOrObject) as? ClassifierDescriptor)?.getAllSuperClassifiers()?.any {
-                    it.fqNameSafe.asString().startsWith("kotlin.collections.")
-                } == true
+        if (classOrObject.superTypeListEntries.isEmpty()) return false
+
+        return (resolveToDescriptor(classOrObject) as? ClassifierDescriptor)?.getAllSuperClassifiers()?.any {
+            it.fqNameSafe.asString().startsWith("kotlin.collections.")
+        } == true
     }
 
     private fun hasAlias(element: KtElement, shortName: Name): Boolean = allAliases(element.containingKtFile)[shortName.asString()] == true

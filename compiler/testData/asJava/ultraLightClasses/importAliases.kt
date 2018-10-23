@@ -1,4 +1,3 @@
-/** should load cls */
 import kotlin.jvm.JvmStatic as JS
 
 /** should load cls */
