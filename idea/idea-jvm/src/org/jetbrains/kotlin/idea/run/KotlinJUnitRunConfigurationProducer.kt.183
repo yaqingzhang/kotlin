@@ -88,7 +88,7 @@ class KotlinJUnitRunConfigurationProducer : RunConfigurationProducer<JUnitConfig
         val methodLocation = getTestMethodLocation(leaf)
         if (methodLocation != null) {
             configuration.beMethodConfiguration(methodLocation)
-            JavaRunConfigurationExtensionManager.getInstance().extendCreatedConfiguration(configuration, location)
+            JavaRunConfigurationExtensionManagerUtil.getInstance().extendCreatedConfiguration(configuration, location)
             configuration.setSdkAndModule(module)
             return true
         }
@@ -96,7 +96,7 @@ class KotlinJUnitRunConfigurationProducer : RunConfigurationProducer<JUnitConfig
         val testClass = getTestClass(leaf)
         if (testClass != null) {
             configuration.beClassConfiguration(testClass)
-            JavaRunConfigurationExtensionManager.getInstance().extendCreatedConfiguration(configuration, location)
+            JavaRunConfigurationExtensionManagerUtil.getInstance().extendCreatedConfiguration(configuration, location)
             configuration.setSdkAndModule(module)
             return true
         }
