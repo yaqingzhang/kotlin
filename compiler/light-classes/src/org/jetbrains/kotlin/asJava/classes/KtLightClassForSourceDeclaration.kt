@@ -22,6 +22,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Comparing
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.psi.*
 import com.intellij.psi.impl.PsiSubstitutorImpl
 import com.intellij.psi.impl.java.stubs.PsiJavaFileStub
@@ -338,14 +339,12 @@ abstract class KtLightClassForSourceDeclaration(protected val classOrObject: KtC
                             .create(createNoCache(classOrObject), OUT_OF_CODE_BLOCK_MODIFICATION_COUNT)
                 }
 
-        private val ultraLight = SystemProperties.getBooleanProperty("use.ultralight.classes", false)
-
         fun createNoCache(classOrObject: KtClassOrObject): KtLightClassForSourceDeclaration? {
             if (classOrObject.shouldNotBeVisibleAsLightClass()) {
                 return null
             }
 
-            if (ultraLight) {
+            if (Registry.`is`("kotlin.use.ultra.light.classes", false)) {
                 LightClassGenerationSupport.getInstance(classOrObject.project).createUltraLightClass(classOrObject)?.let { return it }
             }
 
