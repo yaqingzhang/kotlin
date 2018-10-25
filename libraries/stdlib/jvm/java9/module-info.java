@@ -20,10 +20,11 @@ module kotlin.stdlib {
     exports kotlin.system;
     exports kotlin.text;
 
-    exports kotlin.coroutines.experimental;
-    exports kotlin.coroutines.experimental.intrinsics;
-    exports kotlin.coroutines.experimental.jvm.internal;
-    exports kotlin.coroutines.experimental.migration;
+    // do not export experimental coroutines packages
+    //exports kotlin.coroutines.experimental;
+    //exports kotlin.coroutines.experimental.intrinsics;
+    //exports kotlin.coroutines.experimental.jvm.internal;
+    //exports kotlin.coroutines.experimental.migration;
 
     exports kotlin.experimental;
 
