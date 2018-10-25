@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.resolve.scopes.TypeIntersectionScope
 import org.jetbrains.kotlin.resolve.scopes.receivers.ExtensionReceiver
+import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
 import org.jetbrains.kotlin.storage.LockBasedStorageManager
 import org.jetbrains.kotlin.types.*
 
@@ -127,6 +128,43 @@ open class WrappedValueParameterDescriptor(
     }
 }
 
+open class WrappedReceiverParameterDescriptor(
+    annotations: Annotations = Annotations.EMPTY,
+    sourceElement: SourceElement = SourceElement.NO_SOURCE
+) : ReceiverParameterDescriptor, WrappedCallableDescriptor<IrValueParameter>(annotations, sourceElement) {
+
+    override fun getValue(): ReceiverValue {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getContainingDeclaration(): DeclarationDescriptor =
+        (owner.parent as? IrFunction)?.descriptor ?: (owner.parent as IrClass).descriptor
+
+    override fun getType() = owner.type.toKotlinType()
+    override fun getName() = owner.name
+
+    override fun copy(newOwner: DeclarationDescriptor) = object : WrappedReceiverParameterDescriptor() {
+        override fun getContainingDeclaration() = newOwner
+    }.also { it.bind(owner) }
+
+    override fun getOverriddenDescriptors(): Collection<ValueParameterDescriptor> = emptyList()
+
+    override fun getOriginal() = this
+
+    override fun substitute(substitutor: TypeSubstitutor): ReceiverParameterDescriptor {
+        TODO("")
+    }
+
+    override fun getReturnType(): KotlinType? = owner.type.toKotlinType()
+
+    override fun <R : Any?, D : Any?> accept(visitor: DeclarationDescriptorVisitor<R, D>?, data: D) =
+        visitor!!.visitReceiverParameterDescriptor(this, data)!!
+
+    override fun acceptVoid(visitor: DeclarationDescriptorVisitor<Void, Void>?) {
+        visitor!!.visitReceiverParameterDescriptor(this, null)
+    }
+}
+
 open class WrappedTypeParameterDescriptor(
     annotations: Annotations = Annotations.EMPTY,
     sourceElement: SourceElement = SourceElement.NO_SOURCE
@@ -216,6 +254,7 @@ open class WrappedVariableDescriptor(
 
     override fun <R, D> accept(visitor: DeclarationDescriptorVisitor<R, D>?, data: D): R =
         visitor!!.visitVariableDescriptor(this, data)
+
     override fun acceptVoid(visitor: DeclarationDescriptorVisitor<Void, Void>?) {
         visitor!!.visitVariableDescriptor(this, null)
     }
@@ -248,6 +287,7 @@ open class WrappedSimpleFunctionDescriptor(
         .asSequence()
         .mapNotNull { it.descriptor as? ValueParameterDescriptor }
         .toMutableList()
+
     override fun isExternal() = owner.isExternal
     override fun isSuspend() = owner.isSuspend
     override fun isTailrec() = owner.isTailrec
@@ -314,6 +354,7 @@ open class WrappedClassConstructorDescriptor(
     override fun getDispatchReceiverParameter() = owner.dispatchReceiverParameter?.run {
         (containingDeclaration.containingDeclaration as ClassDescriptor).thisAsReceiverParameter
     }
+
     override fun getTypeParameters() = owner.typeParameters.map { it.descriptor }
     override fun getValueParameters() = owner.valueParameters.asSequence()
         .mapNotNull { it.descriptor as? ValueParameterDescriptor }
@@ -402,9 +443,9 @@ open class WrappedClassDescriptor(
 ) : ClassDescriptor, WrappedDeclarationDescriptor<IrClass>(annotations) {
     override fun getName() = owner.name
 
-    override fun getMemberScope(typeArguments: MutableList<out TypeProjection>)= MemberScope.Empty
+    override fun getMemberScope(typeArguments: MutableList<out TypeProjection>) = MemberScope.Empty
 
-    override fun getMemberScope(typeSubstitution: TypeSubstitution)= MemberScope.Empty
+    override fun getMemberScope(typeSubstitution: TypeSubstitution) = MemberScope.Empty
 
     override fun getUnsubstitutedMemberScope() = MemberScope.Empty
 
@@ -551,7 +592,7 @@ open class WrappedPropertyDescriptor(
     override fun isVar() = owner.isFinal
 
     override fun getDispatchReceiverParameter(): ReceiverParameterDescriptor? {
-        TODO("not implemented")
+        return null
     }
 
     override fun isConst() = false
@@ -561,7 +602,7 @@ open class WrappedPropertyDescriptor(
     override fun isLateInit() = false
 
     override fun getExtensionReceiverParameter(): ReceiverParameterDescriptor? {
-        TODO("not implemented")
+        return null
     }
 
     override fun isExternal() = owner.isExternal
