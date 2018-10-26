@@ -148,10 +148,16 @@ private fun translateFunctionCall(
     val callInfo = context.getCallInfo(resolvedCall, explicitReceivers)
     var callExpression = callInfo.translateFunctionCall()
 
-    if (CallExpressionTranslator.shouldBeInlined(inlineResolvedCall.resultingDescriptor, context)) {
+    val descriptor = if (inlineResolvedCall is VariableAsFunctionResolvedCall) {
+        inlineResolvedCall.variableCall.resultingDescriptor
+    } else {
+        inlineResolvedCall.resultingDescriptor
+    }
+
+    if (CallExpressionTranslator.shouldBeInlined(descriptor, context)) {
         val callElement = resolvedCall.call.callElement
         val ktExpression = (callElement as? KtWhenConditionInRange)?.rangeExpression ?: callElement as KtExpression
-        setInlineCallMetadata(callExpression, ktExpression, inlineResolvedCall.resultingDescriptor, context)
+        setInlineCallMetadata(callExpression, ktExpression, descriptor, context)
     }
 
     if (resolvedCall.resultingDescriptor.isSuspend) {
