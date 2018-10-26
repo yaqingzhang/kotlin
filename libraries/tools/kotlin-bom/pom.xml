@@ -121,7 +121,7 @@
                 <artifactId>kotlin-test-annotations-common</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
-            <!--scripting-->
+            <!-- Scripting -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>kotlin-main-kts</artifactId>
@@ -152,7 +152,7 @@
                 <artifactId>kotlin-scripting-jvm-host</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
-            <!--compiler dependency required by scripting-->
+            <!-- Compiler dependency required by scripting -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>kotlin-compiler</artifactId>
