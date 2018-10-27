@@ -264,6 +264,17 @@ open class DefaultParameterInjector constructor(
                     }
             }
 
+            override fun visitFunctionReference(expression: IrFunctionReference): IrExpression {
+                super.visitFunctionReference(expression)
+
+                val functionDeclaration = expression.symbol.owner
+
+                if (functionDeclaration.needsDefaultArgumentsLowering(skipInline))
+                    argumentCount(expression)
+
+                return expression
+            }
+
             private fun IrFunction.findSuperMethodWithDefaultArguments(): IrFunction? {
                 if (!needsDefaultArgumentsLowering(skipInline)) return null
 
