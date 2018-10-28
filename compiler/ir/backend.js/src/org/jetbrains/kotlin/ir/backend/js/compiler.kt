@@ -105,7 +105,6 @@ private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependenc
     UnitMaterializationLowering(this).lower(moduleFragment)
     EnumClassLowering(this).runOnFilesPostfix(moduleFragment)
     EnumUsageLowering(this).lower(moduleFragment)
-    VarargLowering(this).lower(moduleFragment)
     LateinitLowering(this, true).lower(moduleFragment)
     SharedVariablesLowering(this).runOnFilesPostfix(moduleFragment)
     LocalDelegatedPropertiesLowering().lower(moduleFragment)
@@ -122,6 +121,8 @@ private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependenc
     MultipleCatchesLowering(this).lower(moduleFragment)
     BridgesConstruction(this).runOnFilesPostfix(moduleFragment)
     TypeOperatorLowering(this).lower(moduleFragment)
+    CallableReferenceLowering(this).lower(moduleFragment)
+    VarargLowering(this).lower(moduleFragment)
     BlockDecomposerLowering(this).runOnFilesPostfix(moduleFragment)
 
     SecondaryCtorLowering(this).apply {
@@ -129,7 +130,6 @@ private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependenc
         constructorRedirectorLowering.runOnFilesPostfix(moduleFragment)
     }
 
-    CallableReferenceLowering(this).lower(moduleFragment)
 
     ClassReferenceLowering(this).lower(moduleFragment)
     PrimitiveCompanionLowering(this).lower(moduleFragment)

@@ -9,8 +9,10 @@ import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.descriptors.WrappedTypeParameterDescriptor
 import org.jetbrains.kotlin.backend.common.descriptors.WrappedValueParameterDescriptor
 import org.jetbrains.kotlin.backend.common.lower.BOUND_VALUE_PARAMETER
+import org.jetbrains.kotlin.backend.common.utils.isSubtypeOf
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.backend.js.JsIrBackendContext
 import org.jetbrains.kotlin.ir.backend.js.ir.JsIrBuilder
 import org.jetbrains.kotlin.ir.backend.js.utils.Namer
@@ -19,13 +21,12 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrTypeParameterImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetObjectValueImpl
-import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
+import org.jetbrains.kotlin.ir.expressions.impl.IrVarargImpl
 import org.jetbrains.kotlin.ir.symbols.IrValueSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrTypeParameterSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.toIrType
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
@@ -34,7 +35,8 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 data class CallableReferenceKey(
     val declaration: IrFunction,
     val hasDispatchReference: Boolean,
-    val hasExtensionReceiver: Boolean
+    val hasExtensionReceiver: Boolean,
+    val hasLastVarArg: Boolean
 )
 
 // TODO: generate $metadata$ property and fill it with corresponding KFunction/KProperty interface
@@ -58,7 +60,15 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
     }
 
     private fun makeCallableKey(declaration: IrFunction, reference: IrCallableReference) =
-        CallableReferenceKey(declaration, reference.dispatchReceiver != null, reference.extensionReceiver != null)
+        CallableReferenceKey(declaration, reference.dispatchReceiver != null, reference.extensionReceiver != null, computeVarargKey(declaration, reference))
+
+    private fun computeVarargKey(declaration: IrFunction, reference: IrCallableReference): Boolean {
+        val lastType = declaration.valueParameters.lastOrNull() ?: return false
+        if (lastType.varargElementType == null) return false
+        val unboundParams = declaration.valueParameters.count { it.origin != BOUND_VALUE_PARAMETER }
+        // TODO: more precise check in case (Ctor(outer, a, vararg)
+        return unboundParams == (reference.type as IrSimpleType).arguments.size - 1
+    }
 
     inner class CallableReferenceLowerTransformer : IrElementTransformerVoid() {
         override fun visitFunctionReference(expression: IrFunctionReference): IrExpression {
@@ -154,8 +164,9 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
 
         // KFunctionN<Foo, T2, ..., TN, TReturn>, arguments.size = N + 1
 
+        val paramCount = (functionReference.type as IrSimpleType).arguments.count() - 1
         val refGetFunction = buildGetFunction(declaration, functionReference, createFunctionClosureGetterName(declaration))
-        val refClosureFunction = buildClosureFunction(declaration, refGetFunction, functionReference)
+        val refClosureFunction = buildClosureFunction(declaration, refGetFunction, functionReference, paramCount)
 
         val additionalDeclarations = generateGetterBodyWithGuard(refGetFunction) {
             val irClosureReference = JsIrBuilder.buildFunctionReference(functionReference.type, refClosureFunction.symbol)
@@ -196,11 +207,12 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
         //   return $cache$
         // }
 
+        val paramCount = (propertyReference.type as IrSimpleType).arguments.count() - 1
         val getterName = createPropertyClosureGetterName(getterDeclaration.correspondingProperty!!)
         val refGetFunction = buildGetFunction(propertyReference.getter!!.owner, propertyReference, getterName)
 
-        val getterFunction = propertyReference.getter?.let { buildClosureFunction(it.owner, refGetFunction, propertyReference) }!!
-        val setterFunction = propertyReference.setter?.let { buildClosureFunction(it.owner, refGetFunction, propertyReference) }
+        val getterFunction = propertyReference.getter?.let { buildClosureFunction(it.owner, refGetFunction, propertyReference, paramCount) }!!
+        val setterFunction = propertyReference.setter?.let { buildClosureFunction(it.owner, refGetFunction, propertyReference, paramCount + 1) }
 
         val additionalDeclarations = generateGetterBodyWithGuard(refGetFunction) {
             val statements = mutableListOf<IrStatement>(getterFunction)
@@ -236,9 +248,7 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
             statements += JsIrBuilder.buildCall(context.intrinsics.jsSetJSField.symbol).apply {
                 putValueArgument(0, JsIrBuilder.buildGetValue(irVar.symbol))
                 putValueArgument(1, callableNameConst)
-                putValueArgument(
-                    2,
-                    JsIrBuilder.buildString(
+                putValueArgument(2, JsIrBuilder.buildString(
                         context.irBuiltIns.stringType,
                         getReferenceName(getterDeclaration.correspondingProperty!!)
                     )
@@ -268,10 +278,11 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
         //   return $cache$
         // }
 
+        val paramCount = (propertyReference.type as IrSimpleType).arguments.count() - 1
         val declaration = propertyReference.delegate.owner
         val getterName = createPropertyClosureGetterName(declaration)
         val refGetFunction = buildGetFunction(propertyReference.getter.owner, propertyReference, getterName)
-        val getterFunction = buildClosureFunction(context.irBuiltIns.throwIseFun, refGetFunction, propertyReference)
+        val getterFunction = buildClosureFunction(context.irBuiltIns.throwIseFun, refGetFunction, propertyReference, paramCount)
 
         val additionalDeclarations = generateGetterBodyWithGuard(refGetFunction) {
             val statements = mutableListOf<IrStatement>(getterFunction)
@@ -356,7 +367,8 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
         callable: IrFunction,
         getter: IrFunction,
         closure: IrSimpleFunction,
-        reference: IrCallableReference
+        reference: IrCallableReference,
+        fullParamNumber: Int
     ): List<IrValueParameter> {
         val result = mutableListOf<IrValueParameter>()
 
@@ -377,6 +389,7 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
          * }
          */
         var capturedParams = getter.valueParameters.size
+        val functionSignature = (reference.type as IrSimpleType).arguments.dropLast(1).map { (it as IrTypeProjection).type }.toList()
 
         callable.dispatchReceiverParameter?.let { dispatch ->
             if (reference.dispatchReceiver == null) {
@@ -396,78 +409,39 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
             }
         }
 
-        val closureValueParameters = (reference.type as IrSimpleType).arguments.size - 1 - result.size
+        val closureValueParameters = fullParamNumber - result.size
+        val start = result.size
 
         // pass through value parameters
         for (i in 0 until closureValueParameters) {
             val param = callable.valueParameters[i + capturedParams]
+            val type = if ((i + start) < functionSignature.size) functionSignature[start + i] else param.type
             val paramName = param.name.run { if (!isSpecial) identifier else "p$i" }
-            result += JsIrBuilder.buildValueParameter(paramName, result.size, param.type).also { it.parent = closure }
+            result += JsIrBuilder.buildValueParameter(paramName, result.size, type).also { it.parent = closure }
         }
 
         return result
     }
 
     private fun buildGetFunction(declaration: IrFunction, reference: IrCallableReference, getterName: String): IrSimpleFunction {
-
-        val callableType = reference.type
-
-        var kFunctionValueParamsCount = (callableType as? IrSimpleType)?.arguments?.size?.minus(1) ?: 0
-
-        val fillWithDefault: Int
-
-        if (declaration in context.ir.defaultParameterDeclarationsCache.keys) {
-            val originalParamCount = declaration.valueParameters.size
-            val stubFunction = context.ir.defaultParameterDeclarationsCache[declaration]!!
-//            val fillWithDefault = originalParamCount - kFunctionValueParamsCount
-
-            // fun ( c1, c2, p3, p4, d5, d6)
-
-
-            val boundParamCount = declaration.valueParameters.count { it.origin == BOUND_VALUE_PARAMETER }
-
-//            for (i in 0 .. reference.valueArgumentsCount - 1) {
-//                if (reference.getValueArgument(i) != null) boundParamCount++
-//            }
-
-            val unboundParam = originalParamCount - boundParamCount
-
-            fillWithDefault = unboundParam - kFunctionValueParamsCount
-        } else {
-            fillWithDefault = 0
-        }
-
-
-        if (declaration.dispatchReceiverParameter != null && reference.dispatchReceiver == null) {
-            kFunctionValueParamsCount--
-        }
-
-        if (declaration.extensionReceiverParameter != null && reference.extensionReceiver == null) {
-            kFunctionValueParamsCount--
-        }
-
-        assert(kFunctionValueParamsCount >= 0)
-
         // The `getter` function takes only closure parameters
         val receivers = mutableListOf<IrValueParameter>()
-        if (reference.dispatchReceiver != null) {
-            if (declaration.dispatchReceiverParameter != null) {
-                receivers += declaration.dispatchReceiverParameter!!
-            }
-        }
-        if (reference.extensionReceiver != null) {
-            if (declaration.extensionReceiverParameter != null) {
-                receivers += declaration.extensionReceiverParameter!!
-            }
+
+        reference.dispatchReceiver?.let {
+            // in case outer `this` for inner constructors
+            receivers += declaration.dispatchReceiverParameter ?: declaration.valueParameters[0]
         }
 
-        val getterValueParameters = receivers + declaration.valueParameters.dropLast(kFunctionValueParamsCount + fillWithDefault)
+        reference.extensionReceiver?.let {
+            receivers += declaration.extensionReceiverParameter!!
+        }
 
+        val getterValueParameters = receivers + declaration.valueParameters.filter { it.origin == BOUND_VALUE_PARAMETER }
 
         val refGetDeclaration = JsIrBuilder.buildFunction(getterName, declaration.visibility)
 
         refGetDeclaration.parent = implicitDeclarationFile
-        refGetDeclaration.returnType = callableType
+        refGetDeclaration.returnType = reference.type
 
         for ((i, p) in getterValueParameters.withIndex()) {
             val descriptor = WrappedValueParameterDescriptor()
@@ -514,7 +488,8 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
     private fun buildClosureFunction(
         declaration: IrFunction,
         refGetFunction: IrSimpleFunction,
-        reference: IrCallableReference
+        reference: IrCallableReference,
+        parameterCount: Int
     ): IrFunction {
         val closureName = createClosureInstanceName(declaration)
         val refClosureDeclaration =
@@ -522,7 +497,7 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
                 .also { it.parent = refGetFunction }
 
         // the params which are passed to closure
-        val closureParamDeclarations = generateSignatureForClosure(declaration, refGetFunction, refClosureDeclaration, reference)
+        val closureParamDeclarations = generateSignatureForClosure(declaration, refGetFunction, refClosureDeclaration, reference, parameterCount)
         val closureParamSymbols = closureParamDeclarations.map { it.symbol }
         val returnType = declaration.returnType
 
@@ -536,13 +511,13 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
         var cp = 0
         var gp = 0
 
-        if (declaration.dispatchReceiverParameter != null) {
+        if (callTarget.dispatchReceiverParameter != null) {
             val dispatchReceiverDeclaration =
                 if (reference.dispatchReceiver != null) refGetFunction.valueParameters[gp++].symbol else closureParamSymbols[cp++]
             irCall.dispatchReceiver = JsIrBuilder.buildGetValue(dispatchReceiverDeclaration)
         }
 
-        if (declaration.extensionReceiverParameter != null) {
+        if (callTarget.extensionReceiverParameter != null) {
             val extensionReceiverDeclaration =
                 if (reference.extensionReceiver != null) refGetFunction.valueParameters[gp++].symbol else closureParamSymbols[cp++]
             irCall.extensionReceiver = JsIrBuilder.buildGetValue(extensionReceiverDeclaration)
@@ -555,11 +530,19 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
         }
 
         for (i in cp until closureParamSymbols.size) {
-            irCall.putValueArgument(j++, JsIrBuilder.buildGetValue(closureParamSymbols[i]))
+            val closureParam = closureParamSymbols[i].owner
+            val value = JsIrBuilder.buildGetValue(closureParamSymbols[i])
+            val parameter = callTarget.valueParameters[j]
+            val argument = if (parameter.varargElementType?.let { closureParam.type.isSubtypeOf(it) } == true) {
+                // fun foo(x: X, y: vararg Y): Z
+                // val r: (X, Y) -> Z = ::foo
+                IrVarargImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, parameter.type, parameter.varargElementType!!, listOf(value))
+            } else value
+            irCall.putValueArgument(j++, argument)
         }
 
-        if (j != declaration.valueParameters.size) {
-            // means this requires default values
+        if (declaration != callTarget) {
+            // fill rest with default arguments
             val defaultStart = j
             val maskValues = Array((declaration.valueParameters.size + 31) / 32) { 0 }
             for (i in defaultStart until declaration.valueParameters.size) {
@@ -589,7 +572,14 @@ class CallableReferenceLowering(val context: JsIrBackendContext) : FileLoweringP
             } else if (context.ir.shouldGenerateHandlerParameterForDefaultBodyFun()) {
                 irCall.putValueArgument(j++, JsIrBuilder.buildNull(context.irBuiltIns.nothingNType))
             }
+        } else if (j != declaration.valueParameters.size) {
+            // fun foo(x: X, y: vararg Y): Z
+            // val r: (X) -> Z = ::foo
+            assert(j + 1 == declaration.valueParameters.size)
+            irCall.putValueArgument(j++, null)
         }
+
+        assert(j == callTarget.valueParameters.size)
 
         val irClosureReturn = JsIrBuilder.buildReturn(refClosureDeclaration.symbol, irCall, context.irBuiltIns.nothingType)
 
