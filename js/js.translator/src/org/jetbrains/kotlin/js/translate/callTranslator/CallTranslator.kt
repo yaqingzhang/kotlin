@@ -18,6 +18,8 @@ package org.jetbrains.kotlin.js.translate.callTranslator
 
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.isFunctionTypeOrSubtype
+import org.jetbrains.kotlin.builtins.isSuspendFunctionType
+import org.jetbrains.kotlin.builtins.isSuspendFunctionTypeOrSubtype
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
@@ -109,7 +111,7 @@ private fun translateCall(
     if (resolvedCall is VariableAsFunctionResolvedCall) {
         assert(explicitReceivers.extensionReceiver == null) { "VariableAsFunctionResolvedCall must have one receiver" }
         val variableCall = resolvedCall.variableCall
-        val isFunctionType = variableCall.resultingDescriptor.type.isFunctionTypeOrSubtype
+        val isFunctionType = variableCall.resultingDescriptor.type.run { isFunctionTypeOrSubtype || isSuspendFunctionTypeOrSubtype }
         val inlineCall = if (isFunctionType) variableCall else resolvedCall
 
         val newExplicitReceivers = if (variableCall.expectedReceivers()) {
@@ -148,17 +150,9 @@ private fun translateFunctionCall(
     val callInfo = context.getCallInfo(resolvedCall, explicitReceivers)
     var callExpression = callInfo.translateFunctionCall()
 
-    fun ResolvedCall<out CallableDescriptor>.trySetInlineCallMetadata() {
-        if (CallExpressionTranslator.shouldBeInlined(resultingDescriptor, context)) {
-            setInlineCallMetadata(callExpression, resolvedCall.call.callElement, resultingDescriptor, context)
-        }
-
-        if (this is VariableAsFunctionResolvedCall) {
-            variableCall.trySetInlineCallMetadata()
-        }
+    if (CallExpressionTranslator.shouldBeInlined(inlineResolvedCall.resultingDescriptor, context)) {
+        setInlineCallMetadata(callExpression, resolvedCall.call.callElement, inlineResolvedCall.resultingDescriptor, context)
     }
-
-    inlineResolvedCall.trySetInlineCallMetadata()
 
     if (resolvedCall.resultingDescriptor.isSuspend) {
         val statement = callInfo.constructSuspendSafeCallIfNeeded(JsAstUtils.asSyntheticStatement(callExpression.apply {
