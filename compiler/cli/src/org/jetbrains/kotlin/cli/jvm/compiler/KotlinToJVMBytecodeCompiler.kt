@@ -64,6 +64,7 @@ import org.jetbrains.kotlin.utils.newLinkedHashMapWithExpectedSize
 import java.io.File
 import java.lang.reflect.InvocationTargetException
 import java.net.URLClassLoader
+import javax.swing.SwingUtilities
 
 object KotlinToJVMBytecodeCompiler {
     private fun writeOutput(
@@ -302,9 +303,18 @@ object KotlinToJVMBytecodeCompiler {
                 environment.updateClasspath(result.additionalJavaRoots.map { JavaSourceRoot(it, null) })
             }
 
-            // Clear package caches (see KotlinJavaPsiFacade)
-            ApplicationManager.getApplication().runWriteAction {
-                (PsiManager.getInstance(environment.project).modificationTracker as? PsiModificationTrackerImpl)?.incCounter()
+            fun incModificationTracker() {
+                // Clear package caches (see KotlinJavaPsiFacade)
+                ApplicationManager.getApplication().runWriteAction {
+                    (PsiManager.getInstance(environment.project).modificationTracker as? PsiModificationTrackerImpl)?.incCounter()
+                }
+            }
+
+            if (SwingUtilities.isEventDispatchThread()) {
+                incModificationTracker()
+            } else {
+                // 'invokeAndWait' is empty in 'MockApplication', but 'runWriteAction' still checks the current thread
+                SwingUtilities.invokeAndWait { incModificationTracker() }
             }
 
             // Clear all diagnostic messages
