@@ -81,6 +81,8 @@ fun compile(
 
     val moduleFragmentCopy = moduleFragment.deepCopyWithSymbols()
 
+    LateinitLowering(context, true).lower(moduleFragment)
+
     context.performInlining(moduleFragment)
 
     context.lower(moduleFragment, irDependencyModules)
@@ -106,7 +108,6 @@ private fun JsIrBackendContext.lower(moduleFragment: IrModuleFragment, dependenc
     EnumClassLowering(this).runOnFilesPostfix(moduleFragment)
     EnumUsageLowering(this).lower(moduleFragment)
     VarargLowering(this).lower(moduleFragment)
-    LateinitLowering(this, true).lower(moduleFragment)
     DefaultArgumentStubGenerator(this).runOnFilesPostfix(moduleFragment)
     DefaultParameterInjector(this).runOnFilesPostfix(moduleFragment)
     DefaultParameterCleaner(this).runOnFilesPostfix(moduleFragment)
