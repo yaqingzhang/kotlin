@@ -189,11 +189,7 @@ abstract class AbstractBinaryClassAnnotationAndConstantLoader<A : Any, C : Any>(
         return when (message) {
             is ProtoBuf.Function -> if (message.hasReceiver()) 1 else 0
             is ProtoBuf.Property -> if (message.hasReceiver()) 1 else 0
-            is ProtoBuf.Constructor -> when {
-                (container as ProtoContainer.Class).kind == ProtoBuf.Class.Kind.ENUM_CLASS -> 2
-                container.isInner -> 1
-                else -> 0
-            }
+            is ProtoBuf.Constructor -> 0
             else -> throw UnsupportedOperationException("Unsupported message: ${message::class.java}")
         }
     }
