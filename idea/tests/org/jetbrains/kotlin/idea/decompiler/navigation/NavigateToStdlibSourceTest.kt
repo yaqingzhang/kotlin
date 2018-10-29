@@ -29,11 +29,11 @@ class NavigateToStdlibSourceTest : KotlinCodeInsightTestCase() {
     private val FILE_TEXT = "fun foo() { <caret>println() }"
 
     fun testRefToPrintlnWithJVM() {
-        doTest("Console.kt", ModuleKind.KOTLIN_JVM_WITH_STDLIB_SOURCES)
+        doTest("ioH.kt", ModuleKind.KOTLIN_JVM_WITH_STDLIB_SOURCES)
     }
 
     fun testRefToPrintlnWithJVMAndJS() {
-        doTest("Console.kt", ModuleKind.KOTLIN_JVM_WITH_STDLIB_SOURCES, ModuleKind.KOTLIN_JAVASCRIPT)
+        doTest("ioH.kt", ModuleKind.KOTLIN_JVM_WITH_STDLIB_SOURCES, ModuleKind.KOTLIN_JAVASCRIPT)
     }
 
     fun testRefToPrintlnWithJS() {
@@ -47,6 +47,7 @@ class NavigateToStdlibSourceTest : KotlinCodeInsightTestCase() {
     private fun doTest(sourceFileName: String, mainModule: ModuleKind, additionalModule: ModuleKind? = null) {
         val navigationElement = configureAndResolve(FILE_TEXT, mainModule, additionalModule)
         TestCase.assertEquals(sourceFileName, navigationElement.containingFile.name)
+        println()
     }
 
     override fun tearDown() {
