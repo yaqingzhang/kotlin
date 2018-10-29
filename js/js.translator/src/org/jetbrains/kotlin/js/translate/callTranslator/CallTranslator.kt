@@ -148,17 +148,17 @@ private fun translateFunctionCall(
     val callInfo = context.getCallInfo(resolvedCall, explicitReceivers)
     var callExpression = callInfo.translateFunctionCall()
 
-    val descriptor = if (inlineResolvedCall is VariableAsFunctionResolvedCall) {
-        inlineResolvedCall.variableCall.resultingDescriptor
-    } else {
-        inlineResolvedCall.resultingDescriptor
+    fun ResolvedCall<out CallableDescriptor>.trySetInlineCallMetadata() {
+        if (CallExpressionTranslator.shouldBeInlined(resultingDescriptor, context)) {
+            setInlineCallMetadata(callExpression, resolvedCall.call.callElement, resultingDescriptor, context)
+        }
+
+        if (this is VariableAsFunctionResolvedCall) {
+            variableCall.trySetInlineCallMetadata()
+        }
     }
 
-    if (CallExpressionTranslator.shouldBeInlined(descriptor, context)) {
-        val callElement = resolvedCall.call.callElement
-        val ktExpression = (callElement as? KtWhenConditionInRange)?.rangeExpression ?: callElement as KtExpression
-        setInlineCallMetadata(callExpression, ktExpression, descriptor, context)
-    }
+    inlineResolvedCall.trySetInlineCallMetadata()
 
     if (resolvedCall.resultingDescriptor.isSuspend) {
         val statement = callInfo.constructSuspendSafeCallIfNeeded(JsAstUtils.asSyntheticStatement(callExpression.apply {
@@ -176,7 +176,6 @@ private fun translateFunctionCall(
     mayBeMarkByRangeMetadata(resolvedCall, callExpression)
     return callExpression
 }
-
 
 private fun mayBeMarkByRangeMetadata(resolvedCall: ResolvedCall<out FunctionDescriptor>, callExpression: JsExpression) {
     when (resolvedCall.resultingDescriptor.fqNameSafe) {
