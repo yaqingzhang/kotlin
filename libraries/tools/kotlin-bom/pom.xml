@@ -42,6 +42,13 @@
 
 
     <properties>
+        <!--
+        All dependencies listed in this pom will have version same as the version of this pom.
+
+        This property is local to this project,
+        it isn't affected by the same named property in a consumer project,
+        neither it is visible in the consumer project.
+        -->
         <kotlin.version>${project.version}</kotlin.version>
     </properties>
 
