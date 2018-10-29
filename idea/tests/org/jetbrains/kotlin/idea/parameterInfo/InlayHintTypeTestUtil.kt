@@ -24,6 +24,12 @@ internal fun JavaCodeInsightTestFixture.checkHintType(text: String, hintType: Hi
     Assert.assertEquals(hintType.option.name, (hintInfo as HintInfo.OptionInfo).optionName)
 }
 
+internal fun JavaCodeInsightTestFixture.checkHintType(hintType: HintType) {
+    val hintInfo = getHintInfoFromProvider(caretOffset, file, editor)
+    Assert.assertNotNull("No hint available at caret", hintInfo)
+    Assert.assertEquals(hintType.option.name, (hintInfo as HintInfo.OptionInfo).optionName)
+}
+
 // It's crucial for this method to be conformable with IDEA internals.
 // Originally copied from com.intellij.codeInsight.hints.getHintInfoFromProvider()
 private fun getHintInfoFromProvider(offset: Int, file: PsiFile, editor: Editor): HintInfo? {
