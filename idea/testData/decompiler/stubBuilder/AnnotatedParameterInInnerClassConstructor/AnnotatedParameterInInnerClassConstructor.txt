@@ -1,0 +1,44 @@
+PsiJetFileStubImpl[package=test]
+  PACKAGE_DIRECTIVE
+    REFERENCE_EXPRESSION[referencedName=test]
+  IMPORT_LIST
+  CLASS[fqName=test.AnnotatedParameterInInnerClassConstructor, isEnumEntry=false, isInterface=false, isLocal=false, isTopLevel=true, name=AnnotatedParameterInInnerClassConstructor, superNames=[]]
+    MODIFIER_LIST[public final]
+    PRIMARY_CONSTRUCTOR
+      MODIFIER_LIST[public]
+      VALUE_PARAMETER_LIST
+    CLASS_BODY
+      CLASS[fqName=test.AnnotatedParameterInInnerClassConstructor.Inner, isEnumEntry=false, isInterface=false, isLocal=false, isTopLevel=false, name=Inner, superNames=[]]
+        MODIFIER_LIST[inner public final]
+        PRIMARY_CONSTRUCTOR
+          MODIFIER_LIST[public]
+          VALUE_PARAMETER_LIST
+            VALUE_PARAMETER[fqName=null, hasDefaultValue=false, hasValOrVar=false, isMutable=false, name=a]
+              MODIFIER_LIST[]
+                ANNOTATION_ENTRY[hasValueArguments=false, shortName=Anno]
+                  CONSTRUCTOR_CALLEE
+                    TYPE_REFERENCE
+                      USER_TYPE
+                        USER_TYPE
+                          REFERENCE_EXPRESSION[referencedName=test]
+                        REFERENCE_EXPRESSION[referencedName=Anno]
+              TYPE_REFERENCE
+                USER_TYPE
+                  USER_TYPE
+                    REFERENCE_EXPRESSION[referencedName=kotlin]
+                  REFERENCE_EXPRESSION[referencedName=String]
+            VALUE_PARAMETER[fqName=null, hasDefaultValue=false, hasValOrVar=false, isMutable=false, name=b]
+              MODIFIER_LIST[]
+                ANNOTATION_ENTRY[hasValueArguments=false, shortName=Anno]
+                  CONSTRUCTOR_CALLEE
+                    TYPE_REFERENCE
+                      USER_TYPE
+                        USER_TYPE
+                          REFERENCE_EXPRESSION[referencedName=test]
+                        REFERENCE_EXPRESSION[referencedName=Anno]
+              TYPE_REFERENCE
+                USER_TYPE
+                  USER_TYPE
+                    REFERENCE_EXPRESSION[referencedName=kotlin]
+                  REFERENCE_EXPRESSION[referencedName=String]
+        CLASS_BODY
