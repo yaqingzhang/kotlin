@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.androidJvm
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.jvm
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.usageByName
-import org.jetbrains.kotlin.gradle.utils.isGradleVersionAtLeast
 
 object KotlinUsages {
     const val KOTLIN_API = "kotlin-api"
@@ -83,11 +82,9 @@ object KotlinUsages {
     }
 
     internal fun setupAttributesMatchingStrategy(attributesSchema: AttributesSchema) {
-        if (isGradleVersionAtLeast(4, 0)) {
-            attributesSchema.attribute(Usage.USAGE_ATTRIBUTE) { strategy ->
-                strategy.compatibilityRules.add(KotlinJavaRuntimeJarsCompatibility::class.java)
-                strategy.disambiguationRules.add(KotlinUsagesDisambiguation::class.java)
-            }
+        attributesSchema.attribute(Usage.USAGE_ATTRIBUTE) { strategy ->
+            strategy.compatibilityRules.add(KotlinJavaRuntimeJarsCompatibility::class.java)
+            strategy.disambiguationRules.add(KotlinUsagesDisambiguation::class.java)
         }
     }
 }

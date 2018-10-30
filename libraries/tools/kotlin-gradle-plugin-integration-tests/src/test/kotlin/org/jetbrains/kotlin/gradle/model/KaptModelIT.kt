@@ -13,9 +13,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class KaptModelIT : BaseGradleIT() {
-    override val defaultGradleVersion: GradleVersionRequired
-        get() = GradleVersionRequired.AtLeast("4.0")
-
     @Test
     fun testKaptSimple() {
         val project = Project("simple", directoryPrefix = "kapt2")

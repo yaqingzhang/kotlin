@@ -1,6 +1,7 @@
 package org.jetbrains.kotlin.gradle
 
 import org.gradle.api.logging.LogLevel
+import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.util.modify
 import org.junit.Assert
 import org.junit.AssumptionViolatedException
@@ -51,7 +52,6 @@ class PluginsDslIT : BaseGradleIT() {
     }
 
     companion object {
-        private val GRADLE_VERSION = GradleVersionRequired.AtLeast("4.0")
         private const val DIRECTORY_PREFIX = "pluginsDsl"
 
         private const val MAVEN_LOCAL_URL_PLACEHOLDER = "<mavenLocalUrl>"
@@ -63,7 +63,7 @@ class PluginsDslIT : BaseGradleIT() {
 
     private fun projectWithMavenLocalPlugins(
         projectName: String,
-        wrapperVersion: GradleVersionRequired = GRADLE_VERSION,
+        wrapperVersion: GradleVersionRequired = GradleVersionRequired.None,
         directoryPrefix: String? = DIRECTORY_PREFIX,
         minLogLevel: LogLevel = LogLevel.DEBUG
     ): Project {

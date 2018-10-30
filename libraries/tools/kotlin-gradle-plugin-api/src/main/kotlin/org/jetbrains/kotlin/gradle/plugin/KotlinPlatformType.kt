@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.gradle.plugin
 
 import org.gradle.api.Named
 import org.gradle.api.attributes.*
-import org.gradle.util.GradleVersion
 import java.io.Serializable
 
 enum class KotlinPlatformType: Named, Serializable {
@@ -47,14 +46,9 @@ enum class KotlinPlatformType: Named, Serializable {
 
         fun setupAttributesMatchingStrategy(attributesSchema: AttributesSchema) {
             attributesSchema.attribute(KotlinPlatformType.attribute).run {
-                if (isGradleVersionAtLeast(4, 0)) {
-                    compatibilityRules.add(CompatibilityRule::class.java)
-                    disambiguationRules.add(DisambiguationRule::class.java)
-                }
+                compatibilityRules.add(CompatibilityRule::class.java)
+                disambiguationRules.add(DisambiguationRule::class.java)
             }
         }
     }
 }
-
-private fun isGradleVersionAtLeast(major: Int, minor: Int) =
-    GradleVersion.current() >= GradleVersion.version("$major.$minor")

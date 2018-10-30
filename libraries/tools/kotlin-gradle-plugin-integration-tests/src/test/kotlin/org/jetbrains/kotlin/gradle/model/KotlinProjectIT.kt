@@ -13,9 +13,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class KotlinProjectIT : BaseGradleIT() {
-    override val defaultGradleVersion: GradleVersionRequired
-        get() = GradleVersionRequired.AtLeast("4.0")
-
     @Test
     fun testKotlinProject() {
         val project = Project("kotlinProject")

@@ -13,9 +13,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class AllOpenModelIT : BaseGradleIT() {
-    override val defaultGradleVersion: GradleVersionRequired
-        get() = GradleVersionRequired.AtLeast("4.0")
-
     @Test
     fun testAllOpenSimple() {
         val project = Project("allOpenSimple")
