@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import kotlin.system.measureNanoTime
 
 // abstract so that it doesn't run in CI until known issues (JDK absence in the test project, different module names in mangled methods) are addressed
-abstract class WholeProjectUltraLightClassTest : WholeProjectPerformanceTest(), WholeProjectKotlinFileProvider {
+class WholeProjectUltraLightClassTest : WholeProjectPerformanceTest(), WholeProjectKotlinFileProvider {
 
     override fun doTest(file: VirtualFile): PerFileTestResult {
         val psiFile = file.toPsiFile(project) as? KtFile ?: run {

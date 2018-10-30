@@ -53,9 +53,9 @@ fun findScriptDefinition(file: VirtualFile, project: Project): KotlinScriptDefin
     val psiFile = PsiManager.getInstance(project).findFile(file)
     if (psiFile != null) {
         if (psiFile !is KtFile) return null
-        if (!DumbService.isDumb(project)) {
-            return psiFile.script?.kotlinScriptDefinition
-        }
+        val definitionsProvider = ScriptDefinitionProvider.getInstance(project)
+        val definition = definitionsProvider.findScriptDefinition(psiFile.name)
+        return definition ?: definitionsProvider.getDefaultScriptDefinition()
     }
 
     return ScriptDefinitionProvider.getInstance(project).findScriptDefinition(file.name)
