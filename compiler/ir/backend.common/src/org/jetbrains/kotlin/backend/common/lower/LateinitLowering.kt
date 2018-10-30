@@ -78,10 +78,14 @@ class LateinitLowering(
             override fun visitCall(expression: IrCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
-                return transformIfIsInitializedProperty(expression) { receiver, field ->
-                    expression.run { context.createIrBuilder(symbol, startOffset, endOffset) }.run {
-                        irNotEquals(irGetField(receiver, field), irNull())
-                    }
+                if (expression.symbol != context.ir.symbols.lateinitIsInitializedPropertyGetter) return expression
+
+                val receiver = expression.extensionReceiver as IrPropertyReference
+
+                val property = receiver.getter?.owner?.resolveFakeOverride()?.correspondingProperty!!.also { assert(it.isLateinit) }
+
+                return expression.run { context.createIrBuilder(symbol, startOffset, endOffset) }.run {
+                    irNotEquals(irGetField(receiver.dispatchReceiver, property.backingField!!), irNull())
                 }
             }
 
@@ -108,25 +112,6 @@ class LateinitLowering(
                 }
             }
         })
-    }
-
-
-    private fun transformIfIsInitializedProperty(expression: IrCall, transformer: (IrExpression?, IrField) -> IrExpression): IrExpression {
-        val receiver = (expression.extensionReceiver as? IrPropertyReference) ?: return expression
-
-        val target = expression.symbol.owner as? IrSimpleFunction ?: return expression
-
-        val property = target.correspondingProperty ?: return expression
-
-        if (property.name.asString() != "isInitialized") return expression
-
-        val parent = (property.parent as? IrPackageFragment) ?: return expression
-
-        if (parent.fqName.asString() != "kotlin") return expression
-
-        val accessingProperty = receiver.getter?.owner?.resolveFakeOverride()?.correspondingProperty ?: return expression
-
-        return if (accessingProperty.isLateinit) transformer(receiver.dispatchReceiver, accessingProperty.backingField!!) else expression
     }
 
     private fun IrBuilderWithScope.throwUninitializedPropertyAccessException(name: String) =

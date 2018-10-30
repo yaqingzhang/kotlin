@@ -78,10 +78,9 @@ fun compile(
     ExpectDeclarationsRemoving(context).lower(moduleFragment)
     CoroutineIntrinsicLowering(context).lower(moduleFragment)
     ArrayInlineConstructorLowering(context).lower(moduleFragment)
+    LateinitLowering(context, true).lower(moduleFragment)
 
     val moduleFragmentCopy = moduleFragment.deepCopyWithSymbols()
-
-    LateinitLowering(context, true).lower(moduleFragment)
 
     context.performInlining(moduleFragment)
 
