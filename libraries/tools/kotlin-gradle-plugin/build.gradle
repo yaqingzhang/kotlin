@@ -22,10 +22,6 @@ repositories {
     maven { url 'https://maven.google.com' }
 }
 
-configurations {
-    agp25CompileOnly
-}
-
 pill {
     variant = "FULL"
 }
@@ -47,6 +43,11 @@ dependencies {
     compileOnly project(':kotlin-annotation-processing-gradle')
     compileOnly project(':kotlin-scripting-compiler')
 
+    // com.android.tools.build:gradle has ~50 unneeded transitive dependencies
+    compileOnly('com.android.tools.build:gradle:3.0.0') { transitive = false }
+    compileOnly('com.android.tools.build:gradle-core:3.0.0') { transitive = false }
+    compileOnly('com.android.tools.build:builder-model:3.0.0') { transitive = false }
+
     compileOnly 'com.android.tools.build:gradle:2.0.0'
     compileOnly 'org.codehaus.groovy:groovy-all:2.4.12'
     compileOnly gradleApi()
@@ -65,16 +66,7 @@ dependencies {
     runtime project(path: ':kotlin-compiler-runner', configuration: 'runtimeJar')
     runtime project(path: ':kotlin-scripting-compiler-embeddable', configuration: 'runtimeJar')
     runtime project(':kotlin-reflect')
-
-    // com.android.tools.build:gradle has ~50 unneeded transitive dependencies
-    agp25CompileOnly('com.android.tools.build:gradle:3.0.0-alpha1') { transitive = false }
-    agp25CompileOnly('com.android.tools.build:gradle-core:3.0.0-alpha1') { transitive = false }
-    agp25CompileOnly('com.android.tools.build:builder-model:3.0.0-alpha1') { transitive = false }
-    agp25CompileOnly 'org.codehaus.groovy:groovy-all:2.4.12'
-    agp25CompileOnly gradleApi()
-    agp25CompileOnly project(':kotlin-annotation-processing')
-    agp25CompileOnly project(':kotlin-annotation-processing-gradle')
-
+    
     testCompileOnly project(':compiler')
     testCompile project(path: ':kotlin-build-common', configuration: 'tests-jar')
     testCompile project(':kotlin-android-extensions')
@@ -95,22 +87,13 @@ tasks.withType(project.compileKotlin.class) {
 
 sourceSets.main.java.srcDirs += sourceSets.main.kotlin.srcDirs
 
-sourceSets {
-    agp25 {
-        compileClasspath += configurations.compile + configurations.agp25CompileOnly + sourceSets.main.output
-    }
-}
-
 processResources {
     def props = ["projectVersion" : project.version]
     inputs.properties(props)
     expand(props)
 }
 
-jar.dependsOn agp25Classes
-
 jar {
-    from sourceSets.agp25.output.classesDirs
     manifestAttributes(manifest, project)
 }
 

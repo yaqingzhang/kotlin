@@ -1,3 +1,8 @@
+/*
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the license/LICENSE.txt file.
+ */
+
 package org.jetbrains.kotlin.gradle.plugin
 
 import com.android.build.gradle.*
@@ -16,9 +21,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.utils.addExtendsFromRelation
 import java.io.File
 
-@Suppress("unused")
-class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools)
-    : AbstractAndroidProjectHandler<BaseVariant>(kotlinConfigurationTools) {
+class Android25ProjectHandler(
+    kotlinConfigurationTools: KotlinConfigurationTools
+) : AbstractAndroidProjectHandler<BaseVariant>(kotlinConfigurationTools) {
 
     override fun forEachVariant(project: Project, action: (BaseVariant) -> Unit) {
         val androidExtension = project.extensions.getByName("android")
@@ -68,17 +73,17 @@ class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools
         // Find the classpath entries that comes from the tested variant and register it as the friend path, lazily
         kotlinTask.friendPaths = lazy {
             variantData.getCompileClasspathArtifacts(preJavaClasspathKey)
-                    .filter { it.id.componentIdentifier is TestedComponentIdentifier }
-                    .map { it.file.absolutePath }
-                    .toTypedArray()
+                .filter { it.id.componentIdentifier is TestedComponentIdentifier }
+                .map { it.file.absolutePath }
+                .toTypedArray()
         }
     }
 
     override fun getSourceProviders(variantData: BaseVariant): Iterable<SourceProvider> =
-            variantData.sourceSets
+        variantData.sourceSets
 
     override fun getAllJavaSources(variantData: BaseVariant): Iterable<File> =
-            variantData.getSourceFolders(SourceKind.JAVA).map { it.dir }
+        variantData.getSourceFolders(SourceKind.JAVA).map { it.dir }
 
     override fun getVariantName(variant: BaseVariant): String = variant.name
 
@@ -99,7 +104,7 @@ class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools
     }
 
     override fun addJavaSourceDirectoryToVariantModel(variantData: BaseVariant, javaSourceDirectory: File) =
-            variantData.addJavaSourceFoldersToModel(javaSourceDirectory)
+        variantData.addJavaSourceFoldersToModel(javaSourceDirectory)
 
     override fun getResDirectories(variantData: BaseVariant): List<File> {
         val getAllResourcesMethod =
@@ -140,10 +145,10 @@ class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools
         override val name: String = getVariantName(variantData)
         override val sourceProviders: Iterable<SourceProvider> = getSourceProviders(variantData)
         override fun addJavaSourceFoldersToModel(generatedFilesDir: File) =
-                addJavaSourceDirectoryToVariantModel(variantData, generatedFilesDir)
+            addJavaSourceDirectoryToVariantModel(variantData, generatedFilesDir)
 
         override val annotationProcessorOptions: Map<String, String>? =
-                variantData.javaCompileOptions.annotationProcessorOptions.arguments
+            variantData.javaCompileOptions.annotationProcessorOptions.arguments
 
         override fun registerGeneratedJavaSource(
             project: Project,
@@ -168,7 +173,7 @@ class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools
     //TODO A public API is expected for this purpose. Once it is available, use the public API
     private fun MergeResources.computeResourceSetList0(): List<File>? {
         val computeResourceSetListMethod = MergeResources::class.java.declaredMethods
-                .firstOrNull { it.name == "computeResourceSetList" && it.parameterCount == 0 } ?: return null
+            .firstOrNull { it.name == "computeResourceSetList" && it.parameterCount == 0 } ?: return null
 
         val oldIsAccessible = computeResourceSetListMethod.isAccessible
         try {
@@ -198,5 +203,5 @@ class Android25ProjectHandler(kotlinConfigurationTools: KotlinConfigurationTools
             ?.invoke(this) as? FileCollection
 
     override fun wrapVariantDataForKapt(variantData: BaseVariant): KaptVariantData<BaseVariant> =
-            KaptVariant(variantData)
+        KaptVariant(variantData)
 }
