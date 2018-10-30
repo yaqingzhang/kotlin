@@ -5,4 +5,4 @@
 
 package org.jetbrains.kotlin.load.kotlin
 
-internal const val IS_BUILT_WITH_ASM6 = false
+internal const val IS_BUILT_WITH_ASM6 = true
