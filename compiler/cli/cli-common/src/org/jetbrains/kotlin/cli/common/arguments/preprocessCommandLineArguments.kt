@@ -5,10 +5,12 @@
 
 package org.jetbrains.kotlin.cli.common.arguments
 
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.Reader
+import java.lang.IllegalArgumentException
 
 const val ARGFILE_ARGUMENT = "@"
 private const val EXPERIMENTAL_ARGFILE_ARGUMENT = "-Xargfile="
@@ -34,6 +36,15 @@ fun preprocessCommandLineArguments(args: List<String>, errors: ArgumentParseErro
             listOf(arg)
         }
     }
+
+@TestOnly
+fun readArgumentsFromArgFile(content: String): List<String> {
+    val errors = ArgumentParseErrors()
+    val reader = content.reader()
+    val result = generateSequence { reader.parseNextArgument() }.toList()
+    validateArguments(errors)?.let { throw IllegalArgumentException(it) }
+    return result
+}
 
 private fun File.expand(errors: ArgumentParseErrors): List<String> {
     return try {
